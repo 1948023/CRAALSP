@@ -1,0 +1,178 @@
+Source Threat;Target Threat;Source Category;Target Category;Relation Type
+Abuse / Falsification of right;Unauthorized access;NAA;EIH;Enables
+Abuse of leaked data;Social Engineering;NAA;NAA;Amplifies
+Atmospheric hazards;Electromagnetic interference;DIS;NAA;Causes
+Atmospheric hazards;Jamming;DIS;NAA;Triggers
+Atmospheric hazards;Failure of power supply;DIS;FM;Causes
+Atmospheric hazards;Damage/ Destruction of the satellite via the use of ASAT / Proximity operations;DIS;PA;Triggers
+Coercion, extortion or corruption;Unauthorized physical access;PA;PA;Enables
+Coercion, extortion or corruption;Social Engineering;PA;NAA;Enables
+Compromising confidential information (data breaches): Exfiltration;Data leaks;NAA;LEG;Leads-to
+Compromising confidential information (data breaches): Exfiltration;Identity Theft;NAA;NAA;Enables
+Damage/ Destruction of segment assets;Failure of power supply;PA;FM;Causes
+Damage/ Destruction of the satellite via the use of ASAT / Proximity operations;Damage/ Destruction of segment assets;PA;PA;Causes
+Damage/ Destruction of the satellite via the use of ASAT / Proximity operations;Failure of power supply;PA;FM;Causes
+Data leaks;Identity Theft;LEG;NAA;Leads-to
+Data leaks;Abuse of leaked data;LEG;NAA;Leads-to
+Data leaks;Unauthorized access to recycled or disposed media;LEG;LEG;Leads-to
+Data leaks;Supply Chain Compromise;LEG;NAA;Leads-to
+Data modification;Unauthorized Access;NAA;EIH;Enables
+Data modification;Compromising confidentail information (data breaches): Exfiltration;NAA;NAA;Leads-to
+Data modification;Identity Theft;NAA;NAA;Enables
+Denial of Service (DoS);Personnel Absence;NAA;OUT;Causes
+Electromagnetic interference;Failure of power supply;NAA;FM;Causes
+Electromagnetic interference;Damage/ Destruction of segment assets;NAA;PA;Causes
+Environmental hazards;Damage/ Destruction of segment assets;DIS;PA;Causes
+Environmental hazards;Failure of air conditioning or water supply;DIS;FM;Causes
+Environmental hazards;Failure of power supply;DIS;FM;Causes
+Environmental hazards;Failure of communication networks;DIS;FM;Causes
+Failure of Cloud infrastructure;Failure of communication networks;FM;FM;Causes
+Failure of Cloud infrastructure;Security services failure;FM;OUT;Causes
+Failure of Cloud infrastructure;Denial of Service (DoS);FM;NAA;Causes
+Failure of Cloud infrastructure;Preventing services;FM;NAA;Causes
+Failure of air conditioning or water supply;Failure of power supply;FM;FM;Causes
+Failure of air conditioning or water supply;Damage/ Destruction of segment assets;FM;PA;Causes
+Failure of communication networks;Security services failure;FM;OUT;Causes
+Failure of communication networks;Preventing services;FM;NAA;Causes
+Failure of power supply;Preventing services;FM;NAA;Causes
+Failure of power supply;Security services failure;FM;OUT;Causes
+Failure of power supply;Denial of Service (DoS);FM;NAA;Causes
+Failure to maintain information systems;Software misconfiguration;LEI;UD;Causes
+Failure to maintain information systems;Legacy Software;LEI;LEI;Causes
+Failure to maintain information systems;Security services failure;LEI;OUT;Causes
+Firmware corruption;Seizure of control: Satellite bus;NAA;NAA;Enables
+Firmware corruption;Failure of power supply;NAA;FM;Causes
+Firmware corruption;Rogue hardware;NAA;FM;Causes
+Firmware corruption;Failure to maintain information systems;NAA;LEI;Causes
+Hijacking;Unauthorized modification: Parameters;EIH;NAA;Enables
+Hijacking;Seizure of control: Satellite bus;EIH;NAA;Enables
+Hijacking;Data modification;EIH;NAA;Enables
+Identity Theft;Unauthorized access;NAA;EIH;Enables
+Identity Theft;Supply Chain Compromise;NAA;NAA;Enables
+Identity Theft;Social Engineering;NAA;NAA;Amplifies
+Identity Theft;Abuse / Falsification of right;NAA;NAA;Enables
+Inadequate security planning / management;Failure to maintain information systems;UD;LEI;Causes
+Inadequate security planning / management;Software misconfiguration;UD;UD;Causes
+Inadequate security planning / management;Legacy Software;UD;LEI;Causes
+Inadequate security planning / management;Operating errors;UD;UD;Causes
+Inadequate security planning / management;Software misconfiguration;UD;UD;Causes
+Inadequate security planning / management;Negligence of asset handling security requirements;UD;LEG;Causes
+Interception of communication;Position detection (telemetry);EIH;EIH;Enables
+Interception of communication;Identity Theft;EIH;NAA;Enables
+Interception of communication;Compromising confidentail information (data breaches): Exfiltration;EIH;NAA;Enables
+Jamming;Preventing services;NAA;NAA;Causes
+Jamming;Electromagnetic interference;NAA;NAA;Amplifies
+Jamming;Failure of communication networks;NAA;FM;Causes
+Jamming;Denial of Service (DoS);NAA;NAA;Causes
+Lack of Segregation;Network manipulation (Bus-Payload Link);UD;EIH;Enables
+Lack of Segregation;Unauthorized access;UD;EIH;Enables
+Lack of Segregation;Data leaks;UD;LEG;Leads-to
+Legacy Software;Malicious code/ software/activity: Software and vulnerabilities' exploit;LEI;NAA;Enables
+Legacy Software;Security services failure;LEI;OUT;Causes
+Legacy Software;Malicious code/ software/activity: Network exploit;LEI;NAA;Enables
+Legacy Software;Malicious code/ software/activity: Cryptographic exploit;LEI;NAA;Enables
+Legacy Software;Unauthorized access;LEI;EIH;Enables
+Loss during shipping;Supply Chain Compromise;PA;NAA;Enables
+Malicious code/ software/activity: Cryptographic exploit;Man-in-the-Middle (MITM);NAA;EIH;Enables
+Malicious code/ software/activity: Cryptographic exploit;Interception of communication;NAA;EIH;Enables
+Malicious code/ software/activity: Malicious injection;Data modification;NAA;NAA;Enables
+Malicious code/ software/activity: Malicious injection;Supply Chain Compromise;NAA;NAA;Amplifies
+Malicious code/ software/activity: Malicious injection;Firmware corruption;NAA;NAA;Enables
+Malicious code/ software/activity: Malicious injection;Malicious code/ software/activity: Network exploit;NAA;NAA;Enables
+Malicious code/ software/activity: Malicious injection;Preventing services;NAA;NAA;Enables
+Malicious code/ software/activity: Malicious injection;Interception of communication;NAA;EIH;Enables
+Malicious code/ software/activity: Malicious injection;Seizure of control: Satellite bus;NAA;NAA;Enables
+Malicious code/ software/activity: Network exploit;Seizure of control: Satellite bus;NAA;NAA;Enables
+Malicious code/ software/activity: Network exploit;Firmware corruption;NAA;NAA;Enables
+Malicious code/ software/activity: Network exploit;Data modification;NAA;NAA;Enables
+Malicious code/ software/activity: Network exploit;Identity Theft;NAA;NAA;Enables
+Malicious code/ software/activity: Network exploit;Spoofing;NAA;NAA;Enables
+Malicious code/ software/activity: Network exploit;Preventing services;NAA;NAA;Enables
+Malicious code/ software/activity: Network exploit;Unauthorized access;NAA;EIH;Enables
+Malicious code/ software/activity: Software and vulnerabilities' exploit;Resource exhaustion;NAA;NAA;Enables
+Malicious code/ software/activity: Software and vulnerabilities' exploit;Malicious code/ software/activity: Network exploit;NAA;NAA;Enables
+Malicious code/ software/activity: Software and vulnerabilities' exploit;Unauthorized access;NAA;EIH;Enables
+Man-in-the-Middle (MITM);Abuse / Falsification of right;EIH;NAA;Enables
+Man-in-the-Middle (MITM);Interception of communication;EIH;EIH;Enables
+Man-in-the-Middle (MITM);Spoofing;EIH;NAA;Enables
+Man-in-the-Middle (MITM);Identity Theft;EIH;NAA;Enables
+Man-in-the-Middle (MITM);Data modification;EIH;NAA;Enables
+Manipulation of hardware and software: Zero Day exploit;Unauthorized access;NAA;EIH;Enables
+Manipulation of hardware and software: Zero Day exploit;Malicious code/ software/activity: Software and vulnerabilities' exploit;NAA;NAA;Amplifies
+Misuse of equipment;Operating errors;LEG;UD;Causes
+Misuse of equipment;Operating errors;LEG;UD;Causes
+Misuse of equipment;Unauthorized use of equipment;LEG;NAA;Leads-to
+Negligence of asset handling security requirements;Inadequate security planning / management;LEG;UD;Causes
+Negligence of asset handling security requirements;Software misconfiguration;LEG;UD;Causes
+Network traffic manipulation (TC);Denial of Service (DoS);EIH;NAA;Causes
+Network traffic manipulation (TC);Preventing services;EIH;NAA;Causes
+Network traffic manipulation (TC);Jamming;EIH;NAA;Amplifies
+Network traffic manipulation (TC);Data modification;EIH;NAA;Enables
+Operating errors;Software misconfiguration;UD;UD;Causes
+Operating errors;Failure of communication networks;UD;FM;Causes
+Personnel Absence;Operating errors;OUT;UD;Causes
+Personnel Absence;Inadequate security planning / management;OUT;UD;Causes
+Preventing services;Data modification;NAA;NAA;Enables
+Preventing services;Denial of Service (DoS);NAA;NAA;Amplifies
+Preventing services;Security services failure;NAA;OUT;Causes
+Refusal of actions;Negligence of asset handling security requirements;LEG;LEG;Amplifies
+Refusal of actions;Legacy Software;LEG;LEI;Causes
+Replay of recorded authentic communication traffic;Unauthorized modification: Parameters;EIH;NAA;Enables
+Replay of recorded authentic communication traffic;Seizure of control: Satellite bus;EIH;NAA;Enables
+Replay of recorded authentic communication traffic;Spoofing;EIH;NAA;Leads-to
+Resource exhaustion;Denial of Service (DoS);NAA;NAA;Causes
+Resource exhaustion;Failure of power supply;NAA;FM;Causes
+Rogue hardware;Supply Chain Compromise;FM;NAA;Leads-to
+Rogue hardware;Malicious code/ software/activity: Software and vulnerabilities' exploit;FM;NAA;Enables
+Rogue hardware;Failure to maintain information systems;FM;LEI;Causes
+Sabotage through hardware/software;Rogue hardware;PA;FM;Causes
+Sabotage through hardware/software;Rogue hardware;PA;FM;Causes
+Sabotage through hardware/software;Malicious code/ software/activity: Malicious injection;PA;NAA;Enables
+Sabotage through hardware/software;Firmware corruption;PA;NAA;Enables
+Security services failure;Malicious code/ software/activity: Software and vulnerabilities' exploit;OUT;NAA;Enables
+Security services failure;Unauthorized access;OUT;EIH;Enables
+Security services failure;Data leaks;OUT;LEG;Enables
+Seizure of control: Satellite bus;Unauthorized modification: Parameters;NAA;NAA;Enables
+Seizure of control: Satellite bus;Resource exhaustion;NAA;NAA;Enables
+Seizure of control: Satellite bus;Unauthorized modification: Parameters;NAA;NAA;Enables
+Seizure of control: Satellite bus;Data modification;NAA;NAA;Enables
+Seizure of control: Satellite bus;Resource exhaustion;NAA;NAA;Enables
+Seizure of control: Satellite bus;Data modification;NAA;NAA;Enables
+Social Engineering;Supply Chain Compromise;NAA;NAA;Enables
+Social Engineering;Coercion extortion or corruption;NAA;PA;Enables
+Social Engineering;Unauthorized access;NAA;EIH;Enables
+Social Engineering;Theft of authentication information;NAA;NAA;Enables
+Social Engineering;Identity Theft;NAA;NAA;Enables
+Social Engineering;Personnel Absence;NAA;OUT;Causes
+Software misconfiguration;Unauthorized access;UD;EIH;Enables
+Software misconfiguration;Malicious code/ software/activity: Software and vulnerabilities' exploit;UD;NAA;Enables
+Spoofing;Hijacking;NAA;EIH;Enables
+Spoofing;Position detection (telemetry);NAA;EIH;Enables
+Spoofing;Failure of Cloud infrastructure;NAA;FM;Causes
+Spoofing;Interception of communication;NAA;EIH;Enables
+Spoofing;Data modification;NAA;NAA;Enables
+Spoofing;Failure of communication networks;NAA;FM;Causes
+Spoofing;Seizure of control: Satellite bus;NAA;NAA;Enables
+Supply Chain Compromise;Malicious code/ software/activity: Malicious injection;NAA;NAA;Enables
+Supply Chain Compromise;Rogue hardware;NAA;FM;Causes
+Supply Chain Compromise;Firmware corruption;NAA;NAA;Enables
+Supply Chain Compromise;Third Party non compliance (supply chain);NAA;LEG;Leads-to
+Supply Chain Compromise;Software misconfiguration;NAA;UD;Causes
+Theft of authentication information;Abuse / Falsification of right;NAA;NAA;Enables
+Theft of authentication information;Malicious code/ software/activity: Cryptographic exploit;NAA;NAA;Enables
+Theft of authentication information;Unauthorized access;NAA;EIH;Enables
+Third Party non compliance (supply chain);Rogue hardware;LEG;FM;Enables
+Third Party non compliance (supply chain);Supply Chain Compromise;LEG;NAA;Enables
+Unauthorized access;Spoofing;EIH;NAA;Leads-to
+Unauthorized access;Man-in-the-Middle (MITM);EIH;EIH;Enables
+Unauthorized access;Network manipulation (Bus-Payload Link);EIH;EIH;Leads-to
+Unauthorized access;Replay of recorded authentic communication traffic;EIH;EIH;Leads-to
+Unauthorized access;Interception of communication;EIH;EIH;Enables
+Unauthorized access;Hijacking;EIH;EIH;Enables
+Unauthorized access to recycled or disposed media;Theft of authentication information;LEG;NAA;Enables
+Unauthorized access to recycled or disposed media;Data leaks;LEG;LEG;Causes
+Unauthorized physical access;Theft of authentication information;PA;NAA;Enables
+Unauthorized physical access;Sabotage through hardware/software;PA;PA;Enables
+Unauthorized physical access;Unauthorized use of equipment;PA;NAA;Enables
+Unauthorized physical access;Damage/ Destruction of segment assets;PA;PA;Enables
+Unauthorized physical access;Firmware corruption;PA;NAA;Enables
