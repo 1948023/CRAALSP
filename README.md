@@ -243,9 +243,7 @@ Risk Assessment Tool Suite/
 ├── Legacy.csv                       # Legacy system data
 ├── Threat.csv                       # Threat definitions
 ├── attack_graph_threat_relations.csv # Threat relationships
-└── CSV_Export_[timestamp]/          # Export directory
-    ├── Threat_Analyzed_*.csv        # Analyzed threat data
-    └── [various analysis files]
+└── Output                           # Export directory
 ```
 
 ## 💡 Usage Examples
