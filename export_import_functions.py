@@ -213,8 +213,11 @@ class ExportImportManager:
                 messagebox.showerror("Error", "Could not load threat mapping from Legacy.csv")
                 return
             
-            # Setup logging
-            logging.basicConfig(level=logging.INFO)
+            # Setup logging with UTF-8 encoding
+            logging.basicConfig(
+                level=logging.INFO,
+                format='%(levelname)s: %(message)s'
+            )
             self.logger = logging.getLogger(__name__)
             
             # Load and parse legacy document
@@ -343,7 +346,7 @@ class ExportImportManager:
                     # Check for "Detailed Threat Analysis" section
                     if "Detailed Threat Analysis" in text:
                         in_detailed_section = True
-                        self.logger.info("✅ Found Detailed Threat Analysis section")
+                        self.logger.info("[OK] Found Detailed Threat Analysis section")
                         continue
                     
                     # If in detailed section, check for threat names (heading level 2)
@@ -381,9 +384,9 @@ class ExportImportManager:
                                     threat_specific_data[asset_key] = criteria.copy()
                                 
                                 legacy_data[new_threat].update(threat_specific_data)
-                                self.logger.info(f"✅ Mapped '{current_threat}' -> '{new_threat}' with {len(threat_specific_data)} assets")
+                                self.logger.info(f"[OK] Mapped '{current_threat}' -> '{new_threat}' with {len(threat_specific_data)} assets")
                         else:
-                            self.logger.warning(f"❌ No mapping found for threat: {current_threat} (normalized: {normalized_threat})")
+                            self.logger.warning(f"[ERROR] No mapping found for threat: {current_threat} (normalized: {normalized_threat})")
                     
                     elif len(table.columns) == 2:
                         # Security controls table - skip
@@ -396,7 +399,7 @@ class ExportImportManager:
             return legacy_data
             
         except Exception as e:
-            self.logger.error(f"❌ Error parsing legacy document: {str(e)}")
+            self.logger.error(f"[ERROR] Error parsing legacy document: {str(e)}")
             return {}
 
     def _extract_document_elements(self, doc):
@@ -644,11 +647,11 @@ class ExportImportManager:
             # Update the main table display
             self.app.update_all_threats_in_main_table()
             
-            self.logger.info(f"✅ Integrated {imported_count} assessments into current system")
+            self.logger.info(f"[OK] Integrated {imported_count} assessments into current system")
             return imported_count
             
         except Exception as e:
-            self.logger.error(f"❌ Error integrating legacy data: {str(e)}")
+            self.logger.error(f"[ERROR] Error integrating legacy data: {str(e)}")
             return 0
 
     def _get_current_threat_names(self):

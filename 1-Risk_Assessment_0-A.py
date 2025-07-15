@@ -5,6 +5,9 @@ import os
 import sys
 from datetime import datetime
 
+# Configure environment for UTF-8 compatibility
+os.environ['PYTHONIOENCODING'] = 'utf-8'
+
 def get_base_path():
     """Get the base path for the application (works with both .py and .exe)"""
     if getattr(sys, 'frozen', False):
@@ -345,7 +348,7 @@ class RiskAssessmentTool:
         save_btn.pack(side='left', padx=(0, 10))
         
         # Help button
-        help_btn = tk.Button(buttons_frame, text="❓ Help",
+        help_btn = tk.Button(buttons_frame, text="? Help",
                             font=('Segoe UI', 11, 'bold'),
                             bg=self.COLORS['gray'], fg=self.COLORS['white'],
                             relief='flat', padx=20, pady=10,
@@ -1336,34 +1339,34 @@ class RiskAssessmentTool:
                 # Check if we are in the "Detailed Threat Analysis" section
                 if "Detailed Threat Analysis" in text:
                     in_detailed_section = True
-                    print("✅ Found Detailed Threat Analysis section")
+                    print("[OK] Found Detailed Threat Analysis section")
                     continue
 
                 # If we are in the detailed section, look for threat names
                 if in_detailed_section and text in self.THREATS:
                     current_threat = text
                     threat_table_count[current_threat] = 0
-                    print(f"📋 Found threat: {current_threat}")
+                    print(f"[INFO] Found threat: {current_threat}")
                     
             elif element_type == 'table' and current_threat and in_detailed_section:
                 table = element_data
                 threat_table_count[current_threat] += 1
                 table_number = threat_table_count[current_threat]
                 
-                print(f"🔍 Processing table #{table_number} for threat: {current_threat}")
+                print(f"[INFO] Processing table #{table_number} for threat: {current_threat}")
 
                 # Check table type by number of columns
                 if len(table.columns) == 9:
                     # Asset table
-                    print(f"   → Asset table detected (9 columns)")
+                    print(f"   -> Asset table detected (9 columns)")
                     self.extract_asset_table_data(table, current_threat)
                 elif len(table.columns) == 2:
                     # Controls table (ignore for data import)
-                    print(f"   → Controls table detected (2 columns) - skipping")
+                    print(f"   -> Controls table detected (2 columns) - skipping")
                 else:
-                    print(f"   → Unknown table format ({len(table.columns)} columns) - skipping")
+                    print(f"   -> Unknown table format ({len(table.columns)} columns) - skipping")
                     
-        print(f"🎯 Import completed. Found data for threats: {list(self.threat_data.keys())}")
+        print(f"[OK] Import completed. Found data for threats: {list(self.threat_data.keys())}")
 
         # Debug: show imported data
         for threat_name, threat_data in self.threat_data.items():
@@ -1372,12 +1375,12 @@ class RiskAssessmentTool:
     def extract_asset_table_data(self, table, threat_name):
         """Extracts data from the asset table for a specific threat"""
         try:
-            print(f"🔍 Extracting asset table data for threat: {threat_name}")
-            print(f"   Table dimensions: {len(table.rows)} rows × {len(table.columns)} columns")
+            print(f"[INFO] Extracting asset table data for threat: {threat_name}")
+            print(f"   Table dimensions: {len(table.rows)} rows x {len(table.columns)} columns")
 
             # Check table format (must have 9 columns)
             if len(table.columns) != 9:
-                print(f"❌ Invalid table format: expected 9 columns, got {len(table.columns)}")
+                print(f"[ERROR] Invalid table format: expected 9 columns, got {len(table.columns)}")
                 return
 
             # Check header to confirm it's the right table
@@ -1394,10 +1397,10 @@ class RiskAssessmentTool:
                         break
             
             if not header_match:
-                print(f"❌ Header mismatch - not an asset table")
+                print(f"[ERROR] Header mismatch - not an asset table")
                 return
             
-            print(f"✅ Valid asset table confirmed")
+            print(f"[OK] Valid asset table confirmed")
 
             # Initialized data for this threat if not exists
             if threat_name not in self.threat_data:
@@ -1409,13 +1412,13 @@ class RiskAssessmentTool:
                 try:
                     cells = row.cells
                     if len(cells) < 9:
-                        print(f"⚠️  Row {row_idx}: insufficient cells ({len(cells)})")
+                        print(f"[ERROR]  Row {row_idx}: insufficient cells ({len(cells)})")
                         continue
 
                     # Extract asset name from the first cell
                     asset_name = cells[0].text.strip()
                     if not asset_name:
-                        print(f"⚠️  Row {row_idx}: empty asset name")
+                        print(f"[ERROR]  Row {row_idx}: empty asset name")
                         continue
                     
                     print(f"   Processing asset: '{asset_name}'")
@@ -1428,12 +1431,12 @@ class RiskAssessmentTool:
                             break
                     
                     if asset_index is None:
-                        print(f"❌ Asset '{asset_name}' not found in standard categories")
+                        print(f"[ERROR] Asset '{asset_name}' not found in standard categories")
                         # Try partial matching
                         for i, (category, name) in enumerate(self.ASSET_CATEGORIES):
                             if asset_name.lower() in name.lower() or name.lower() in asset_name.lower():
                                 asset_index = i + 1
-                                print(f"✅ Found partial match: '{name}' → using index {asset_index}")
+                                print(f"[OK] Found partial match: '{name}' -> using index {asset_index}")
                                 break
                         
                         if asset_index is None:
@@ -1463,18 +1466,18 @@ class RiskAssessmentTool:
                     if valid_scores >= 3:
                         self.threat_data[threat_name][asset_key] = criteria_scores
                         data_rows_processed += 1
-                        print(f"✅ Saved data for asset {asset_index} ({asset_name}): {valid_scores} criteria")
+                        print(f"[OK] Saved data for asset {asset_index} ({asset_name}): {valid_scores} criteria")
                     else:
-                        print(f"❌ Insufficient valid criteria ({valid_scores}/5) for asset {asset_name}")
-                    
+                        print(f"[ERROR] Insufficient valid criteria ({valid_scores}/5) for asset {asset_name}")
+
                 except Exception as e:
-                    print(f"❌ Error processing row {row_idx}: {e}")
+                    print(f"[ERROR] Error processing row {row_idx}: {e}")
                     continue
             
-            print(f"🎯 Processed {data_rows_processed} valid asset rows for threat '{threat_name}'")
+            print(f"[OK] Processed {data_rows_processed} valid asset rows for threat '{threat_name}'")
                     
         except Exception as e:
-            print(f"❌ Error extracting asset table data for {threat_name}: {e}")
+            print(f"[ERROR] Error extracting asset table data for {threat_name}: {e}")
     
     def parse_score_from_cell(self, cell_text):
         """Extracts a score from a Word table cell with various formats"""
