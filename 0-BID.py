@@ -7,6 +7,16 @@ from tkinter import messagebox, ttk
 import tkinter.font as tkFont
 from datetime import datetime
 import os
+import sys
+
+def get_base_path():
+    """Get the base path for the application (works with both .py and .exe)"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as script
+        return os.path.dirname(os.path.abspath(__file__))
 
 try:
     from PIL import Image, ImageTk, ImageDraw
@@ -29,7 +39,7 @@ class BIDOptimized:
     risk_filename = f"BID_Risk_Assessment_{timestamp}.csv"
         
         # Create Output directory if it doesn't exist
-    output_dir = os.path.join(os.path.dirname(__file__), "Output")
+    output_dir = os.path.join(get_base_path(), "Output")
     os.makedirs(output_dir, exist_ok=True)
         
     risk_filepath = os.path.join(output_dir, risk_filename)   # Configuration data
@@ -610,7 +620,7 @@ class BIDOptimized:
         filename = f"BID_Assessment_{timestamp}.docx"
         
         # Create Output directory if it doesn't exist
-        output_dir = os.path.join(os.path.dirname(__file__), "Output")
+        output_dir = os.path.join(get_base_path(), "Output")
         os.makedirs(output_dir, exist_ok=True)
         
         # Destination folder (Output directory)
@@ -772,7 +782,7 @@ class BIDOptimized:
         risk_filename = f"BID_Risk_Assessment_{timestamp}.csv"
         
         # Create Output directory if it doesn't exist
-        output_dir = os.path.join(os.path.dirname(__file__), "Output")
+        output_dir = os.path.join(get_base_path(), "Output")
         os.makedirs(output_dir, exist_ok=True)
         
         risk_filepath = os.path.join(output_dir, risk_filename)

@@ -1,0 +1,8 @@
+tkinter
+pillow
+python-docx
+pandas
+networkx
+matplotlib
+numpy <2.0
+scipy

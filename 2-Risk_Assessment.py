@@ -14,9 +14,29 @@ from tkinter import ttk, messagebox, filedialog
 import csv
 import json
 import os
+import sys
 import math
 import datetime
 import logging
+
+def get_base_path():
+    """Get the base path for the application (works with both .py and .exe)"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        # PyInstaller stores data files in sys._MEIPASS
+        return getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    else:
+        # Running as script
+        return os.path.dirname(os.path.abspath(__file__))
+
+def get_output_path():
+    """Get the path where output files should be saved"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable - save next to the .exe
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as script - save in script directory
+        return os.path.dirname(os.path.abspath(__file__))
 
 # Import for Word export/import
 try:
@@ -139,7 +159,7 @@ class RiskAssessmentTool:
 
     def load_threats_from_csv(self):
         """Load threats from Threat.csv"""
-        threats_file = os.path.join(os.path.dirname(__file__), "Threat.csv")
+        threats_file = os.path.join(get_base_path(), "Threat.csv")
         self.THREATS = []
         
         try:
@@ -167,7 +187,7 @@ class RiskAssessmentTool:
 
     def load_assets_from_json(self):
         """Load assets from Asset.json"""
-        assets_file = os.path.join(os.path.dirname(__file__), "Asset.json")
+        assets_file = os.path.join(get_base_path(), "Asset.json")
         self.ASSET_CATEGORIES = []
         
         try:
@@ -1896,7 +1916,7 @@ class RiskAssessmentTool:
     def load_threat_details(self):
         """Load threat details from Threat_Subset.csv"""
         threat_details = {}
-        threats_file = os.path.join(os.path.dirname(__file__), "Threat_Subset.csv")
+        threats_file = os.path.join(get_base_path(), "Threat_Subset.csv")
         
         try:
             with open(threats_file, 'r', newline='', encoding='utf-8') as csvfile:
@@ -2136,7 +2156,7 @@ class RiskAssessmentTool:
     def load_controls_for_threat(self, threat_name):
         """Load controls from Control.csv that address the specified threat"""
         controls = []
-        controls_file = os.path.join(os.path.dirname(__file__), "Control.csv")
+        controls_file = os.path.join(get_base_path(), "Control.csv")
         
         try:
             with open(controls_file, 'r', newline='', encoding='utf-8') as csvfile:

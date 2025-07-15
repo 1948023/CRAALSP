@@ -38,10 +38,31 @@ import numpy as np
 from collections import Counter
 import warnings
 import os
+import sys
+import traceback
 from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 warnings.filterwarnings('ignore')
+
+def get_base_path():
+    """Get the base path for the application (works with both .py and .exe)"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        # PyInstaller stores data files in sys._MEIPASS
+        return getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    else:
+        # Running as script
+        return os.path.dirname(os.path.abspath(__file__))
+
+def get_output_path():
+    """Get the path where output files should be saved"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable - save next to the .exe
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as script - save in script directory
+        return os.path.dirname(os.path.abspath(__file__))
 
 # Conditional import for scipy
 try:
@@ -61,10 +82,10 @@ except ImportError:
 # IMPORTANT: Only threats that are present BOTH in relations AND in this file will be analyzed
 THREAT_FILE_NAME = "CSV_Export_20250708_094356/Threat_Analyzed.csv"  # Simplified CSV file: THREAT;Likelihood;Impact;Risk
 
-# Specific paths to analyze - Modify these threats to analyze different paths
+# These will be dynamically calculated after loading the graph
 SPECIFIC_PATH_ANALYSIS = {
-    "source_threat": "Social Engineering",
-    "target_threat": "Seizure of control: Satellite bus",
+    "source_threat": None,  # Will be set to the threat with most outgoing connections
+    "target_threat": None,  # Will be set to the threat with most incoming connections
     "max_path_length": 5
 }
 
@@ -72,41 +93,10 @@ SPECIFIC_PATH_ANALYSIS = {
 save_path = 0
 # Flag to decide whether to save maximum 5 combined paths (1) or all combined paths (0) 
 max_five = 0
-SPECIFIC_THREAT = "Malicious code/ software/activity: Malicious injection"  # Change this to analyze a specific threat
+SPECIFIC_THREAT = None  # Will be set to the threat with highest risk
 
-# List of multiple paths to analyze (optional)
-MULTIPLE_PATH_ANALYSIS = [
-    {
-        "source": "Social Engineering", 
-        "target": "Data modification",
-        "description": "From Social Engineering to Data modification"
-    },
-    {
-        "source": "Unauthorized physical access", 
-        "target": "Firmware corruption",
-        "description": "From Unauthorized physical access to Firmware corruption"
-    },
-    {
-        "source": "Supply Chain Compromise", 
-        "target": "Malicious code/ software/activity: Malicious injection",
-        "description": "From Supply Chain Compromise to Malicious code/ software/activity: Malicious injection"
-    },
-    {
-        "source": "Denial of Service (DoS)", 
-        "target": "Unauthorized modification: Parameters",
-        "description": "From Denial of Service (DoS) to Unauthorized modification: Parameters"
-    },
-    {
-        "source": "Replay of recorded authentic communication traffic", 
-        "target": "Identity Theft",
-        "description": "From Replay of recorded authentic communication traffic to Identity Theft"
-    },
-    {
-        "source": "Man-in-the-Middle (MITM)", 
-        "target": "Identity Theft",
-        "description": "From Man-in-the-Middle (MITM) to Identity Theft"
-    }
-]
+# This will be dynamically populated with the 6 most critical paths
+MULTIPLE_PATH_ANALYSIS = []
 
 # Analysis parameters
 ANALYSIS_PARAMETERS = {
@@ -139,7 +129,7 @@ class OutputManager:
     
     def __init__(self, output_file="attack_graph_analysis.txt"):
         # Create Output directory if it doesn't exist
-        output_dir = os.path.join(os.path.dirname(__file__), "Output")
+        output_dir = os.path.join(get_output_path(), "Output")
         os.makedirs(output_dir, exist_ok=True)
         
         self.output_file = os.path.join(output_dir, output_file)
@@ -196,6 +186,9 @@ class AttackGraphAnalyzer:
         self.load_data()
         self.load_subset()
         self.create_graph()
+        
+        # Calculate dynamic configurations after the graph is created
+        self._calculate_dynamic_configurations()
 
     def load_data(self):
         """Loads data from CSV file."""
@@ -311,6 +304,131 @@ class AttackGraphAnalyzer:
         # Apply the subset filter
         self._filter_graph_by_subset()
     
+    def _calculate_dynamic_configurations(self):
+        """
+        Calculate dynamic configurations based on the loaded graph.
+        This function adapts analysis parameters based on graph characteristics.
+        """
+        if self.graph is None:
+            self.output.log("⚠️ Cannot calculate dynamic configurations: graph not available")
+            return
+        
+        # Get basic graph metrics
+        num_nodes = self.graph.number_of_nodes()
+        num_edges = self.graph.number_of_edges()
+        
+        self.output.log(f"\n🔧 CALCULATING DYNAMIC CONFIGURATIONS")
+        self.output.log(f"   Graph size: {num_nodes} nodes, {num_edges} edges")
+        
+        # Update global ANALYSIS_PARAMETERS based on graph size
+        global ANALYSIS_PARAMETERS
+        
+        # Adjust parameters based on graph size
+        if num_nodes < 50:
+            # Small graph - more detailed analysis
+            ANALYSIS_PARAMETERS["top_centrality_nodes"] = min(10, max(5, num_nodes // 2))
+            ANALYSIS_PARAMETERS["max_paths_per_pair"] = 5
+            ANALYSIS_PARAMETERS["max_critical_path_length"] = 6
+            ANALYSIS_PARAMETERS["top_critical_paths"] = min(15, num_nodes)
+            
+        elif num_nodes < 200:
+            # Medium graph - balanced analysis
+            ANALYSIS_PARAMETERS["top_centrality_nodes"] = min(15, num_nodes // 4)
+            ANALYSIS_PARAMETERS["max_paths_per_pair"] = 3
+            ANALYSIS_PARAMETERS["max_critical_path_length"] = 5
+            ANALYSIS_PARAMETERS["top_critical_paths"] = min(20, num_nodes // 2)
+            
+        else:
+            # Large graph - focus on most important elements
+            ANALYSIS_PARAMETERS["top_centrality_nodes"] = min(20, num_nodes // 8)
+            ANALYSIS_PARAMETERS["max_paths_per_pair"] = 2
+            ANALYSIS_PARAMETERS["max_critical_path_length"] = 4
+            ANALYSIS_PARAMETERS["top_critical_paths"] = min(25, num_nodes // 4)
+        
+        # Dynamic threat selection based on available threats
+        available_threats = list(self.graph.nodes())
+        
+        # Update SPECIFIC_PATH_ANALYSIS with dynamic threat selection
+        global SPECIFIC_PATH_ANALYSIS
+        
+        # Find good source threats (high out-degree, low in-degree)
+        out_degrees = dict(self.graph.out_degree())
+        in_degrees = dict(self.graph.in_degree())
+        
+        # Potential sources: high out-degree, low in-degree
+        source_candidates = [(node, out_degrees[node], in_degrees[node]) 
+                           for node in available_threats 
+                           if out_degrees[node] > 0]
+        source_candidates.sort(key=lambda x: (x[1], -x[2]), reverse=True)
+        
+        # Potential targets: high in-degree, low out-degree  
+        target_candidates = [(node, in_degrees[node], out_degrees[node])
+                           for node in available_threats
+                           if in_degrees[node] > 0]
+        target_candidates.sort(key=lambda x: (x[1], -x[2]), reverse=True)
+        
+        # Update source and target if we found good candidates
+        if source_candidates:
+            best_source = source_candidates[0][0]
+            SPECIFIC_PATH_ANALYSIS["source_threat"] = best_source
+            self.output.log(f"   📍 Dynamic source selected: {best_source}")
+            
+        if target_candidates:
+            best_target = target_candidates[0][0]
+            SPECIFIC_PATH_ANALYSIS["target_threat"] = best_target
+            self.output.log(f"   🎯 Dynamic target selected: {best_target}")
+        
+        # Adjust path length based on graph density
+        density = nx.density(self.graph)
+        if density > 0.3:  # High density
+            SPECIFIC_PATH_ANALYSIS["max_path_length"] = 3
+        elif density > 0.1:  # Medium density
+            SPECIFIC_PATH_ANALYSIS["max_path_length"] = 4
+        else:  # Low density
+            SPECIFIC_PATH_ANALYSIS["max_path_length"] = 5
+            
+        # Update STAR_GRAPH_CONFIG with dynamic center threat selection
+        global STAR_GRAPH_CONFIG
+        
+        # Find threat with highest betweenness centrality as center
+        if num_nodes > 2:  # Need at least 3 nodes for meaningful centrality
+            try:
+                betweenness_centrality = nx.betweenness_centrality(self.graph)
+                if betweenness_centrality:
+                    center_threat = max(betweenness_centrality.keys(), 
+                                      key=lambda x: betweenness_centrality[x])
+                    STAR_GRAPH_CONFIG["center_threat"] = center_threat
+                    self.output.log(f"   ⭐ Dynamic center threat selected: {center_threat}")
+            except Exception as e:
+                self.output.log(f"   ⚠️ Could not calculate dynamic center threat: {e}")
+        
+        # Update MULTIPLE_PATH_ANALYSIS with dynamic paths
+        global MULTIPLE_PATH_ANALYSIS
+        MULTIPLE_PATH_ANALYSIS.clear()
+        
+        # Add multiple interesting paths based on graph analysis
+        if len(source_candidates) >= 2 and len(target_candidates) >= 2:
+            # Add top 3 source-target combinations
+            for i in range(min(3, len(source_candidates))):
+                for j in range(min(2, len(target_candidates))):
+                    if i * 2 + j < 5:  # Limit total paths
+                        source = source_candidates[i][0]
+                        target = target_candidates[j][0]
+                        if source != target:
+                            MULTIPLE_PATH_ANALYSIS.append({
+                                "description": f"High-criticality path #{i+1}-{j+1}",
+                                "source": source,
+                                "target": target
+                            })
+        
+        # Log final configuration
+        self.output.log(f"   ✅ Dynamic configuration completed:")
+        self.output.log(f"      - Top centrality nodes: {ANALYSIS_PARAMETERS['top_centrality_nodes']}")
+        self.output.log(f"      - Max paths per pair: {ANALYSIS_PARAMETERS['max_paths_per_pair']}")
+        self.output.log(f"      - Max path length: {ANALYSIS_PARAMETERS['max_critical_path_length']}")
+        self.output.log(f"      - Top critical paths: {ANALYSIS_PARAMETERS['top_critical_paths']}")
+        self.output.log(f"      - Multiple paths configured: {len(MULTIPLE_PATH_ANALYSIS)}")
+
     def get_graph_statistics(self):
         """Calculates and displays graph statistics."""
         if self.graph is None:
@@ -557,11 +675,11 @@ class AttackGraphAnalyzer:
     
     def _get_top_impact_threats(self, top_n=10):
         """Gets the top N threats with the highest impact from the configured THREAT_FILE_NAME file."""
-        # Use the configured file instead of a hardcoded reference
-        subset_file = os.path.join(os.path.dirname(self.csv_file_path), THREAT_FILE_NAME)
+        # Use the subset file path that was configured at initialization
+        subset_file = self.subset_file_path
         
         if not os.path.exists(subset_file):
-            self.output.log(f"⚠️  File {THREAT_FILE_NAME} not found, using predefined keywords.")
+            self.output.log(f"⚠️  File {subset_file} not found, using predefined keywords.")
             return []
         
         try:
@@ -1379,7 +1497,7 @@ class AttackGraphAnalyzer:
             filename = f"threat_connections_{safe_threat_name}_{timestamp}.png"
             
             # Create Output directory if it doesn't exist
-            output_dir = os.path.join(os.path.dirname(__file__), "Output")
+            output_dir = os.path.join(get_output_path(), "Output")
             os.makedirs(output_dir, exist_ok=True)
             filepath = os.path.join(output_dir, filename)
             
@@ -1622,168 +1740,28 @@ class AttackGraphAnalyzer:
                         path_config["target"],
                         max_len
                     )
-              # Create and save graphs for specific paths
+            
+            # Create and save graphs for specific paths
             self.output.log("\n=== CREATION SPECIFIC PATH GRAPH ===")
-            self.visualize_specific_paths()
+            
+            # Generate combined graphs for the main configured path
+            source = SPECIFIC_PATH_ANALYSIS["source_threat"]
+            target = SPECIFIC_PATH_ANALYSIS["target_threat"]
+            main_paths = self.find_attack_paths(source, target, max_len)
+            
+            if main_paths:
+                self._create_combined_paths_graph(main_paths, source, target)
+            else:
+                self.output.log("No paths found for visualization")
             
             self.output.log("\n✅ ANALYSIS COMPLETED SUCCESSFULLY")
             
         except Exception as e:
             self.output.log(f"❌ Error occurred during analysis: {e}")
-            import traceback
             self.output.log(traceback.format_exc())
         
         finally:
             self.output.close()
-    
-    def visualize_specific_paths(self):
-        """
-        Create and save separate graphs for each specific path defined in SPECIFIC_PATH_ANALYSIS
-        """
-        if not self.graph:
-            self.output.log("Error: Graph not available for visualizing specific paths.")
-            return
-        
-        try:
-            import matplotlib.pyplot as plt
-            import matplotlib.cm as cm
-            from matplotlib.lines import Line2D
-        except ImportError:
-            self.output.log("Matplotlib not available. Skipping specific paths visualization.")
-            return
-        
-        self.output.log("\n" + "="*80)
-        self.output.log("CREATION SPECIFIC PATH GRAPHS")
-        self.output.log("="*80)
-
-        # Extract main path configuration
-        source = SPECIFIC_PATH_ANALYSIS["source_threat"]
-        target = SPECIFIC_PATH_ANALYSIS["target_threat"]
-        max_length = SPECIFIC_PATH_ANALYSIS["max_path_length"]
-
-        # Check if nodes exist in the graph
-        if source not in self.graph.nodes():
-            self.output.log(f"⚠️ Threat source '{source}' not found in graph")
-            return
-        
-        if target not in self.graph.nodes():
-            self.output.log(f"⚠️ Threat target '{target}' not found in graph")
-            return
-
-        # Find all paths between source and target
-        try:
-            all_paths = list(nx.all_simple_paths(self.graph, source, target, cutoff=max_length))
-            
-            if not all_paths:
-                self.output.log(f"⚠️ No path found between '{source}' and '{target}' (max length: {max_length})")
-                return
-
-            # Sort by length and take the first 5
-            if max_five:
-                all_paths = sorted(all_paths, key=len)[:5]
-            else:
-                all_paths = sorted(all_paths, key=len)
-            self.output.log(f"🎯 Found {len(all_paths)} paths between '{source}' and '{target}'")
-
-            # Create a graph for each path
-            for i, path in enumerate(all_paths, 1):
-                self._create_single_path_graph(path, i, source, target)
-
-            # Create a combined graph with all paths
-            self._create_combined_paths_graph(all_paths, source, target)
-            
-        except nx.NetworkXNoPath:
-            self.output.log(f"⚠️ No path found between '{source}' and '{target}'")
-        except Exception as e:
-            self.output.log(f"❌ Error occurred while creating specific graphs: {e}")
-
-    def _create_single_path_graph(self, path, path_number, source, target):
-        """Create a graph for a single path"""
-        try:
-            import matplotlib.pyplot as plt
-            import networkx as nx
-
-            # Create a subgraph with only the nodes of the path
-            path_graph = nx.DiGraph()
-            # Add nodes and edges of the path
-            for i in range(len(path) - 1):
-                source_node = path[i]
-                target_node = path[i + 1]
-
-                # Copy attributes from the original if they exist
-                if self.graph and self.graph.has_edge(source_node, target_node):
-                    edge_data = self.graph[source_node][target_node]
-                    path_graph.add_edge(source_node, target_node, **edge_data)
-                else:
-                    path_graph.add_edge(source_node, target_node)
-
-            # Figure configuration
-            plt.figure(figsize=(16, 10))
-            plt.suptitle(f'Specific Path #{path_number}: {source} → {target}', 
-                        fontsize=16, fontweight='bold')
-            # Pseudo-hierarchical layout for specific paths
-            pos = self._create_pseudo_hierarchical_layout(path_graph)
-
-            # Node colors
-            node_colors = []
-            for node in path_graph.nodes():
-                if node == source:
-                    node_colors.append('#FF6B6B')  # Red for source
-                elif node == target:
-                    node_colors.append('#4ECDC4')  # Aqua green for target
-                else:
-                    node_colors.append('#FFD93D')  # Yellow for intermediate nodes
-
-            # Draw the graph
-            nx.draw(path_graph, pos, 
-                   node_color=node_colors,
-                   node_size=3000,
-                   with_labels=True,
-                   labels={node: node.replace(' ', '\n') for node in path_graph.nodes()},
-                   font_size=8,
-                   font_weight='bold',
-                   arrows=True,
-                   arrowsize=20,
-                   arrowstyle='->',
-                   edge_color='#2C3E50',
-                   width=2)
-
-            # Add path information
-            path_info = f"Path: {' → '.join(path)}\nLength: {len(path)} nodes"
-            plt.figtext(0.02, 0.02, path_info, fontsize=10, 
-                       bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray"))
-
-            # Legend
-            legend_elements = [
-                Line2D([0], [0], marker='o', color='w', markerfacecolor='#FF6B6B', 
-                      markersize=15, label='Source'),
-                Line2D([0], [0], marker='o', color='w', markerfacecolor='#4ECDC4', 
-                      markersize=15, label='Target'),
-                Line2D([0], [0], marker='o', color='w', markerfacecolor='#FFD93D', 
-                      markersize=15, label='Intermedio')
-            ]
-            plt.legend(handles=legend_elements, loc='upper right')
-            
-            plt.tight_layout()
-            # Save the graph
-            if save_path:
-                source_clean = source.replace(' ', '_').replace(':', '').replace('/', '_')
-                target_clean = target.replace(' ', '_').replace(':', '').replace('/', '_')
-                filename = f"path_specific_{path_number}_{source_clean}_{target_clean}.png"
-                
-                # Create Output directory if it doesn't exist
-                output_dir = os.path.join(os.path.dirname(__file__), "Output")
-                os.makedirs(output_dir, exist_ok=True)
-                filepath = os.path.join(output_dir, filename)
-                
-                plt.savefig(filepath, dpi=300, bbox_inches='tight', facecolor='white')
-                self.output.log(f"✅ Specific path graph #{path_number} saved: {filepath}")
-            plt.close()
-            
-            
-            
-        except Exception as e:
-            self.output.log(f"❌ Error creating specific path graph #{path_number}: {e}")
 
     def _create_combined_paths_graph(self, all_paths, source, target):
         """Create a combined graph with all found paths"""
@@ -1885,7 +1863,7 @@ class AttackGraphAnalyzer:
             filename = f"paths_combined_{source_clean}_{target_clean}.png"
             
             # Create Output directory if it doesn't exist
-            output_dir = os.path.join(os.path.dirname(__file__), "Output")
+            output_dir = os.path.join(get_output_path(), "Output")
             os.makedirs(output_dir, exist_ok=True)
             filepath = os.path.join(output_dir, filename)
             
@@ -2104,9 +2082,12 @@ def main():
     # Show the current configuration
     #print_configuration()
     # File paths
-    csv_path = "attack_graph_threat_relations.csv"
-    # Use the selected file for threats
-    subset_path = THREAT_FILE_NAME
+    csv_path = os.path.join(get_base_path(), "attack_graph_threat_relations.csv")
+    # Use the selected file for threats - ensure it has the correct base path
+    if os.path.isabs(THREAT_FILE_NAME):
+        subset_path = THREAT_FILE_NAME
+    else:
+        subset_path = os.path.join(get_base_path(), THREAT_FILE_NAME)
 
     # Check if the files exist
     #if not os.path.exists(csv_path):
@@ -2141,7 +2122,7 @@ def main():
         analyzer.create_category_network()
         
         # Create Output directory if it doesn't exist
-        output_dir = os.path.join(os.path.dirname(__file__), "Output")
+        output_dir = os.path.join(get_output_path(), "Output")
         os.makedirs(output_dir, exist_ok=True)
         
         analyzer.visualize_graph(layout_type='spring', save_path=os.path.join(output_dir, 'attack_graph.png'))

@@ -21,6 +21,15 @@ try:
 except ImportError:
     PIL_AVAILABLE = False
 
+def get_base_path():
+    """Get the base path for the application (handles both .py and .exe execution)"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as Python script
+        return os.path.dirname(os.path.abspath(__file__))
+
 class MainInterface:
     """Main interface for the Risk Assessment Tool Suite"""
     
@@ -38,28 +47,28 @@ class MainInterface:
     TOOLS = [
         {
             'name': 'BID Phase',
-            'file': '0-BID.py',
+            'file': '0-BID.exe',
             'description': 'Calculate risk value of an ITT from project category',
             'color': '#4a90c2',
             'icon': '📊'
         },
         {
             'name': 'Risk Assessment 0-A',
-            'file': '1-Risk_Assessment_0-A.py',
+            'file': '1-Risk_Assessment_0-A.exe',
             'description': 'Preliminary risk assessment for space missions',
             'color': '#5a67d8',
             'icon': '🔍'
         },
         {
             'name': 'Risk Assessment',
-            'file': '2-Risk_Assessment.py',
+            'file': '2-Risk_Assessment.exe',
             'description': 'Complete risk assessment tool',
             'color': '#38b2ac',
             'icon': '⚠️'
         },
         {
             'name': 'Attack Graph Analyzer',
-            'file': '3-attack_graph_analyzer.py',
+            'file': '3-attack_graph_analyzer.exe',
             'description': 'Analyze relationships between threats in space systems',
             'color': '#dc3545',
             'icon': '🔗'
@@ -314,12 +323,16 @@ class MainInterface:
                 f"The tool {tool['name']} is already running."
             )
             return
-            
-        # Check if file exists
-        if not os.path.exists(tool['file']):
+        
+        # Get the full path to the executable
+        base_path = get_base_path()
+        exe_path = os.path.join(base_path, tool['file'])
+        
+        # Check if executable exists
+        if not os.path.exists(exe_path):
             messagebox.showerror(
                 "Error", 
-                f"The file {tool['file']} was not found."
+                f"The executable {tool['file']} was not found in {base_path}."
             )
             return
             
@@ -328,16 +341,16 @@ class MainInterface:
         tool['status_label'].config(text="Starting...", fg=self.COLORS['blue'])
         
         # Run in separate thread
-        thread = threading.Thread(target=self.execute_tool, args=(tool,))
+        thread = threading.Thread(target=self.execute_tool, args=(tool, exe_path))
         thread.daemon = True
         thread.start()
         
-    def execute_tool(self, tool):
+    def execute_tool(self, tool, exe_path):
         """Execute tool in separate thread"""
         try:
-            # Execute the Python script
+            # Execute the .exe file directly
             process = subprocess.Popen(
-                [sys.executable, tool['file']], 
+                [exe_path], 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE,
                 text=True,
@@ -348,43 +361,33 @@ class MainInterface:
             self.running_processes[tool['file']] = process
             
             # Update UI in main thread
-            self.root.after(0, lambda: self.update_tool_status(tool, "Running", self.COLORS['success']))
-            self.root.after(0, lambda: self.update_status(f"{tool['name']} running"))
+            self.root.after(0, lambda: tool['status_label'].config(text="Running...", fg=self.COLORS['success']))
+            self.root.after(0, lambda: self.update_status(f"{tool['name']} is running"))
             
             # Wait for process to complete
             stdout, stderr = process.communicate()
             
+            # Process completed
+            if process.returncode == 0:
+                self.root.after(0, lambda: tool['status_label'].config(text="Completed", fg=self.COLORS['success']))
+                self.root.after(0, lambda: self.update_status(f"{tool['name']} completed successfully"))
+            else:
+                self.root.after(0, lambda: tool['status_label'].config(text="Error", fg=self.COLORS['secondary']))
+                self.root.after(0, lambda: self.update_status(f"{tool['name']} completed with errors"))
+                
+        except Exception as e:
+            # Error occurred
+            error_msg = f"Error running {tool['name']}: {str(e)}"
+            self.root.after(0, lambda: tool['status_label'].config(text="Error", fg=self.COLORS['secondary']))
+            self.root.after(0, lambda: self.update_status(error_msg))
+            
+        finally:
             # Remove from running processes
             if tool['file'] in self.running_processes:
                 del self.running_processes[tool['file']]
             
-            # Update UI in main thread
-            if process.returncode == 0:
-                self.root.after(0, lambda: self.update_tool_status(tool, "Completed", self.COLORS['success']))
-                self.root.after(0, lambda: self.update_status(f"{tool['name']} completed successfully"))
-            else:
-                self.root.after(0, lambda: self.update_tool_status(tool, "Error", self.COLORS['secondary']))
-                self.root.after(0, lambda: self.update_status(f"Error executing {tool['name']}"))
-                
-                # Show error details
-                if stderr:
-                    self.root.after(0, lambda: messagebox.showerror(
-                        "Execution Error",
-                        f"Error executing {tool['name']}:\n\n{stderr[:500]}"
-                    ))
-                    
-        except Exception as e:
-            # Remove from running processes
-            if tool['file'] in self.running_processes:
-                del self.running_processes[tool['file']]
-                
-            # Update UI in main thread
-            self.root.after(0, lambda: self.update_tool_status(tool, "Error", self.COLORS['secondary']))
-            self.root.after(0, lambda: self.update_status(f"Error starting {tool['name']}"))
-            self.root.after(0, lambda: messagebox.showerror(
-                "Error",
-                f"Error starting {tool['name']}:\n\n{str(e)}"
-            ))
+            # Clear status after 3 seconds
+            self.root.after(3000, lambda: tool['status_label'].config(text="", fg=self.COLORS['gray']))
             
     def update_tool_status(self, tool, status, color):
         """Update tool status in UI"""

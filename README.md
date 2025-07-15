@@ -1,24 +1,38 @@
-# Cyber Risk Assessment Across Lifecycle of Space Program
+# Cyber Risk Assessment Across Lifecycle of Space Program (CRAALSP)
 
 A comprehensive cybersecurity risk assessment toolkit designed specifically for space missions and satellite systems. This suite provides tools for threat analysis, risk evaluation, and attack graph visualization to support space program security assessments.
 
 ## 🚀 Overview
 
-This tool suite was developed as part of a thesis work for space program risk assessment and consists of four main components:
+This tool suite was developed as part of a thesis work for space program risk assessment and consists of four main components with both Python scripts and standalone executables:
 
 1. **BID Phase Tool** - Initial risk assessment based on project category
-2. **Risk Assessment 0-A** - Preliminary threat and vulnerability analysis
+2. **Risk Assessment 0-A** - Preliminary threat and vulnerability analysis  
 3. **Risk Assessment** - Comprehensive risk evaluation with detailed criteria
-4. **Attack Graph Analyzer** - Threat relationship analysis and visualization
+4. **Attack Graph Analyzer** - Advanced threat relationship analysis and visualization with network graphs
+
+### 🎯 Key Features
+
+- **Dual Execution Modes**: Python scripts and standalone Windows executables (.exe)
+- **Main Launcher Interface**: Unified GUI to run all tools
+- **Professional Reporting**: Automated Word document generation
+- **Advanced Visualizations**: Network graphs, attack paths, and statistical analysis
+- **Interactive Analysis**: Real-time threat selection and path exploration
+- **Export Capabilities**: Multiple formats (Word, CSV, PNG, GEXF)
 
 ## 📋 Table of Contents
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Standalone Executables](#standalone-executables)
 - [Tool Descriptions](#tool-descriptions)
+- [Attack Graph Analyzer - Advanced Features](#attack-graph-analyzer---advanced-features)
 - [File Structure](#file-structure)
 - [Usage Examples](#usage-examples)
+- [Configuration](#configuration)
 - [Dependencies](#dependencies)
+- [Data Formats](#data-formats)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -26,11 +40,17 @@ This tool suite was developed as part of a thesis work for space program risk as
 
 ### Prerequisites
 
-- Python 3.7 or higher
-- Windows/Linux/macOS
+- Python 3.7 or higher (for Python scripts)
+- Windows 10/11 (for standalone executables)
+- No additional software required for .exe files
 
-### Required Libraries
+### Required Libraries (Python Scripts Only)
 
+```bash
+pip install -r requirements.txt
+```
+
+Or install individually:
 ```bash
 pip install tkinter
 pip install python-docx
@@ -52,6 +72,18 @@ pip install reportlab  # For PDF generation
 
 ## 🚀 Quick Start
 
+### Option 1: Standalone Executables (Recommended)
+
+1. **No installation required** - just run the executables
+2. **Launch the main interface**:
+   ```
+   _Main.exe
+   ```
+3. **Select a tool** from the graphical interface and click "Run"
+4. **Results** are automatically saved in the `Output` folder
+
+### Option 2: Python Scripts
+
 1. **Clone or download** the repository to your local machine
 2. **Install dependencies** using pip (see above)
 3. **Run the main interface**:
@@ -59,6 +91,24 @@ pip install reportlab  # For PDF generation
    python _Main.py
    ```
 4. **Select a tool** from the graphical interface and click "Run"
+
+## 📦 Standalone Executables
+
+The following Windows executables are provided for easy deployment:
+
+- **`_Main.exe`** - Main launcher interface (8.2 MB)
+- **`0-BID.exe`** - BID Phase assessment tool (36.8 MB)
+- **`1-Risk_Assessment_0-A.exe`** - Preliminary risk assessment (15.7 MB)
+- **`2-Risk_Assessment.exe`** - Complete risk assessment (15.8 MB)
+- **`3-attack_graph_analyzer.exe`** - Attack graph analyzer (794 MB)
+
+### 🎯 Executable Features
+
+- **No Python installation required**
+- **Self-contained** - all dependencies included
+- **Portable** - can be run from any directory
+- **Automatic path management** - finds data files relative to executable location
+- **Output management** - creates Output folder automatically
 
 ## 📊 Tool Descriptions
 
@@ -180,136 +230,577 @@ pip install reportlab  # For PDF generation
 
 ### 4. Attack Graph Analyzer (`3-attack_graph_analyzer.py`)
 
-**Purpose**: Analyze relationships between threats in space systems and create threat attack graphs
+**Purpose**: Advanced analysis of threat relationships in space systems with network graph visualization and attack path discovery
 
-**Key Features**:
-- Interactive file selection for threat data
-- Network graph visualization
-- Path analysis between threats
-- Centrality analysis
-- Star graph generation
-- Multiple visualization formats
-- Statistical analysis of threat relationships
+**🔥 Key Features**:
+- **Interactive Threat Selection** - GUI-based CSV file selection with validation
+- **Advanced Network Analysis** - Graph theory algorithms for threat relationships
+- **Multiple Analysis Types** - Centrality, critical paths, attack surface analysis
+- **Professional Visualizations** - High-quality PNG graphs with customizable layouts
+- **Configurable Path Analysis** - User-defined source-target threat combinations
+- **Statistical Reporting** - Comprehensive analysis reports with metrics
 
-**Analysis Capabilities**:
-- **Path Analysis**: Find attack paths between specific threats
-- **Centrality Analysis**: Identify key threats in the network
-- **Star Graph Analysis**: Show all connections to a specific threat
-- **Critical Path Identification**: Discover high-risk attack sequences
-- **Network Metrics**: Calculate graph statistics and properties
+**🎯 Analysis Capabilities**:
 
-**Visualization Options**:
-- Full threat network graph
-- Specific threat connection maps
-- Attack path visualizations
-- Centrality heat maps
-- Risk-weighted network layouts
+#### **Network Analysis**
+- **Graph Statistics**: Nodes, edges, density, connectivity metrics
+- **Category Analysis**: Threat distribution by category with visualizations
+- **Centrality Analysis**: Degree, betweenness, closeness, PageRank centrality
+- **Attack Surface Analysis**: Entry points and final targets identification
 
-**Configuration Options**:
-- Adjustable path length limits
-- Customizable threat selection
-- Flexible visualization parameters
-- Export format selection
+#### **Path Analysis**
+- **Specific Path Finding**: Discover attack paths between selected threats
+- **Multiple Path Analysis**: Batch analysis of predefined threat combinations
+- **Critical Path Identification**: High-risk attack sequences with scoring
+- **Path Visualization**: Combined graphs showing all discovered paths
 
-**Input Requirements**:
-- CSV file with threat data containing:
-  - THREAT: Threat name
-  - Likelihood: Threat likelihood (Very Low to Very High)
-  - Impact: Threat impact (Very Low to Very High)
-  - Risk: Overall risk level (Very Low to Very High)
+#### **Threat Connection Analysis**
+- **Star Graph Analysis**: Complete connection map for specific threats
+- **Predecessor/Successor Analysis**: Threats that enable or are enabled by target
+- **Second-level Neighbors**: Extended threat network exploration
+- **Centrality Scoring**: Quantitative importance metrics for individual threats
 
-**Output**:
-- Network graph visualizations (PNG format)
-- Attack path analysis report
-- Centrality analysis results
-- Statistical summary
-- Interactive graph files
+**🎨 Visualization Features**:
+- **Full Network Graph**: Complete threat relationship visualization
+- **Star Connection Maps**: Focused analysis around specific threats
+- **Attack Path Graphs**: Step-by-step attack sequence visualization
+- **Combined Path Views**: Multiple attack paths in single visualization
+- **Professional Layouts**: Hierarchical, spring, and custom layouts
+
+**⚙️ Configuration Options**:
+```python
+# Main path analysis
+SPECIFIC_PATH_ANALYSIS = {
+    "source_threat": "Social Engineering",
+    "target_threat": "Seizure of control: Satellite bus", 
+    "max_path_length": 5
+}
+
+# Multiple paths analysis
+MULTIPLE_PATH_ANALYSIS = [
+    {
+        "source": "Unauthorized physical access",
+        "target": "Denial of Service: Satellite bus", 
+        "description": "Physical to DoS attack path"
+    }
+]
+
+# Analysis parameters
+ANALYSIS_PARAMETERS = {
+    "top_centrality_nodes": 10,
+    "top_critical_paths": 15,
+    "max_paths_per_analysis": 20
+}
+```
+
+**📊 Input Requirements**:
+CSV file with threat data containing:
+- **THREAT**: Threat name/description
+- **Likelihood**: Threat likelihood (Very Low, Low, Medium, High, Very High)
+- **Impact**: Threat impact (Very Low, Low, Medium, High, Very High)  
+- **Risk**: Overall risk level (Very Low, Low, Medium, High, Very High)
+
+**📈 Output Formats**:
+- **Analysis Reports**: Detailed text reports with statistics and findings
+- **Network Visualizations**: High-resolution PNG images with legends
+- **GEXF Export**: Gephi-compatible graph files for advanced analysis
+- **Statistical Summaries**: Quantitative metrics and rankings
+
+**🔍 Advanced Features**:
+- **Dynamic Threat Selection**: Runtime CSV file selection with validation
+- **Path Criticality Scoring**: Weighted algorithms considering multiple factors
+- **Risk-based Highlighting**: Visual emphasis on high-risk threats and paths
+- **Relationship Type Analysis**: Different edge types (Enables, Causes, Leads-to)
+- **Category-based Filtering**: Focus analysis on specific threat categories
+
+---
+
+## 🔬 Attack Graph Analyzer - Advanced Features
+
+### Interactive Analysis Workflow
+
+1. **Launch Tool**: Run `3-attack_graph_analyzer.exe` or `python 3-attack_graph_analyzer.py`
+2. **Select Threat Data**: GUI dialog to choose CSV file with threat information
+3. **Automatic Validation**: Tool validates CSV format and required columns
+4. **Complete Analysis**: Runs all analysis types automatically
+5. **Review Results**: Generated reports and visualizations in Output folder
+
+### Analysis Types Performed
+
+#### **1. Graph Statistics**
+```
+🚀 GRAPH STATISTICS
+Total threats (nodes): 156
+Total relationships (edges): 312  
+Graph density: 0.026
+Average degree: 4.0
+```
+
+#### **2. Category Analysis**
+- Distribution of threats by category (NAA, EIH, PA, etc.)
+- Category relationship matrix
+- Visual breakdown with charts
+
+#### **3. Centrality Analysis**
+- **Degree Centrality**: Most connected threats
+- **Betweenness Centrality**: Bridge threats between different clusters  
+- **Closeness Centrality**: Threats with shortest paths to others
+- **PageRank**: Most "important" threats in the network
+
+#### **4. Critical Path Analysis**
+```
+🚨 TOP 15 CRITICAL PATHS IDENTIFIED:
+🔥 CRITICAL PATH #1 (Score: 12.45, Danger: 0.89, Length: 4)
+   From: Social Engineering
+   To: Seizure of control: Satellite bus
+   Sequence:
+     1. [NAA] Social Engineering
+        --(Enables)--> [EIH] Unauthorized access
+     2. [EIH] Unauthorized access  
+        --(Leads-to)--> [SEC] Security services failure
+     3. [SEC] Security services failure
+        --(Causes)--> [NAA] Seizure of control: Satellite bus
+```
+
+#### **5. Attack Surface Analysis**
+- **Entry Points**: Threats with few inputs but many outputs (attack vectors)
+- **Final Targets**: Threats with many inputs but few outputs (attack goals)
+- Risk-weighted importance scoring
+
+#### **6. Threat Connection Analysis**
+```
+🔍 CONNECTION ANALYSIS FOR: 'Social Engineering'
+📊 BASIC INFORMATION:
+   Category: NAA
+   Incoming connections: 2
+   Outgoing connections: 8
+   Total connections: 10
+
+🔽 PREDECESSORS (2) - Threats that LEAD TO 'Social Engineering'
+🔼 SUCCESSORS (8) - Threats ENABLED BY 'Social Engineering'
+```
+
+### Configuration Examples
+
+#### **Custom Path Analysis**
+```python
+# Single path analysis
+SPECIFIC_PATH_ANALYSIS = {
+    "source_threat": "Supply Chain",
+    "target_threat": "Data modification",
+    "max_path_length": 6
+}
+
+# Multiple predefined paths
+MULTIPLE_PATH_ANALYSIS = [
+    {
+        "source": "Physical access",
+        "target": "Firmware corruption",
+        "description": "Physical to firmware attack"
+    },
+    {
+        "source": "Social Engineering", 
+        "target": "Data exfiltration",
+        "description": "Social to data theft"
+    }
+]
+```
+
+#### **Visualization Settings**
+```python
+# Star graph configuration
+STAR_GRAPH_CONFIG = {
+    "center_threat": "Unauthorized access",
+    "max_connections": 20,
+    "save_individual": True
+}
+
+# Threat connection analysis
+THREAT_CONNECTION_ANALYSIS = {
+    "save_visualization": True,
+    "max_distance": 2,
+    "include_predecessors": True,
+    "include_successors": True,
+    "show_relation_types": True
+}
+```
+
+### Output Files Generated
+
+#### **Reports**
+- `attack_graph_analysis_[timestamp].txt` - Complete analysis report
+- Statistical summaries and findings
+- Threat rankings and scores
+
+#### **Visualizations** 
+- `attack_graph.png` - Full network graph
+- `threat_connections_[threat]_[timestamp].png` - Individual threat analysis
+- `paths_combined_[source]_[target].png` - Attack path visualization
+- Custom graphs based on configuration
+
+#### **Data Export**
+- `attack_graph.gexf` - Gephi-compatible graph file
+- CSV exports of analysis results
+- JSON configuration backups
 
 ---
 
 ## 📁 File Structure
 
 ```
-Risk Assessment Tool Suite/
-├── _Main.py                          # Main launcher interface
-├── 0-BID.py                         # BID Phase assessment tool
-├── 1-Risk_Assessment_0-A.py         # Preliminary risk assessment
-├── 2-Risk_Assessment.py             # Complete risk assessment
-├── 3-attack_graph_analyzer.py       # Attack graph analyzer
-├── export_import_functions.py       # Shared export/import utilities
-├── README.md                        # This file
-├── Asset.json                       # Asset definitions
-├── Control.csv                      # Control measures database
-├── Legacy.csv                       # Legacy system data
-├── Threat.csv                       # Threat definitions
-├── attack_graph_threat_relations.csv # Threat relationships
-└── Output                           # Export directory
+CRAALSP/
+├── 📱 EXECUTABLES
+│   ├── _Main.exe                     # Main launcher interface (8.2 MB)
+│   ├── 0-BID.exe                     # BID Phase assessment (36.8 MB)
+│   ├── 1-Risk_Assessment_0-A.exe     # Preliminary risk assessment (15.7 MB)
+│   ├── 2-Risk_Assessment.exe         # Complete risk assessment (15.8 MB)
+│   └── 3-attack_graph_analyzer.exe   # Attack graph analyzer (794 MB)
+│
+├── 🐍 PYTHON SCRIPTS
+│   ├── _Main.py                      # Main launcher interface
+│   ├── 0-BID.py                      # BID Phase assessment tool
+│   ├── 1-Risk_Assessment_0-A.py      # Preliminary risk assessment
+│   ├── 2-Risk_Assessment.py          # Complete risk assessment
+│   ├── 3-attack_graph_analyzer.py    # Attack graph analyzer
+│   └── export_import_functions.py    # Shared export/import utilities
+│
+├── 📋 DATA FILES
+│   ├── Asset.json                    # Asset definitions and categories
+│   ├── Control.csv                   # Control measures database
+│   ├── Legacy.csv                    # Legacy system threat data
+│   ├── Threat.csv                    # Comprehensive threat definitions
+│   └── attack_graph_threat_relations.csv  # Threat relationships matrix
+│
+├── 📄 DOCUMENTATION
+│   ├── README.md                     # This comprehensive guide
+│   └── requirements.txt              # Python dependencies
+│
+└── 📂 OUTPUT (Auto-generated)
+    ├── *.docx                        # Generated assessment reports
+    ├── *.png                         # Network visualizations
+    ├── *.txt                         # Analysis reports
+    ├── *.gexf                        # Gephi graph files
+    └── *.csv                         # Exported data
 ```
+
+### 🔧 Key Data Files
+
+#### **attack_graph_threat_relations.csv**
+Defines relationships between threats with columns:
+- Source Threat, Target Threat, Relation Type, Source Category, Target Category
+
+#### **Threat.csv** 
+Complete threat database with:
+- THREAT, Likelihood, Impact, Risk, Category, Description
+
+#### **Asset.json**
+Asset definitions for risk assessment including:
+- Ground segment, Space segment, Link segment, User segment assets
+
+#### **Control.csv**
+Security control measures with effectiveness ratings
 
 ## 💡 Usage Examples
 
-### Running the Main Interface
+### Using the Main Interface
 
+#### **Executable Version (Recommended)**
 ```bash
-python _Main.py
+# Launch main interface
+_Main.exe
+
+# Or run individual tools directly
+0-BID.exe
+1-Risk_Assessment_0-A.exe  
+2-Risk_Assessment.exe
+3-attack_graph_analyzer.exe
 ```
 
-This launches the graphical interface where you can:
-- Select any of the four tools
-- Monitor execution status
-- View completion notifications
-
-### Running Individual Tools
-
-Each tool can also be run independently:
-
+#### **Python Script Version**
 ```bash
-# BID Phase Assessment
+# Launch main interface  
+python _Main.py
+
+# Or run individual tools
 python 0-BID.py
-
-# Preliminary Risk Assessment
 python 1-Risk_Assessment_0-A.py
-
-# Complete Risk Assessment
 python 2-Risk_Assessment.py
-
-# Attack Graph Analyzer
 python 3-attack_graph_analyzer.py
 ```
 
-### Example Workflow
+### Main Interface Features
 
-1. **Start with BID Phase** to assess initial project risk
-2. **Use Risk Assessment 0-A** for preliminary threat analysis
-3. **Run complete Risk Assessment** for detailed evaluation
-4. **Analyze threat relationships** with Attack Graph Analyzer
-5. **Generate comprehensive reports** from all tools
+The `_Main.exe` launcher provides:
+- **Tool Selection**: Click buttons to launch any of the 4 tools
+- **Status Monitoring**: Real-time feedback on tool execution
+- **Error Handling**: Graceful error reporting and recovery
+- **Unified Interface**: Consistent experience across all tools
+
+### Example Analysis Workflow
+
+#### **1. Space Mission Risk Assessment**
+```bash
+# Step 1: Initial project assessment
+0-BID.exe
+# → Evaluates cybersecurity requirements by project category
+# → Generates risk score and Word report
+
+# Step 2: Preliminary threat analysis  
+1-Risk_Assessment_0-A.exe
+# → Maps threats to assets across mission segments
+# → Creates threat-asset risk matrix
+
+# Step 3: Comprehensive assessment
+2-Risk_Assessment.exe  
+# → Detailed risk evaluation with controls
+# → Advanced statistical analysis
+
+# Step 4: Attack graph analysis
+3-attack_graph_analyzer.exe
+# → Network analysis of threat relationships
+# → Attack path discovery and visualization
+```
+
+#### **2. Attack Graph Analysis Example**
+
+1. **Launch** `3-attack_graph_analyzer.exe`
+2. **Select threat data** - GUI opens to choose CSV file
+3. **Review validation** - Tool confirms file format
+4. **Wait for analysis** - Complete analysis runs automatically
+5. **Check results** - Reports and graphs saved to Output folder
+
+**Sample Output Structure:**
+```
+Output/
+├── attack_graph_analysis_20250715_143022.txt
+├── attack_graph.png  
+├── threat_connections_Social_Engineering_20250715_143025.png
+├── paths_combined_Social_Engineering_Seizure_of_control.png
+└── attack_graph.gexf
+```
+
+### Advanced Attack Graph Usage
+
+#### **Custom Path Analysis**
+To analyze specific threat combinations, modify the configuration in the script:
+
+```python
+# Edit these variables in 3-attack_graph_analyzer.py
+SPECIFIC_PATH_ANALYSIS = {
+    "source_threat": "Supply Chain",        # Starting threat
+    "target_threat": "Data corruption",     # Target threat  
+    "max_path_length": 5                    # Maximum hops
+}
+
+MULTIPLE_PATH_ANALYSIS = [
+    {
+        "source": "Physical access",
+        "target": "Denial of Service",
+        "description": "Physical to DoS analysis"
+    },
+    {
+        "source": "Social Engineering",
+        "target": "Data exfiltration", 
+        "description": "Social to data theft"
+    }
+]
+```
+
+#### **Visualization Customization**
+```python
+# Star graph around specific threat
+STAR_GRAPH_CONFIG = {
+    "center_threat": "Unauthorized access",
+    "max_connections": 15,
+    "save_individual": True
+}
+
+# Connection analysis settings  
+THREAT_CONNECTION_ANALYSIS = {
+    "save_visualization": True,
+    "max_distance": 3,
+    "show_relation_types": True
+}
+```
+
+### Report Generation Examples
+
+#### **BID Phase Report Output**
+```
+📊 CYBERSECURITY RISK ASSESSMENT - BID PHASE
+Project Category: Communication Satellite (GEO)
+Assessment Date: 2025-07-15
+
+🎯 RISK SCORE: 8.2/10 (HIGH RISK)
+
+📋 CRITERIA EVALUATION:
+✓ Cybersecurity Requirements: High (4/4)
+✓ Security Architecture: Medium (3/4) 
+✓ Cryptographic Requirements: High (4/4)
+...
+
+📈 RECOMMENDATIONS:
+• Implement additional access controls
+• Enhance monitoring capabilities
+• Review supply chain security
+```
+
+#### **Attack Graph Analysis Report**
+```
+🚀 ATTACK GRAPH ANALYSIS REPORT
+Analysis Date: 2025-07-15 14:30:22
+Threat Data: Threat_Space_Systems.csv
+
+📊 NETWORK STATISTICS:
+• Total Threats: 156 nodes
+• Relationships: 312 edges  
+• Network Density: 0.026
+• Average Connections: 4.0
+
+🎯 TOP CRITICAL PATHS:
+1. Social Engineering → Unauthorized access → Security failure → Control seizure
+   Score: 12.45, Danger: 0.89, Length: 4 steps
+
+🔍 KEY THREATS BY CENTRALITY:
+• Highest Degree: "Unauthorized access" (12 connections)
+• Highest Betweenness: "Security services failure" (0.156)
+• Highest PageRank: "Social Engineering" (0.034)
+```
 
 ## 🔧 Configuration
 
 ### Attack Graph Analyzer Configuration
 
-The attack graph analyzer can be configured by modifying variables in the script:
+The attack graph analyzer supports extensive customization through configuration variables:
 
+#### **Path Analysis Settings**
 ```python
-# File selection (interactive or programmatic)
-THREAT_FILE_NAME = "CSV_Export_[timestamp]/Threat_Analyzed.csv"
-
-# Path analysis configuration
+# Single main path analysis
 SPECIFIC_PATH_ANALYSIS = {
-    "source_threat": "Social Engineering",
-    "target_threat": "Seizure of control: Satellite bus",
-    "max_path_length": 5
+    "source_threat": "Social Engineering",           # Starting threat
+    "target_threat": "Seizure of control: Satellite bus",  # Target threat
+    "max_path_length": 5                            # Maximum path length
 }
 
-# Visualization settings
-save_path = 0  # Save individual path plots
-max_five = 0   # Limit to 5 combined paths
+# Multiple predefined path analyses  
+MULTIPLE_PATH_ANALYSIS = [
+    {
+        "source": "Unauthorized physical access",
+        "target": "Denial of Service: Satellite bus",
+        "description": "Physical to DoS attack sequence"
+    },
+    {
+        "source": "Supply Chain",  
+        "target": "Firmware corruption",
+        "description": "Supply chain to firmware attack"
+    }
+]
+```
+
+#### **Analysis Parameters**
+```python
+ANALYSIS_PARAMETERS = {
+    "top_centrality_nodes": 10,      # Number of top central nodes to show
+    "top_critical_paths": 15,        # Number of critical paths to analyze
+    "max_paths_per_analysis": 20,    # Limit paths per source-target pair
+    "path_criticality_threshold": 5.0 # Minimum score for critical paths
+}
+```
+
+#### **Visualization Settings**
+```python
+# Star graph configuration (threat-centered analysis)
+STAR_GRAPH_CONFIG = {
+    "center_threat": "Social Engineering",  # Central threat to analyze
+    "max_connections": 20,                  # Maximum connections to show
+    "save_individual": True,                # Save individual path graphs
+    "layout_type": "spring"                 # Graph layout algorithm
+}
+
+# Threat connection analysis
+THREAT_CONNECTION_ANALYSIS = {
+    "save_visualization": True,       # Save connection visualizations
+    "max_distance": 2,               # Include threats up to N hops away
+    "include_predecessors": True,     # Include threat predecessors  
+    "include_successors": True,       # Include threat successors
+    "show_relation_types": True       # Show edge labels with relation types
+}
+```
+
+#### **File and Output Settings**
+```python
+# Default threat file (can be overridden by GUI selection)
+THREAT_FILE_NAME = "Threat.csv"
+
+# Output configuration
+OUTPUT_SETTINGS = {
+    "save_full_report": True,        # Save complete analysis report
+    "save_individual_graphs": True,  # Save separate graph files
+    "image_format": "png",           # Image format (png, svg, pdf)
+    "image_dpi": 300,               # Image resolution
+    "figure_size": (20, 15)         # Graph dimensions in inches
+}
 ```
 
 ### Risk Assessment Configuration
 
-Risk matrices and scoring criteria can be customized in each tool by modifying the relevant data structures in the source code.
+#### **BID Phase Scoring Weights**
+```python
+# Modify scoring weights in 0-BID.py
+CRITERIA_WEIGHTS = {
+    "cybersecurity_requirements": 1.2,
+    "security_architecture": 1.0, 
+    "cryptographic_requirements": 1.1,
+    "authentication_access": 1.0,
+    "supply_chain_security": 1.3,
+    # ... additional criteria
+}
+```
+
+#### **Risk Matrix Customization**
+Risk levels and thresholds can be customized in individual tools by modifying the risk calculation functions.
+
+### Data File Configuration
+
+#### **Threat Relationship Format**
+The `attack_graph_threat_relations.csv` file should follow this structure:
+```csv
+Source Threat,Target Threat,Relation Type,Source Category,Target Category
+Social Engineering,Unauthorized access,Enables,NAA,EIH
+Unauthorized access,Security services failure,Leads-to,EIH,SEC
+Security services failure,Seizure of control,Causes,SEC,NAA
+```
+
+#### **Threat Data Format**  
+Individual threat CSV files should include:
+```csv
+THREAT;Likelihood;Impact;Risk
+Social Engineering;High;Very High;Very High
+Unauthorized physical access;Medium;High;High
+Supply Chain;Low;Very High;High
+```
+
+### Advanced Configuration
+
+#### **Network Analysis Algorithms**
+```python
+# Centrality calculation parameters
+CENTRALITY_CONFIG = {
+    "degree_centrality": True,
+    "betweenness_centrality": True, 
+    "closeness_centrality": True,
+    "pagerank_centrality": True,
+    "eigenvector_centrality": False  # Disable for large graphs
+}
+
+# Path finding algorithms
+PATH_ANALYSIS_CONFIG = {
+    "algorithm": "all_simple_paths",    # or "shortest_path"
+    "cutoff_length": 6,                 # Maximum path length
+    "max_paths_per_pair": 10,          # Limit for performance
+    "include_cycles": False             # Exclude circular paths
+}
+```
 
 ## 📊 Data Formats
 
@@ -384,30 +875,136 @@ Denial of Service;Low;Medium;Low
 
 ## 🤝 Contributing
 
-This tool suite was developed as part of academic research. For contributions or modifications:
+This tool suite was developed as part of academic research for space program cybersecurity assessment. The project is open for contributions and enhancements.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request with detailed description
+### Development Guidelines
+
+#### **Code Standards**
+- Follow PEP 8 Python style guidelines
+- Include comprehensive docstrings for all functions
+- Maintain backward compatibility where possible
+- Add unit tests for new functionality
+
+#### **Contributing Process**
+1. **Fork** the repository from GitHub
+2. **Create** a feature branch (`git checkout -b feature/new-analysis`)
+3. **Implement** your changes with appropriate documentation
+4. **Test** thoroughly with sample data
+5. **Submit** a pull request with detailed description
+
+#### **Areas for Contribution**
+- **New Analysis Algorithms**: Additional graph analysis methods
+- **Visualization Improvements**: Enhanced plotting and export options
+- **Data Format Support**: Additional input/output file formats
+- **Performance Optimization**: Scalability for larger datasets
+- **User Interface**: GUI enhancements and usability improvements
+
+#### **Research Extensions**
+- Integration with other cybersecurity frameworks
+- Machine learning-based threat prediction
+- Real-time threat monitoring capabilities
+- Integration with space system simulators
+
+### Academic Usage
+
+#### **Citation**
+When using this tool suite in academic work, please cite:
+```
+Nonni, G. (2025). Cyber Risk Assessment Across Lifecycle of Space Program (CRAALSP). 
+Thesis work, [University Name], Student ID: 1948023.
+```
+
+#### **Research Applications**
+- Space mission security assessment
+- Cybersecurity risk analysis methodologies
+- Attack graph analysis in space systems
+- Threat modeling for satellite operations
 
 ## 📜 License
 
-This project is part of a thesis work for space program risk assessment. Please refer to your institution's policies regarding academic software usage and distribution.
+### Academic License
 
-## 👤 Author
+This project is developed as part of thesis work for space program risk assessment. Usage terms:
 
-**Giuseppe Nonni** (Student ID: 1948023)  
-Email: giuseppe.nonni@gmail.com  
-Thesis work for space program risk assessment tool
+- **Academic Use**: Free for educational and research purposes
+- **Commercial Use**: Contact author for licensing arrangements
+- **Modification**: Permitted with attribution to original work
+- **Distribution**: Allowed with proper academic citation
 
-## 📞 Support
+### Disclaimer
 
-For technical support or questions:
-- Check the troubleshooting section above
-- Review the source code comments for detailed implementation notes
-- Contact the author for specific issues
+This tool suite is provided for educational and research purposes. While developed with space industry best practices:
+
+- **No Warranty**: Tools provided "as-is" without guarantees
+- **Validation Required**: Results should be validated by domain experts
+- **Responsibility**: Users responsible for appropriate application
+- **Security**: Ensure proper handling of sensitive assessment data
+
+### Third-Party Licenses
+
+This project incorporates open-source libraries with their respective licenses:
+- **Python**: PSF License
+- **NetworkX**: BSD License  
+- **Matplotlib**: PSF-based License
+- **Pandas**: BSD License
+- **NumPy**: BSD License
+
+## 👤 Author & Contact
+
+### Project Author
+**Giuseppe Nonni**  
+- **Student ID**: 1948023
+- **Email**: giuseppe.nonni@gmail.com
+- **Institution**: [University Name]
+- **Field**: Space Systems Engineering, Cybersecurity
+
+### Thesis Information
+- **Title**: Cyber Risk Assessment Across Lifecycle of Space Program
+- **Focus**: Cybersecurity methodologies for space missions
+- **Year**: 2025
+- **Supervisor**: [Supervisor Name]
+
+### Technical Support
+
+#### **For Tool Issues**
+- **GitHub Issues**: Report bugs and feature requests
+- **Email Support**: Technical questions and implementation help
+- **Documentation**: Check README and source code comments
+
+#### **For Research Questions**
+- **Space Domain Expertise**: Contact for space-specific cybersecurity questions
+- **Methodology Discussion**: Available for academic collaboration
+- **Tool Validation**: Assistance with tool validation and verification
+
+#### **Acknowledgments**
+Special thanks to:
+- Thesis supervisor for guidance and support
+- Space industry experts for domain knowledge validation
+- Open-source community for foundational libraries
+- Academic reviewers for feedback and improvements
 
 ---
 
-*This tool suite is designed to support cybersecurity risk assessment in space missions and satellite systems. It provides a comprehensive framework for threat analysis, risk evaluation, and security planning in the space domain.*
+## 📚 Additional Resources
+
+### Related Documentation
+- **Space Cybersecurity Standards**: ISO/IEC 27001, NIST Cybersecurity Framework
+- **Attack Graph Theory**: Academic papers on graph-based security analysis
+- **Space Mission Security**: ESA and NASA cybersecurity guidelines
+
+### Further Reading
+- Space Systems Security Engineering methodologies
+- Graph theory applications in cybersecurity
+- Risk assessment frameworks for critical infrastructure
+- Satellite constellation security considerations
+
+### Tool Integration
+- **Gephi**: For advanced graph visualization and analysis
+- **MITRE ATT&CK**: Framework integration for threat mapping
+- **Risk Management Tools**: Integration with enterprise risk platforms
+
+---
+
+*This tool suite represents a comprehensive approach to cybersecurity risk assessment in space missions. It combines academic research with practical implementation to support the growing need for space system security analysis.*
+
+**🚀 CRAALSP - Securing the Future of Space Exploration 🛰️**

@@ -6,11 +6,31 @@ Separated module for better code organization
 import csv
 import json
 import os
+import sys
 import re
 import datetime
 import logging
 import traceback
 from tkinter import messagebox, filedialog
+
+def get_base_path():
+    """Get the base path for the application (works with both .py and .exe)"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        # PyInstaller stores data files in sys._MEIPASS
+        return getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    else:
+        # Running as script
+        return os.path.dirname(os.path.abspath(__file__))
+
+def get_output_path():
+    """Get the path where output files should be saved"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable - save next to the .exe
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as script - save in script directory
+        return os.path.dirname(os.path.abspath(__file__))
 
 # Word export/import functionality
 try:
@@ -43,7 +63,7 @@ class ExportImportManager:
             
             # Create export folder with timestamp in Output directory
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_dir = os.path.join(os.path.dirname(__file__), "Output")
+            output_dir = os.path.join(get_output_path(), "Output")
             os.makedirs(output_dir, exist_ok=True)
             export_folder = os.path.join(output_dir, f"CSV_Export_{timestamp}")
             os.makedirs(export_folder, exist_ok=True)
@@ -79,7 +99,7 @@ class ExportImportManager:
             filename = f"Risk_Assessment_Report_{timestamp}.docx"
             
             # Create Output directory if it doesn't exist
-            output_dir = os.path.join(os.path.dirname(__file__), "Output")
+            output_dir = os.path.join(get_output_path(), "Output")
             os.makedirs(output_dir, exist_ok=True)
             
             file_path = os.path.join(output_dir, filename)
@@ -122,7 +142,7 @@ class ExportImportManager:
             file_path = filedialog.askopenfilename(
                 title="Select Report to Import",
                 filetypes=[("Word Documents", "*.docx"), ("All files", "*.*")],
-                initialdir=os.path.dirname(__file__)
+                initialdir=get_base_path()
             )
             
             if not file_path:
@@ -181,7 +201,7 @@ class ExportImportManager:
             file_path = filedialog.askopenfilename(
                 title="Select Legacy Report to Import",
                 filetypes=[("Word Documents", "*.docx"), ("All files", "*.*")],
-                initialdir=os.path.dirname(__file__)
+                initialdir=get_base_path()
             )
             
             if not file_path:
@@ -242,7 +262,7 @@ class ExportImportManager:
     def _load_threat_mapping(self):
         """Load threat mapping from Legacy.csv"""
         threat_mapping = {}
-        legacy_file = os.path.join(os.path.dirname(__file__), "Legacy.csv")
+        legacy_file = os.path.join(get_base_path(), "Legacy.csv")
         
         try:
             with open(legacy_file, 'r', newline='', encoding='utf-8') as csvfile:
@@ -636,7 +656,7 @@ class ExportImportManager:
         try:
             # Load current threats from Threat.csv
             current_threats = set()
-            threats_file = os.path.join(os.path.dirname(__file__), "Threat.csv")
+            threats_file = os.path.join(get_base_path(), "Threat.csv")
             
             with open(threats_file, 'r', newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile, delimiter=';')
@@ -656,7 +676,7 @@ class ExportImportManager:
     def _load_threat_details(self):
         """Load threat details from Threat_Subset.csv"""
         threat_details = {}
-        threats_file = os.path.join(os.path.dirname(__file__), "Threat_Subset.csv")
+        threats_file = os.path.join(get_base_path(), "Threat_Subset.csv")
         
         try:
             with open(threats_file, 'r', newline='', encoding='utf-8') as csvfile:
@@ -1249,7 +1269,7 @@ class ExportImportManager:
         
         # Load known threats from Threat.csv
         known_threats = set()
-        threats_file = os.path.join(os.path.dirname(__file__), "Threat.csv")
+        threats_file = os.path.join(get_base_path(), "Threat.csv")
         try:
             with open(threats_file, 'r', newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile, delimiter=';')
@@ -1327,7 +1347,7 @@ class ExportImportManager:
         try:
             # Load known threats from Threat.csv for validation
             known_threats = set()
-            threats_file = os.path.join(os.path.dirname(__file__), "Threat.csv")
+            threats_file = os.path.join(get_base_path(), "Threat.csv")
             try:
                 with open(threats_file, 'r', newline='', encoding='utf-8') as csvfile:
                     reader = csv.DictReader(csvfile, delimiter=';')
@@ -1736,7 +1756,7 @@ class ExportImportManager:
         try:
             # Find the most recent report file
             import glob
-            pattern = os.path.join(os.path.dirname(__file__), "Risk_Assessment_Report_*.docx")
+            pattern = os.path.join(get_base_path(), "Risk_Assessment_Report_*.docx")
             report_files = glob.glob(pattern)
             
             if not report_files:

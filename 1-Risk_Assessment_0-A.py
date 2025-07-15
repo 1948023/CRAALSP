@@ -2,7 +2,17 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import math
 import os
+import sys
 from datetime import datetime
+
+def get_base_path():
+    """Get the base path for the application (works with both .py and .exe)"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as script
+        return os.path.dirname(os.path.abspath(__file__))
 
 # Import for Word export/import
 try:
@@ -895,7 +905,7 @@ class RiskAssessmentTool:
             filename = f"Risk_Assessment_0-A_{timestamp}.docx"
 
             # Create Output directory if it doesn't exist
-            output_dir = os.path.join(os.path.dirname(__file__), "Output")
+            output_dir = os.path.join(get_base_path(), "Output")
             os.makedirs(output_dir, exist_ok=True)
 
             # Destination folder (Output directory)
