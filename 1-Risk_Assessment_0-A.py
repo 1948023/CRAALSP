@@ -138,7 +138,7 @@ class RiskAssessmentTool:
     ]
     def __init__(self, root):
         self.root = root
-        self.root.title("Risk Assessment Tool - Phase 0/A")
+        self.root.title("Risk Assessment Tool - Phase 0-A")
         self.root.state('zoomed')        
         self.root.configure(bg=self.COLORS['white'])
         # Data for threats and calculations
@@ -157,7 +157,7 @@ class RiskAssessmentTool:
         header.pack(fill='x')
         header.pack_propagate(False)
         
-        tk.Label(header, text="Risk Assessment Tool - Phase 0/A", 
+        tk.Label(header, text="Risk Assessment Tool - Phase 0-A", 
                 font=('Segoe UI', 16, 'bold'),
                 bg=self.COLORS['light'], fg=self.COLORS['dark']).pack(pady=15)
         
@@ -236,47 +236,59 @@ class RiskAssessmentTool:
     def create_buttons(self, parent):
         """Creates the buttons"""
         button_frame = tk.Frame(parent, bg=self.COLORS['white'])
-        button_frame.pack(fill='x')
+        button_frame.pack(fill='x', pady=20)
 
-        # ADD THREAT button
-        add_btn = tk.Button(button_frame, text="ADD THREAT",
-                           font=('Segoe UI', 12, 'bold'),
-                           bg=self.COLORS['primary'], fg=self.COLORS['white'],
-                           relief='flat', padx=30, pady=10,
-                           command=self.open_threat_window)
-        add_btn.pack(pady=10)
+        # Main container with three sections
+        main_container = tk.Frame(button_frame, bg=self.COLORS['white'])
+        main_container.pack()
 
-        # Buttons Word Export/Import
-        bottom_frame = tk.Frame(button_frame, bg=self.COLORS['white'])
-        bottom_frame.pack()
+        # Left section - Export/Import 0-A buttons
+        left_frame = tk.Frame(main_container, bg=self.COLORS['white'])
+        left_frame.pack(side='left', padx=(0, 30))
         
         if DOCX_AVAILABLE:
-            export_word_btn = tk.Button(bottom_frame, text="EXPORT WORD",
-                                       font=('Segoe UI', 11, 'bold'),
-                                       bg='#2e86de', fg=self.COLORS['white'],
-                                       relief='flat', padx=20, pady=8,
+            export_word_btn = tk.Button(left_frame, text="EXPORT 0-A REPORT",
+                                       font=('Segoe UI', 10, 'bold'),
+                                       bg="#0E831E", fg=self.COLORS['white'],
+                                       relief='flat', padx=20, pady=2,
                                        command=self.export_to_word)
-            export_word_btn.pack(side='left', padx=(0, 10))
+            export_word_btn.pack(pady=(0, 2))
             
-            import_word_btn = tk.Button(bottom_frame, text="IMPORT WORD",
-                                       font=('Segoe UI', 11, 'bold'),
+            import_word_btn = tk.Button(left_frame, text="IMPORT 0-A REPORT",
+                                       font=('Segoe UI', 10, 'bold'),
                                        bg='#8e44ad', fg=self.COLORS['white'],
-                                       relief='flat', padx=20, pady=8,
+                                       relief='flat', padx=19.5, pady=2,
                                        command=self.import_from_word)
-            import_word_btn.pack(side='left', padx=(10, 0))
+            import_word_btn.pack(pady=(2, 0))
         else:
-            no_docx_label = tk.Label(bottom_frame, text="Word export/import unavailable - install python-docx",
+            no_docx_label = tk.Label(left_frame, text="Word export/import unavailable\ninstall python-docx",
                                    font=('Segoe UI', 9),
-                                   bg=self.COLORS['white'], fg=self.COLORS['gray'])
+                                   bg=self.COLORS['white'], fg=self.COLORS['gray'],
+                                   justify='center')
             no_docx_label.pack()
+
+        # Center section - THREAT ANALYSIS button
+        center_frame = tk.Frame(main_container, bg=self.COLORS['white'])
+        center_frame.pack(side='left', padx=30)
         
-        # Import Legacy Report button (always available)
-        import_legacy_btn = tk.Button(bottom_frame, text="IMPORT LEGACY",
+        threat_btn = tk.Button(center_frame, text="THREAT ANALYSIS",
+                              font=('Segoe UI', 14, 'bold'),
+                              bg=self.COLORS['primary'], fg=self.COLORS['white'],
+                              relief='flat', padx=40, pady=15,
+                              command=self.open_threat_window)
+        threat_btn.pack()
+
+        # Right section - Import Legacy Report button
+        right_frame = tk.Frame(main_container, bg=self.COLORS['white'])
+        right_frame.pack(side='left', padx=(30, 0))
+        
+        import_legacy_btn = tk.Button(right_frame, text="IMPORT MISSION\nANALYSIS REPORT",
                                      font=('Segoe UI', 11, 'bold'),
                                      bg='#e67e22', fg=self.COLORS['white'],
-                                     relief='flat', padx=20, pady=8,
-                                     command=self.import_legacy_report)
-        import_legacy_btn.pack(side='left', padx=(10, 0))
+                                     relief='flat', padx=20, pady=12,
+                                     command=self.import_legacy_report,
+                                     justify='center')
+        import_legacy_btn.pack()
     
     def open_threat_window(self):
         """Open Threat Analysis window"""
@@ -292,7 +304,7 @@ class RiskAssessmentTool:
         header.pack(fill='x')
         header.pack_propagate(False)
         
-        tk.Label(header, text="Threat Analysis - Asset Assessment",
+        tk.Label(header, text="Threat Analysis",
                 font=('Segoe UI', 14, 'bold'),
                 bg=self.COLORS['light'], fg=self.COLORS['dark']).pack(pady=12)
 
@@ -348,7 +360,7 @@ class RiskAssessmentTool:
         save_btn.pack(side='left', padx=(0, 10))
         
         # Help button
-        help_btn = tk.Button(buttons_frame, text="? Help",
+        help_btn = tk.Button(buttons_frame, text="❓ Help",
                             font=('Segoe UI', 11, 'bold'),
                             bg=self.COLORS['gray'], fg=self.COLORS['white'],
                             relief='flat', padx=20, pady=10,
@@ -968,7 +980,7 @@ class RiskAssessmentTool:
         try:
             file_path = filedialog.askopenfilename(
                 filetypes=[("Word documents", "*.docx"), ("All files", "*.*")],
-                title="Import Legacy Risk Assessment Report"
+                title="Import Risk Assessment Report from older phases"
             )
             
             if not file_path:
@@ -1593,7 +1605,7 @@ class RiskAssessmentTool:
         """Show help window with criteria descriptions"""
         help_window = tk.Toplevel(self.root)
         help_window.title("Assessment Criteria - Help")
-        help_window.geometry("1200x540")
+        help_window.geometry("1200x700")  # Increased height to accommodate tool explanation
         help_window.configure(bg=self.COLORS['white'])
         help_window.resizable(True, True)
         
@@ -1675,6 +1687,70 @@ class RiskAssessmentTool:
                                  bg=row_color, fg='#495057', anchor='nw',
                                  padx=15, pady=8, wraplength=800, justify='left')
             desc_label.grid(row=0, column=1, sticky='new')
+        
+        # Add separator and tool explanation section
+        separator_frame = tk.Frame(scrollable_frame, bg=self.COLORS['gray'], height=2)
+        separator_frame.pack(fill='x', pady=(20, 15), padx=15)
+        
+        # Tool explanation title
+        explanation_title = tk.Label(scrollable_frame, text="How the Risk Assessment Tool Works", 
+                                    font=('Segoe UI', 14, 'bold'),
+                                    bg=self.COLORS['white'], fg=self.COLORS['primary'])
+        explanation_title.pack(pady=(10, 15), padx=15, anchor='w')
+        
+        # Tool explanation content
+        explanation_frame = tk.Frame(scrollable_frame, bg=self.COLORS['light'], relief='ridge', bd=1)
+        explanation_frame.pack(fill='x', padx=15, pady=(0, 20))
+        
+        explanation_text = """The Risk Assessment Tool for Phase 0-A helps evaluate cybersecurity risks during the preliminary design phase of space missions. Here's how to use it effectively:
+
+1. MISSION CONFIGURATION:
+   • Start by selecting your mission type from the dropdown (Earth Observation, Communication Satellite, etc.)
+   • This helps contextualize the risk assessment for your specific mission profile
+
+2. THREAT ANALYSIS PROCESS:
+   • Click "THREAT ANALYSIS" to open the detailed assessment window
+   • For each threat, evaluate all 9 asset categories (Ground Stations, Mission Control, Space Platform, etc.)
+   • Rate each asset using the 5 assessment criteria on a scale of 1-5:
+     - Vulnerability Level: How exposed is the asset to known vulnerabilities?
+     - Access Control: How well protected is access to the asset?
+     - Defense Capability: What countermeasures and detection systems are in place?
+     - Operational Impact: How would a successful attack affect mission operations?
+     - Recovery Time: How long would it take to restore normal operations?
+
+3. AUTOMATIC RISK CALCULATION:
+   • The tool automatically calculates Likelihood using the quadratic mean of Vulnerability, Access, and Defense scores
+   • Impact is calculated using the quadratic mean of Operational Impact and Recovery Time scores
+   • Likelihood is calculated using the quadratic mean of Vulnerability Level, Access Control and Defense Capability
+   • Final Risk Level is determined using a standard risk matrix (Likelihood x Impact)
+   • The main table shows the highest risk level found across all assets for each threat
+
+4. DATA MANAGEMENT:
+   • Save your assessments for each threat individually
+   • Export complete reports to Word documents for documentation and sharing
+   • Import previously saved assessments to continue work or review past analyses
+
+5. LEGACY DATA INTEGRATION:
+   • Use "IMPORT MISSION ANALYSIS REPORT" to import risk data from earlier mission phases
+   • The tool can process reports from the Output folder containing mission analysis data
+   • This helps maintain continuity across different project phases
+
+6. OUTPUT AND REPORTING:
+   • All exported reports are saved in the "Output" folder for easy access
+   • Reports include detailed threat analysis, asset assessments, and security control recommendations
+   • Check the Output folder for examples of risk reports from previous mission analysis phases
+
+7. BEST PRACTICES:
+   • Assess all relevant threats for your mission type
+   • Consider both current security posture and planned security measures
+   • Review and update assessments as the mission design evolves
+   • Use the assessment results to prioritize security investments and controls"""
+        
+        explanation_label = tk.Label(explanation_frame, text=explanation_text,
+                                   font=('Segoe UI', 10),
+                                   bg=self.COLORS['light'], fg='#495057', anchor='nw',
+                                   padx=20, pady=15, wraplength=1100, justify='left')
+        explanation_label.pack(fill='both', expand=True)
         
         # Pack canvas and scrollbar
         canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))

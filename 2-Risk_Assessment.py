@@ -233,7 +233,7 @@ class RiskAssessmentTool:
         header.pack(fill='x')
         header.pack_propagate(False)
         
-        tk.Label(header, text="Risk Assessment Tool III Iteration", 
+        tk.Label(header, text="Risk Assessment Tool for Advanced Phases", 
                 font=('Segoe UI', 16, 'bold'),
                 bg=self.COLORS['light'], fg=self.COLORS['dark']).pack(pady=15)
         
@@ -327,7 +327,7 @@ class RiskAssessmentTool:
         buttons_container.pack(pady=10)
 
         # THREAT button
-        add_threat_btn = tk.Button(buttons_container, text="Threat Analysis",
+        add_threat_btn = tk.Button(buttons_container, text="THREAT ANALYSIS",
                                   font=('Segoe UI', 12, 'bold'),
                                   bg=self.COLORS['primary'], fg=self.COLORS['white'],
                                   relief='flat', padx=30, pady=10,
@@ -335,7 +335,7 @@ class RiskAssessmentTool:
         add_threat_btn.pack(side='left', padx=(0, 10))
 
         # ASSET button
-        add_asset_btn = tk.Button(buttons_container, text="Asset Analysis",
+        add_asset_btn = tk.Button(buttons_container, text="ASSET ANALYSIS",
                                  font=('Segoe UI', 12, 'bold'),
                                  bg=self.COLORS['success'], fg=self.COLORS['white'],
                                  relief='flat', padx=30, pady=10,
@@ -343,7 +343,7 @@ class RiskAssessmentTool:
         add_asset_btn.pack(side='left', padx=(10, 10))
 
         # EXPORT button
-        export_btn = tk.Button(buttons_container, text="Export File",
+        export_btn = tk.Button(buttons_container, text="EXPORT CSV",
                               font=('Segoe UI', 12, 'bold'),
                               bg='#e67e22', fg=self.COLORS['white'],
                               relief='flat', padx=30, pady=10,
@@ -351,7 +351,7 @@ class RiskAssessmentTool:
         export_btn.pack(side='left', padx=(10, 10))
 
         # EXPORT REPORT button
-        export_report_btn = tk.Button(buttons_container, text="Export Report",
+        export_report_btn = tk.Button(buttons_container, text="EXPORT REPORT",
                                      font=('Segoe UI', 12, 'bold'),
                                      bg='#8e44ad', fg=self.COLORS['white'],
                                      relief='flat', padx=30, pady=10,
@@ -359,7 +359,7 @@ class RiskAssessmentTool:
         export_report_btn.pack(side='left', padx=(10, 0))
 
         # IMPORT REPORT button
-        import_report_btn = tk.Button(buttons_container, text="Import Report",
+        import_report_btn = tk.Button(buttons_container, text="IMPORT REPORT",
                                     font=('Segoe UI', 12, 'bold'),
                                     bg='#2c3e50', fg=self.COLORS['white'],
                                     relief='flat', padx=30, pady=10,
@@ -367,7 +367,7 @@ class RiskAssessmentTool:
         import_report_btn.pack(side='left', padx=(10, 0))
 
         # LEGACY IMPORT button
-        legacy_import_btn = tk.Button(buttons_container, text="Legacy Import",
+        legacy_import_btn = tk.Button(buttons_container, text="IMPORT REPORT 0-A",
                                      font=('Segoe UI', 12, 'bold'),
                                      bg="#7e2929", fg=self.COLORS['white'],
                                      relief='flat', padx=30, pady=10,
@@ -486,7 +486,7 @@ class RiskAssessmentTool:
         """Show help window with criteria descriptions"""
         help_window = tk.Toplevel(self.root)
         help_window.title("Assessment Criteria - Help")
-        help_window.geometry("1200x540")
+        help_window.geometry("1200x700")
         help_window.configure(bg=self.COLORS['white'])
         help_window.resizable(True, True)
         
@@ -496,7 +496,7 @@ class RiskAssessmentTool:
         
         # Title
         title_label = tk.Label(help_window, text="Risk Assessment Criteria Descriptions", 
-                              font=('Segoe UI',  16, 'bold'),
+                              font=('Segoe UI', 16, 'bold'),
                               bg=self.COLORS['white'], fg=self.COLORS['dark'])
         title_label.pack(pady=(20, 15))
         
@@ -571,33 +571,87 @@ class RiskAssessmentTool:
                                  padx=15, pady=8, wraplength=800, justify='left')
             desc_label.grid(row=0, column=1, sticky='new')
         
+        # Add separator and tool explanation section
+        separator_frame = tk.Frame(scrollable_frame, bg=self.COLORS['gray'], height=2)
+        separator_frame.pack(fill='x', pady=(20, 15), padx=15)
+        
+        # Tool explanation title
+        explanation_title = tk.Label(scrollable_frame, text="How the Risk Assessment Tool Works", 
+                                    font=('Segoe UI', 14, 'bold'),
+                                    bg=self.COLORS['white'], fg=self.COLORS['primary'])
+        explanation_title.pack(pady=(10, 15), padx=15, anchor='w')
+        
+        # Tool explanation content
+        explanation_frame = tk.Frame(scrollable_frame, bg=self.COLORS['light'], relief='ridge', bd=1)
+        explanation_frame.pack(fill='x', padx=15, pady=(0, 20))
+        
+        explanation_text = """The Risk Assessment Tool for Phase B-C-D helps evaluate cybersecurity risks during detailed design and implementation phases of space missions. Here's how to use it effectively:
+
+1. MISSION CONFIGURATION:
+   • Configure mission parameters and security requirements for design/implementation phases
+   • The tool adapts assessment criteria based on mission complexity and criticality
+   • Load baseline data from previous Phase 0/A assessments for continuity
+
+2. DETAILED THREAT ANALYSIS:
+   • Click "THREAT ANALYSIS" to open the detailed assessment window
+   • Select a specific threat from the dropdown menu to analyze
+   • For each threat, evaluate all asset categories using 7 specific criteria on a scale of 1-5:
+     - Vulnerability effectiveness, Mitigation Presence, Detection Probability, Access Complexity, Privilege Requirement, Response Delay, Resilience Impact
+   • The tool automatically calculates Likelihood and Impact based on your assessments
+   • Final Risk Level is determined using a standard risk matrix (Likelihood x Impact)
+
+3. COMPREHENSIVE ASSET ANALYSIS:
+   • Click "ASSET ANALYSIS" to open the asset-focused assessment window
+   • Evaluate all assets using 9 detailed criteria covering both likelihood and impact factors
+   • Asset criteria include: Dependency, Penetration, Cyber Maturity, Trust, Performance, Schedule, Costs, Reputation, Recovery
+   • This provides a complementary view focusing on asset vulnerabilities and business impact
+
+4. AUTOMATED RISK CALCULATIONS:
+   • Advanced risk computation using multi-factor analysis: Risk = f(Threat, Vulnerability, Impact, Likelihood)
+   • Dynamic risk scoring that adapts to mission phase and operational context
+   • Risk aggregation across asset categories and threat domains
+   • Confidence intervals and uncertainty analysis for risk estimates
+
+5. DATA MANAGEMENT AND INTEGRATION:
+   • Export detailed risk reports and assessment matrices using "EXPORT REPORT"
+   • Import reports from Phase 0/A or external risk assessments using "IMPORT REPORT"
+   • Import legacy data from previous 0-A reports using "IMPORT REPORT 0-A" (available in Output folder)
+   • Maintain audit trails and version control for assessment iterations
+
+6. HELP AND GUIDANCE:
+   • Access context-sensitive help for both threat and asset analysis windows
+   • Built-in guidance for industry-standard risk assessment methodologies
+   • Reference materials and best practices for space mission security
+
+7. RESULTS VISUALIZATION AND REPORTING:
+   • Generate heat maps and risk matrices for stakeholder communication
+   • Create executive dashboards with key risk indicators
+   • Export findings in multiple formats for technical and management audiences
+   • Produce compliance reports aligned with space industry standards
+
+8. CONTINUOUS IMPROVEMENT:
+   • Update assessments as design details and implementation plans evolve
+   • Track risk mitigation effectiveness and residual risk levels
+   • Integrate lessons learned and incident response feedback
+   • Support iterative security design and validation processes"""
+        
+        explanation_label = tk.Label(explanation_frame, text=explanation_text,
+                                   font=('Segoe UI', 10),
+                                   bg=self.COLORS['light'], fg=self.COLORS['dark'],
+                                   anchor='nw', justify='left', wraplength=1150,
+                                   padx=20, pady=15)
+        explanation_label.pack(fill='both', expand=True)
+        
         # Pack canvas and scrollbar
         canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
         scrollbar.pack(side="right", fill="y")
         
-        # Mouse wheel scrolling for help window only
+        # Mouse wheel scrolling
         def _on_mousewheel(event):
             canvas.yview_scroll(int(-1*(event.delta/120)), "units")
         
-        # Keep track of bound widgets for cleanup
-        bound_widgets = []
-        
-        # Bind mouse wheel only to the help window and its children
         canvas.bind("<MouseWheel>", _on_mousewheel)
         scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
-        bound_widgets.extend([canvas, scrollable_frame])
-        
-        # Ensure proper cleanup when window is closed
-        def on_help_window_close():
-            # Remove all mouse wheel bindings
-            for widget in bound_widgets:
-                try:
-                    widget.unbind("<MouseWheel>")
-                except:
-                    pass  # Widget might be already destroyed
-            help_window.destroy()
-        
-        help_window.protocol("WM_DELETE_WINDOW", on_help_window_close)
         
         # Focus on help window
         help_window.focus_set()
@@ -655,7 +709,7 @@ class RiskAssessmentTool:
         """Show help window with criteria descriptions"""
         help_window = tk.Toplevel(self.root)
         help_window.title("Assessment Criteria - Help")
-        help_window.geometry("1200x540")
+        help_window.geometry("1200x700")  # Increased height to accommodate tool explanation
         help_window.configure(bg=self.COLORS['white'])
         help_window.resizable(True, True)
         
@@ -758,19 +812,90 @@ class RiskAssessmentTool:
         scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
         bound_widgets.extend([canvas, scrollable_frame])
         
-        # Ensure proper cleanup when window is closed
-        def on_help_window_close():
-            # Remove all mouse wheel bindings
-            for widget in bound_widgets:
-                try:
-                    widget.unbind("<MouseWheel>")
-                except:
-                    pass  # Widget might be already destroyed
-            help_window.destroy()
+        # Add separator and tool explanation section
+        separator_frame = tk.Frame(scrollable_frame, bg=self.COLORS['gray'], height=2)
+        separator_frame.pack(fill='x', pady=(20, 15), padx=15)
         
-        help_window.protocol("WM_DELETE_WINDOW", on_help_window_close)
+        # Tool explanation title
+        explanation_title = tk.Label(scrollable_frame, text="How the Risk Assessment Tool Works", 
+                                    font=('Segoe UI', 14, 'bold'),
+                                    bg=self.COLORS['white'], fg=self.COLORS['primary'])
+        explanation_title.pack(pady=(10, 15), padx=15, anchor='w')
+        
+        # Tool explanation content
+        explanation_frame = tk.Frame(scrollable_frame, bg=self.COLORS['light'], relief='ridge', bd=1)
+        explanation_frame.pack(fill='x', padx=15, pady=(0, 20))
+        
+        explanation_text = """The Risk Assessment Tool for Phase B-C-D helps evaluate cybersecurity risks during detailed design and implementation phases of space missions. Here's how to use it effectively:
+
+1. MISSION CONFIGURATION:
+   • Configure mission parameters and security requirements for design/implementation phases
+   • The tool adapts assessment criteria based on mission complexity and criticality
+   • Load baseline data from previous Phase 0/A assessments for continuity
+
+2. DETAILED THREAT ANALYSIS:
+   • Click "THREAT ANALYSIS" to open the detailed assessment window
+   • Select a specific threat from the dropdown menu to analyze
+   • For each threat, evaluate all asset categories using 7 specific criteria on a scale of 1-5:
+     - Vulnerability effectiveness, Mitigation Presence, Detection Probability, Access Complexity, Privilege Requirement, Response Delay, Resilience Impact
+   • The tool automatically calculates Likelihood and Impact based on your assessments
+   • Final Risk Level is determined using a standard risk matrix (Likelihood x Impact)
+
+3. COMPREHENSIVE ASSET ANALYSIS:
+   • Click "ASSET ANALYSIS" to open the asset-focused assessment window
+   • Evaluate all assets using 9 detailed criteria covering both likelihood and impact factors
+   • Asset criteria include: Dependency, Penetration, Cyber Maturity, Trust, Performance, Schedule, Costs, Reputation, Recovery
+   • This provides a complementary view focusing on asset vulnerabilities and business impact
+
+4. AUTOMATED RISK CALCULATIONS:
+   • Advanced risk computation using multi-factor analysis: Risk = f(Threat, Vulnerability, Impact, Likelihood)
+   • Dynamic risk scoring that adapts to mission phase and operational context
+   • Risk aggregation across asset categories and threat domains
+   • Confidence intervals and uncertainty analysis for risk estimates
+
+5. DATA MANAGEMENT AND INTEGRATION:
+   • Export detailed risk reports and assessment matrices using "EXPORT REPORT"
+   • Import reports from Phase 0/A or external risk assessments using "IMPORT REPORT"
+   • Import legacy data from previous 0-A reports using "IMPORT REPORT 0-A" (available in Output folder)
+   • Maintain audit trails and version control for assessment iterations
+
+6. HELP AND GUIDANCE:
+   • Access context-sensitive help for both threat and asset analysis windows
+   • Built-in guidance for industry-standard risk assessment methodologies
+   • Reference materials and best practices for space mission security
+
+7. RESULTS VISUALIZATION AND REPORTING:
+   • Generate heat maps and risk matrices for stakeholder communication
+   • Create executive dashboards with key risk indicators
+   • Export findings in multiple formats for technical and management audiences
+   • Produce compliance reports aligned with space industry standards
+
+8. CONTINUOUS IMPROVEMENT:
+   • Update assessments as design details and implementation plans evolve
+   • Track risk mitigation effectiveness and residual risk levels
+   • Integrate lessons learned and incident response feedback
+   • Support iterative security design and validation processes"""
+        
+        explanation_label = tk.Label(explanation_frame, text=explanation_text,
+                                   font=('Segoe UI', 10),
+                                   bg=self.COLORS['light'], fg=self.COLORS['dark'],
+                                   anchor='nw', justify='left', wraplength=1150,
+                                   padx=20, pady=15)
+        explanation_label.pack(fill='both', expand=True)
+        
+        # Pack canvas and scrollbar
+        canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
+        scrollbar.pack(side="right", fill="y")
+        
+        # Mouse wheel scrolling
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        canvas.bind("<MouseWheel>", _on_mousewheel)
+        scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
         
         # Focus on help window
+        help_window.focus_set()
      
 
     def create_criteria_table(self, parent, assessment_type):

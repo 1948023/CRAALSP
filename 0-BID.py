@@ -831,7 +831,7 @@ class BIDOptimized:
         """Show help window with criteria descriptions"""
         help_window = tk.Toplevel(self.root)
         help_window.title("Criteria Descriptions - Help")
-        help_window.geometry("1200x540")  # Increased further for better visibility
+        help_window.geometry("1200x700")  # Increased height to accommodate tool explanation
         help_window.configure(bg=self.COLORS['white'])
         help_window.resizable(True, True)
         
@@ -904,6 +904,69 @@ class BIDOptimized:
                                  bg=row_color, fg='#495057', anchor='nw',
                                  padx=15, pady=8, wraplength=950, justify='left')  # Much larger wraplength
             desc_label.grid(row=0, column=1, sticky='new')
+        
+        # Add separator and tool explanation section
+        separator_frame = tk.Frame(scrollable_frame, bg=self.COLORS['gray'], height=2)
+        separator_frame.pack(fill='x', pady=(20, 15), padx=15)
+        
+        # Tool explanation title
+        explanation_title = tk.Label(scrollable_frame, text="How the BID Risk Assessment Tool Works", 
+                                    font=('Segoe UI', self.scaled_font_size + 2, 'bold'),
+                                    bg=self.COLORS['white'], fg=self.COLORS['primary'])
+        explanation_title.pack(pady=(10, 15), padx=15, anchor='w')
+        
+        # Tool explanation content
+        explanation_frame = tk.Frame(scrollable_frame, bg=self.COLORS['light'], relief='ridge', bd=1)
+        explanation_frame.pack(fill='x', padx=15, pady=(0, 20))
+        
+        explanation_text = """The BID (Bid Phase) Risk Assessment Tool helps evaluate cybersecurity risks during the bidding phase of space projects. Here's how to use it:
+
+1. EVALUATION PROCESS:
+   • For each of the 11 cybersecurity criteria, assess the quality of requirements in the ITT (Invitation to Tender)
+   • Rate each criterion from 1 to 4 based on how well it is defined in the tender documents:
+     - Score 1 (Low): Well-defined, detailed requirements with clear specifications
+     - Score 2 (Significative): Partially defined with some details but lacking specificity
+     - Score 3 (Moderate): Vague or unclear requirements with minimal guidance
+     - Score 4 (High): No mention or very poor definition of the requirement
+
+2. WEIGHTING SYSTEM:
+   • Each criterion has a predefined weight based on its importance to overall cybersecurity
+   • Higher weights are assigned to more critical security aspects like:
+     - Cybersecurity Requirements (15%)
+     - Security Architecture Constraints (12%)
+     - Supply Chain Security (12%)
+
+3. INAPPLICABILITY OPTION:
+   • If a criterion is not applicable to the specific project, check the "Inapplicability" box
+   • The tool will automatically redistribute that criterion's weight among the remaining applicable criteria
+   • This ensures the assessment remains accurate for the project's specific context
+
+4. AUTOMATIC CALCULATION:
+   • The tool calculates a total risk score using the formula: Σ((Score-1) × Weight / 3)
+   • This normalizes scores to a 0-1 scale where:
+     - 0.0-0.1: Very Low Risk
+     - 0.1-0.4: Low Risk
+     - 0.4-0.7: Medium Risk
+     - 0.7-0.9: High Risk
+     - 0.9-1.0: Very High Risk
+
+5. RESULTS INTERPRETATION:
+   • Higher scores indicate greater cybersecurity risk due to poorly defined requirements
+   • Use this assessment to:
+     - Identify areas requiring clarification during the bidding process
+     - Estimate additional effort needed for cybersecurity implementation
+     - Make informed go/no-go decisions on tender participation
+     - Plan appropriate cybersecurity measures and resources
+
+6. EXPORT FUNCTIONALITY:
+   • Save your assessment as a Word document for documentation and reporting
+   • The export includes all evaluation details, scores, and risk analysis results"""
+        
+        explanation_label = tk.Label(explanation_frame, text=explanation_text,
+                                   font=('Segoe UI', self.scaled_font_size - 1),
+                                   bg=self.COLORS['light'], fg='#495057', anchor='nw',
+                                   padx=20, pady=15, wraplength=1100, justify='left')
+        explanation_label.pack(fill='both', expand=True)
         
         # Pack canvas and scrollbar
         canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))

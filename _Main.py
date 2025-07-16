@@ -16,7 +16,7 @@ import threading
 from datetime import datetime
 
 try:
-    from PIL import Image, ImageTk
+    from PIL import Image, ImageTk, ImageDraw
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False
@@ -53,18 +53,18 @@ class MainInterface:
             'icon': '📊'
         },
         {
-            'name': 'Risk Assessment 0-A',
+            'name': 'Preliminary Risk Assessment',
             'file': '1-Risk_Assessment_0-A.exe',
-            'description': 'Preliminary risk assessment for space missions',
+            'description': 'Risk Assessment for phase 0-A',
             'color': '#5a67d8',
             'icon': '🔍'
         },
         {
-            'name': 'Risk Assessment',
+            'name': 'Complete Risk Assessment',
             'file': '2-Risk_Assessment.exe',
-            'description': 'Complete risk assessment tool',
+            'description': 'Risk Assessment for phases B-C-D',
             'color': '#38b2ac',
-            'icon': '⚠️'
+            'icon': '🚀'
         },
         {
             'name': 'Attack Graph Analyzer',
@@ -81,6 +81,22 @@ class MainInterface:
         self.setup_scaling()
         self.setup_ui()
         self.running_processes = {}
+        
+    def create_rounded_image(self, image, radius):
+        """Create an image with rounded corners"""
+        # Create a mask with rounded corners
+        mask = Image.new('L', image.size, 0)
+        draw = ImageDraw.Draw(mask)
+        
+        # Draw rounded rectangle on mask
+        draw.rounded_rectangle([(0, 0), image.size], radius=radius, fill=255)
+        
+        # Apply mask to image
+        output = Image.new('RGBA', image.size, (0, 0, 0, 0))
+        output.paste(image, (0, 0))
+        output.putalpha(mask)
+        
+        return output
         
     def setup_scaling(self):
         """Calculate scale factors based on screen resolution"""
@@ -125,25 +141,64 @@ class MainInterface:
         header_frame.pack(fill='x')
         header_frame.pack_propagate(False)
         
+        # Logo and title container
+        title_container = tk.Frame(header_frame, bg=self.COLORS['primary'])
+        title_container.pack(pady=(15, 5))
+        
+        # Try to load and display logo
+        logo_label = None
+        if PIL_AVAILABLE:
+            try:
+                logo_path = os.path.join(get_base_path(), "logo.png")
+                if os.path.exists(logo_path):
+                    # Load and resize logo
+                    logo_image = Image.open(logo_path)
+                    # Resize logo to fit header (max height 80px)
+                    logo_height = min(80, int(80 * self.scale_factor))
+                    logo_ratio = logo_height / logo_image.height
+                    logo_width = int(logo_image.width * logo_ratio)
+                    logo_image = logo_image.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
+                    
+                    # Apply rounded corners
+                    radius = min(15, int(15 * self.scale_factor))  # Adjust radius based on scale
+                    logo_image = self.create_rounded_image(logo_image, radius)
+                    
+                    logo_photo = ImageTk.PhotoImage(logo_image)
+                    
+                    # Create logo label
+                    logo_label = tk.Label(
+                        title_container,
+                        image=logo_photo,
+                        bg=self.COLORS['primary']
+                    )
+                    logo_label.image = logo_photo  # type: ignore # Keep a reference
+                    logo_label.pack(side='left', padx=(0, 15))
+            except Exception as e:
+                print(f"Could not load logo: {e}")
+        
+        # Title text container
+        title_text_frame = tk.Frame(title_container, bg=self.COLORS['primary'])
+        title_text_frame.pack(side='left')
+        
         # Title
         title_label = tk.Label(
-            header_frame, 
-            text="Risk Assessment Tool Suite",
+            title_text_frame, 
+            text="       Risk Assessment Tool Suite",
             font=('Segoe UI', self.scaled_title_font, 'bold'),
             bg=self.COLORS['primary'], 
             fg=self.COLORS['white']
         )
-        title_label.pack(pady=(20, 5))
+        title_label.pack(anchor='w')
         
         # Subtitle
         subtitle_label = tk.Label(
-            header_frame, 
-            text="Integrated tool for risk analysis in space missions",
+            title_text_frame, 
+            text="Integrated tool for risk analysis in space missions \n Choose the tool to run based on the actual phase of the project",
             font=('Segoe UI', self.scaled_font_size, 'italic'),
             bg=self.COLORS['primary'], 
             fg=self.COLORS['white']
         )
-        subtitle_label.pack(pady=(0, 10))
+        subtitle_label.pack(anchor='w', pady=(2, 0))
         
     def create_main_content(self):
         """Create main content area with tool cards"""
