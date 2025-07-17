@@ -169,7 +169,7 @@ class RiskAssessmentTool:
                     threat_name = row.get('THREAT', '').strip()
                     if threat_name:
                         self.THREATS.append(threat_name)
-            
+            self.THREATS.sort()
             #print(f"✅ Loaded {len(self.THREATS)} threats from {threats_file}")
             
         except FileNotFoundError:
@@ -886,10 +886,6 @@ class RiskAssessmentTool:
         # Pack canvas and scrollbar
         canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
         scrollbar.pack(side="right", fill="y")
-        
-        # Mouse wheel scrolling
-        def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
         
         canvas.bind("<MouseWheel>", _on_mousewheel)
         scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
