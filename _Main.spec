@@ -5,8 +5,20 @@ a = Analysis(
     ['_Main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
-    hiddenimports=[],
+    datas=[
+        ('logo.png', '.'),
+    ],
+    hiddenimports=[
+        'tkinter',
+        'tkinter.ttk',
+        'PIL',
+        'PIL.Image',
+        'PIL.ImageTk',
+        'PIL.ImageDraw',
+        'subprocess',
+        'os',
+        'sys'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

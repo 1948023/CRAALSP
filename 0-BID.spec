@@ -5,8 +5,20 @@ a = Analysis(
     ['0-BID.py'],
     pathex=[],
     binaries=[],
-    datas=[],
-    hiddenimports=[],
+    datas=[
+        ('logo.png', '.'),
+    ],
+    hiddenimports=[
+        'tkinter',
+        'tkinter.ttk',
+        'PIL',
+        'PIL.Image',
+        'PIL.ImageTk',
+        'PIL.ImageDraw',
+        'docx',
+        'os',
+        'sys'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
