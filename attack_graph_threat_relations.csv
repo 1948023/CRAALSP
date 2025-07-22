@@ -17,7 +17,7 @@ Data leaks;Abuse of leaked data;LEG;NAA;Leads-to
 Data leaks;Unauthorized access to recycled or disposed media;LEG;LEG;Leads-to
 Data leaks;Supply Chain Compromise;LEG;NAA;Leads-to
 Data modification;Unauthorized Access;NAA;EIH;Enables
-Data modification;Compromising confidentail information (data breaches): Exfiltration;NAA;NAA;Leads-to
+Data modification;Compromising confidential information (data breaches): Exfiltration;NAA;NAA;Leads-to
 Data modification;Identity Theft;NAA;NAA;Enables
 Denial of Service (DoS);Personnel Absence;NAA;OUT;Causes
 Electromagnetic interference;Failure of power supply;NAA;FM;Causes
@@ -59,7 +59,7 @@ Inadequate security planning / management;Software misconfiguration;UD;UD;Causes
 Inadequate security planning / management;Negligence of asset handling security requirements;UD;LEG;Causes
 Interception of communication;Position detection (telemetry);EIH;EIH;Enables
 Interception of communication;Identity Theft;EIH;NAA;Enables
-Interception of communication;Compromising confidentail information (data breaches): Exfiltration;EIH;NAA;Enables
+Interception of communication;Compromising confidential information (data breaches): Exfiltration;EIH;NAA;Enables
 Jamming;Preventing services;NAA;NAA;Causes
 Jamming;Electromagnetic interference;NAA;NAA;Amplifies
 Jamming;Failure of communication networks;NAA;FM;Causes
@@ -139,7 +139,7 @@ Seizure of control: Satellite bus;Data modification;NAA;NAA;Enables
 Seizure of control: Satellite bus;Resource exhaustion;NAA;NAA;Enables
 Seizure of control: Satellite bus;Data modification;NAA;NAA;Enables
 Social Engineering;Supply Chain Compromise;NAA;NAA;Enables
-Social Engineering;Coercion extortion or corruption;NAA;PA;Enables
+Social Engineering;Coercion, extortion or corruption;NAA;PA;Enables
 Social Engineering;Unauthorized access;NAA;EIH;Enables
 Social Engineering;Theft of authentication information;NAA;NAA;Enables
 Social Engineering;Identity Theft;NAA;NAA;Enables

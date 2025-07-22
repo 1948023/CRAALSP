@@ -7,11 +7,9 @@ a = Analysis(
     binaries=[],
     datas=[
         ('Asset.json', '.'), 
-        ('Control.csv', '.'), 
         ('Legacy.csv', '.'), 
-        ('Threat.csv', '.'), 
         ('export_import_functions.py', '.'),
-        ('logo.png', '.'),
+        ('logo.ico', '.'),
         ('attack_graph_threat_relations.csv', '.')
     ],
     hiddenimports=[

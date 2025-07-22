@@ -6,7 +6,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('logo.png', '.'),
+        ('logo.ico', '.'),
     ],
     hiddenimports=[
         'tkinter',

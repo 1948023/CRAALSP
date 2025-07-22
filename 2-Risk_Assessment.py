@@ -22,9 +22,8 @@ import logging
 def get_base_path():
     """Get the base path for the application (works with both .py and .exe)"""
     if getattr(sys, 'frozen', False):
-        # Running as compiled executable
-        # PyInstaller stores data files in sys._MEIPASS
-        return getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+        # Running as compiled executable - look for CSV files next to the .exe
+        return os.path.dirname(sys.executable)
     else:
         # Running as script
         return os.path.dirname(os.path.abspath(__file__))

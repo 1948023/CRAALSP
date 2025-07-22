@@ -70,7 +70,6 @@ try:
     HAS_SCIPY = True
 except ImportError:
     HAS_SCIPY = False
-    ##print("⚠️  Scipy not available. Some centrality features will be limited.")
 
 # =============================================================================
 # ANALYSIS CONFIGURATION - MODIFY THESE VALUES TO CUSTOMIZE THE ANALYSIS
@@ -142,12 +141,10 @@ class OutputManager:
             self.file_handle = open(self.output_file, 'w', encoding='utf-8')
             self.log(f"=== ATTACK GRAPH ANALYSIS - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n")
         except Exception as e:
-            ##print(f"⚠️  Unable to create output file: {e}")
             self.file_handle = None
     
     def log(self, message):
         """Writes a message both to console and file."""
-        ##print(message)
         if self.file_handle:
             try:
                 self.file_handle.write(message + '\n')
@@ -1357,6 +1354,30 @@ class AttackGraphAnalyzer:
             # Create the subgraph
             subgraph = self.graph.subgraph(nodes_to_include).copy()
             
+            # Find nodes that are both predecessors and successors
+            both_pred_and_succ = set(predecessors) & set(successors)
+            
+            # Add duplicate nodes and edges for nodes that are both predecessors and successors
+            for node in both_pred_and_succ:
+                if node in successors and node in predecessors:
+                    # Create duplicate node name
+                    duplicate_node_name = f"{node}_successor_copy"
+                    
+                    # Add the duplicate node to the subgraph
+                    subgraph.add_node(duplicate_node_name, **self.graph.nodes[node])
+                    
+                    # Add edge from central threat to duplicate node (successor relationship)
+                    if self.graph.has_edge(target_threat, node):
+                        edge_data = self.graph[target_threat][node]
+                        subgraph.add_edge(target_threat, duplicate_node_name, **edge_data)
+                    
+                    # Add edges from duplicate node to its successors
+                    for successor in self.graph.successors(node):
+                        if successor in nodes_to_include:
+                            if self.graph.has_edge(node, successor):
+                                edge_data = self.graph[node][successor]
+                                subgraph.add_edge(duplicate_node_name, successor, **edge_data)
+            
             if len(subgraph.nodes()) == 0:
                 self.output.log("   ⚠️ No nodes to visualize")
                 return
@@ -1365,30 +1386,35 @@ class AttackGraphAnalyzer:
             plt.figure(figsize=(16, 12))
             plt.clf()
 
-            # Layout - use spring layout with the central threat fixed in the center
-            pos = nx.spring_layout(subgraph, k=3, iterations=50,
-                                 fixed=[target_threat] if target_threat in subgraph.nodes() else None,
-                                 pos={target_threat: (0, 0)} if target_threat in subgraph.nodes() else None)
+            # Hierarchical layout: central threat in center, predecessors left, successors right
+            pos = self._create_hierarchical_threat_connections_layout(
+                subgraph, target_threat, predecessors, successors
+            )
 
-            # Colors for different types of nodes
+            # Colors and sizes for different types of nodes - handle duplicates properly
             node_colors = []
             node_sizes = []
             
+            # Process all nodes in the subgraph (including duplicates)
             for node in subgraph.nodes():
                 if node == target_threat:
                     node_colors.append('#FF4444')  # Red for the central threat
-                    node_sizes.append(2000)
-                elif node in successors:
+                    node_sizes.append(2500)
+                elif node.endswith('_successor_copy'):
+                    # This is a duplicate node representing a successor
                     node_colors.append('#44FF44')  # Green for successors
-                    node_sizes.append(1200)
+                    node_sizes.append(1500)
                 elif node in predecessors:
                     node_colors.append('#4444FF')  # Blue for predecessors
-                    node_sizes.append(1200)
+                    node_sizes.append(1500)
+                elif node in successors:
+                    node_colors.append('#44FF44')  # Green for successors
+                    node_sizes.append(1500)
                 else:
                     node_colors.append('#FFAA44')  # Orange for second-level neighbors
-                    node_sizes.append(800)
+                    node_sizes.append(1000)
 
-            # Draw the nodes
+            # Draw all nodes with their assigned colors using networkx
             nx.draw_networkx_nodes(subgraph, pos,
                                  node_color=node_colors,  # type: ignore
                                  node_size=node_sizes,  # type: ignore
@@ -1396,38 +1422,36 @@ class AttackGraphAnalyzer:
                                  edgecolors='black',
                                  linewidths=2)
 
-            # Draw edges with different colors
+            # Draw edges - only direct connections to/from the central threat
+            direct_edges = []
             edge_colors = []
-            edge_styles = []
             
             for edge in subgraph.edges():
                 source, target = edge
+                # Only include edges that involve the central threat
                 if source == target_threat or target == target_threat:
+                    direct_edges.append(edge)
                     edge_colors.append('#333333')  # Dark gray for direct connections
-                    edge_styles.append('solid')
-                else:
-                    edge_colors.append('#888888')  # Light gray for indirect connections
-                    edge_styles.append('dashed')
             
-            nx.draw_networkx_edges(subgraph, pos,
-                                 edge_color=edge_colors,  # type: ignore
-                                 style=edge_styles,  # type: ignore
-                                 width=2,
-                                 alpha=0.7,
-                                 arrows=True,
-                                 arrowsize=20,
-                                 arrowstyle='->')
+            if direct_edges:
+                nx.draw_networkx_edges(subgraph, pos,
+                                     edgelist=direct_edges,
+                                     edge_color=edge_colors,  # type: ignore
+                                     width=2,
+                                     alpha=0.7,
+                                     arrows=True,
+                                     arrowsize=20,
+                                     arrowstyle='->')
             
-            # Node Label with abbreviations
+            # Draw node labels - simplified since all nodes are now in subgraph
             labels = {}
             for node in subgraph.nodes():
-                # Abbreviate long names
-                #if len(node) > 30:
-                #    label = node[:27] + "..."
-                #else:
-                #    label = node
-                label = node
-                labels[node] = label
+                if node.endswith('_successor_copy'):
+                    # Show original name for duplicate nodes
+                    original_name = node.replace('_successor_copy', '')
+                    labels[node] = original_name
+                else:
+                    labels[node] = node
             
             nx.draw_networkx_labels(subgraph, pos, labels,
                                   font_size=9,
@@ -1436,46 +1460,27 @@ class AttackGraphAnalyzer:
                                   bbox=dict(boxstyle='round,pad=0.3', 
                                           facecolor='black', 
                                           alpha=0.7))
-            
-            # Edge Label if configured
-            if THREAT_CONNECTION_ANALYSIS.get("show_relation_types", True):
-                edge_labels = {}
-                for edge in subgraph.edges():
-                    edge_data = subgraph[edge[0]][edge[1]]
-                    relation_type = edge_data.get('relation_type', 'Unknown')
-                    # Abbreviate long relation types
-                    #if len(relation_type) > 15:
-                    #    relation_type = relation_type[:12] + "..."
-                    edge_labels[edge] = relation_type
-                
-                nx.draw_networkx_edge_labels(subgraph, pos, edge_labels,
-                                           font_size=7,
-                                           font_color='darkred',
-                                           bbox=dict(boxstyle='round,pad=0.2',
-                                                   facecolor='white',
-                                                   alpha=0.8))
 
             # Title and legend
             plt.title(f"Threat Connections: {target_threat}", 
                      fontsize=16, fontweight='bold', pad=20)
 
-            # Create legend
+            # Create simplified legend
             legend_elements = [
                 Line2D([0], [0], marker='o', color='w', markerfacecolor='#FF4444', 
-                          markersize=15, label='Central Threat  '),
+                          markersize=15, label='Central Threat'),
                 Line2D([0], [0], marker='o', color='w', markerfacecolor='#4444FF', 
-                          markersize=12, label='Predecessors (enable)'),
+                          markersize=12, label='Predecessors (left)'),
                 Line2D([0], [0], marker='o', color='w', markerfacecolor='#44FF44', 
-                          markersize=12, label='Successors (enabled)'),
+                          markersize=12, label='Successors (right)'),
                 Line2D([0], [0], marker='o', color='w', markerfacecolor='#FFAA44', 
                           markersize=10, label='Second Level'),
-                Line2D([0], [0], color='#333333', linewidth=2, label='Direct Connection'),
-                Line2D([0], [0], color='#888888', linewidth=2, linestyle='--', label='Indirect Connection')
+                Line2D([0], [0], color='#333333', linewidth=2, label='Direct Connection')
             ]
             
             plt.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.15, 1))
             
-            # Additional info
+            # Simplified additional info (no duplicates)
             info_text = (f"Total Nodes: {len(subgraph.nodes())}\n"
                         f"Total Edges: {len(subgraph.edges())}\n"
                         f"Predecessors: {len(predecessors)}\n"
@@ -1537,6 +1542,13 @@ class AttackGraphAnalyzer:
         
         try:
             paths = list(nx.all_simple_paths(self.graph, source_threat, target_threat, cutoff=max_length))
+            
+            # Check for direct connection (path of length 1)
+            if self.graph.has_edge(source_threat, target_threat):
+                # Add direct path if not already included
+                direct_path = [source_threat, target_threat]
+                if direct_path not in paths:
+                    paths.insert(0, direct_path)  # Put direct path first
             
             self.output.log(f"\n=== ATTACK PATHS: {source_threat} → {target_threat} ===")
             if not paths:
@@ -1695,8 +1707,296 @@ class AttackGraphAnalyzer:
         nx.write_gexf(self.graph, output_path)
         self.output.log(f"Graph exported to GEXF format: {output_path}")
 
-    def run_complete_analysis(self):
-        """Run a complete analysis and save everything to the output file."""
+    def run_interactive_analysis(self):
+        """Run an interactive analysis where the user can choose specific threats using GUI."""
+        if self.graph is None:
+            messagebox.showerror("Error", "Graph not available for interactive analysis")
+            return
+        
+        available_threats = list(self.graph.nodes())
+        
+        if not available_threats:
+            messagebox.showerror("Error", "No threats available in the graph")
+            return
+        
+        # Show initial info
+        messagebox.showinfo("Interactive Analysis", 
+                           f"Interactive Threat Analysis Mode\n\n"
+                           f"Graph loaded with {len(available_threats)} threats\n\n"
+                           f"You can choose specific threats to analyze in detail.")
+        
+        # Menu for analysis options using GUI
+        def ask_analysis_option():
+            """Ask user what type of analysis to perform"""
+            root_temp = tk.Tk()
+            root_temp.withdraw()
+            
+            class AnalysisOptionDialog:
+                def __init__(self):
+                    self.choice = None
+                    self.root = tk.Toplevel()
+                    self.root.title("🎯 Interactive Analysis Options")
+                    self.root.geometry("650x450")
+                    self.root.resizable(False, False)
+                    self.root.configure(bg='#f8fafc')
+                    
+                    # Center the window
+                    self.root.transient()
+                    self.root.grab_set()
+                    
+                    # Force window to front and keep on top
+                    self.root.attributes('-topmost', True)
+                    self.root.lift()
+                    self.root.focus_force()
+                    
+                    # Remove topmost after 2 seconds to avoid annoying behavior
+                    self.root.after(2000, lambda: self.root.attributes('-topmost', False))
+                    
+                    self.setup_ui()
+                    
+                def setup_ui(self):
+                    # Header
+                    header_frame = tk.Frame(self.root, bg='#1e40af', height=80)
+                    header_frame.pack(fill=tk.X)
+                    header_frame.pack_propagate(False)
+                    
+                    title_label = tk.Label(header_frame, text="🎯 Interactive Analysis Options",
+                                          font=('Arial', 18, 'bold'),
+                                          fg='white', bg='#1e40af')
+                    title_label.pack(expand=True)
+                    
+                    # Main content
+                    content_frame = tk.Frame(self.root, bg='#f8fafc')
+                    content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+                    
+                    # Info
+                    info_label = tk.Label(content_frame, 
+                                         text="Choose the type of analysis you want to perform:",
+                                         font=('Arial', 12), bg='#f8fafc', fg='#374151')
+                    info_label.pack(pady=(0, 25))
+                    
+                    # Enhanced buttons with icons and descriptions
+                    button_configs = [
+                        {
+                            'text': '📡 Threat Connections Analysis',
+                            'desc': 'Analyze connections of a specific threat\n(predecessors and successors)',
+                            'color': '#3b82f6',
+                            'hover': '#2563eb',
+                            'choice': 1
+                        },
+                        {
+                            'text': '🛤️ Path Analysis', 
+                            'desc': 'Find attack paths between two threats\n(source → target)',
+                            'color': '#10b981',
+                            'hover': '#059669',
+                            'choice': 2
+                        },
+                        {
+                            'text': '� Combined Analysis',
+                            'desc': 'Perform both threat connections and path analysis\n(comprehensive analysis)',
+                            'color': '#8b5cf6',
+                            'hover': '#7c3aed',
+                            'choice': 3
+                        },
+                        {
+                            'text': '❌ Exit Interactive Mode',
+                            'desc': 'Return to main menu\n(close interactive analysis)',
+                            'color': '#ef4444',
+                            'hover': '#dc2626',
+                            'choice': 4
+                        }
+                    ]
+                    
+                    self.buttons = []
+                    for config in button_configs:
+                        # Button container for better layout
+                        btn_container = tk.Frame(content_frame, bg='#f8fafc')
+                        btn_container.pack(fill=tk.X, pady=8)
+                        
+                        btn = tk.Button(btn_container,
+                                       text=config['text'],
+                                       font=('Arial', 13, 'bold'),
+                                       bg=config['color'], fg='white',
+                                       relief='raised', bd=3,
+                                       cursor='hand2',
+                                       width=25, height=2,
+                                       command=lambda c=config['choice']: self.set_choice(c))
+                        btn.pack(side=tk.LEFT, padx=(0, 15))
+                        
+                        # Description label
+                        desc_label = tk.Label(btn_container,
+                                             text=config['desc'],
+                                             font=('Arial', 9),
+                                             bg='#f8fafc', fg='#6b7280',
+                                             justify=tk.LEFT)
+                        desc_label.pack(side=tk.LEFT, expand=True, anchor='w')
+                        
+                        # Add hover effect
+                        self.add_hover_effect(btn, config['hover'], config['color'])
+                        self.buttons.append(btn)
+                        
+                def add_hover_effect(self, button, hover_color, normal_color):
+                    def on_enter(e):
+                        button.config(bg=hover_color)
+                    def on_leave(e):
+                        button.config(bg=normal_color)
+                        
+                    button.bind("<Enter>", on_enter)
+                    button.bind("<Leave>", on_leave)
+                    
+                def set_choice(self, choice):
+                    self.choice = choice
+                    self.root.destroy()
+            
+            dialog = AnalysisOptionDialog()
+            root_temp.wait_window(dialog.root)
+            root_temp.destroy()
+            
+            return dialog.choice
+        
+        # Helper function for enhanced messageboxes
+        def show_info_message(title, message, icon="info"):
+            """Show an enhanced info message with better styling"""
+            root_temp = tk.Tk()
+            root_temp.withdraw()
+            
+            if icon == "success":
+                messagebox.showinfo(f"✅ {title}", message)
+            elif icon == "warning": 
+                messagebox.showwarning(f"⚠️ {title}", message)
+            elif icon == "error":
+                messagebox.showerror(f"❌ {title}", message)
+            else:
+                messagebox.showinfo(f"💡 {title}", message)
+                
+            root_temp.destroy()
+        
+        def ask_yes_no(title, message):
+            """Ask yes/no question with enhanced styling"""
+            root_temp = tk.Tk()
+            root_temp.withdraw()
+            result = messagebox.askyesno(f"❓ {title}", message)
+            root_temp.destroy()
+            return result
+        
+        # Main interactive loop
+        while True:
+            choice = ask_analysis_option()
+            
+            if choice is None or choice == 4:
+                messagebox.showinfo("Exit", "Exiting interactive mode")
+                break
+                
+            elif choice == 1:
+                # Threat connections analysis
+                central_threat = interactive_threat_selection(available_threats, "central")
+                
+                if central_threat:
+                    # Show analysis progress
+                    messagebox.showinfo("Analysis Started", f"Analyzing connections for: {central_threat}")
+                    
+                    predecessors = list(self.graph.predecessors(central_threat))
+                    successors = list(self.graph.successors(central_threat))
+                    
+                    # Save visualization
+                    old_setting = THREAT_CONNECTION_ANALYSIS.get("save_visualization", False)
+                    THREAT_CONNECTION_ANALYSIS["save_visualization"] = True
+                    
+                    result = self.analyze_threat_connections(central_threat)
+                    
+                    THREAT_CONNECTION_ANALYSIS["save_visualization"] = old_setting
+                    
+                    # Show results
+                    if result:
+                        show_info_message("Analysis Complete", 
+                                           f"🎯 Threat connections analysis completed!\n\n"
+                                           f"Central threat: {central_threat}\n"
+                                           f"📥 Predecessors: {len(result['predecessors'])}\n"
+                                           f"📤 Successors: {len(result['successors'])}\n\n"
+                                           f"📊 Visualization saved to Output folder", "success")
+                
+            elif choice == 2:
+                # Path analysis
+                source_threat, target_threat = interactive_path_selection(available_threats)
+                
+                if source_threat and target_threat:
+                    messagebox.showinfo("Analysis Started", f"Finding paths from:\n{source_threat}\nto:\n{target_threat}")
+                    
+                    paths = self.find_attack_paths(source_threat, target_threat, max_length=5)
+                    
+                    if paths:
+                        # Ask if user wants to create visualization
+                        create_viz = ask_yes_no("Paths Found", 
+                                                        f"🎉 Found {len(paths)} path(s) between the selected threats!\n\n"
+                                                        f"Source: {source_threat}\n"
+                                                        f"Target: {target_threat}\n\n"
+                                                        f"Would you like to create and save a path visualization?")
+                        if create_viz:
+                            self._create_combined_paths_graph(paths, source_threat, target_threat)
+                            show_info_message("Visualization Complete", 
+                                             f"🎨 Path visualization created and saved!\n\n"
+                                             f"📁 Check the Output folder for the generated image", "success")
+                        else:
+                            show_info_message("Analysis Complete", 
+                                             f"📊 Path analysis completed!\n\n"
+                                             f"Found {len(paths)} path(s) between:\n"
+                                             f"• {source_threat}\n"
+                                             f"• {target_threat}", "success")
+                    else:
+                        show_info_message("No Paths Found", 
+                                         f"🔍 No attack paths found between the selected threats.\n\n"
+                                         f"Source: {source_threat}\n"
+                                         f"Target: {target_threat}\n\n"
+                                         f"💡 Try selecting different threats or check if they are connected.", "warning")
+            
+            elif choice == 3:
+                # Both analyses
+                messagebox.showinfo("Combined Analysis", "Running both analyses - threat connections and path analysis")
+                
+                # First: Threat connections
+                central_threat = interactive_threat_selection(available_threats, "central")
+                
+                if central_threat:
+                    old_setting = THREAT_CONNECTION_ANALYSIS.get("save_visualization", False)
+                    THREAT_CONNECTION_ANALYSIS["save_visualization"] = True
+                    result = self.analyze_threat_connections(central_threat)
+                    THREAT_CONNECTION_ANALYSIS["save_visualization"] = old_setting
+                    
+                    messagebox.showinfo("Step 1 Complete", f"Threat connections completed for: {central_threat}")
+                    
+                    # Second: Path analysis
+                    source_threat, target_threat = interactive_path_selection(available_threats)
+                    
+                    if source_threat and target_threat:
+                        paths = self.find_attack_paths(source_threat, target_threat, max_length=5)
+                        if paths:
+                            self._create_combined_paths_graph(paths, source_threat, target_threat)
+                            messagebox.showinfo("Analysis Complete", 
+                                               f"Both analyses completed successfully!\n\n"
+                                               f"Threat connections: {central_threat}\n"
+                                               f"Path analysis: {source_threat} → {target_threat}\n"
+                                               f"Paths found: {len(paths)}")
+                        else:
+                            messagebox.showwarning("Partial Success", 
+                                                  f"Threat connections completed, but no paths found between selected threats")
+            break
+        
+        show_info_message("Session Complete", 
+                         "🎉 Interactive analysis session completed!\n\n"
+                         "📁 All results and visualizations have been saved to the Output folder.\n"
+                         "🔍 Check the generated files for detailed analysis results.", "success")
+
+    def run_complete_analysis(self, interactive_mode=False):
+        """Run a complete analysis and save everything to the output file.
+        
+        Args:
+            interactive_mode (bool): If True, allows user to select specific threats interactively.
+                                   If False, uses pre-configured automatic analysis.
+        """
+        if interactive_mode:
+            self.run_interactive_analysis()
+            return
+        
         self.output.log("🚀 STARTING COMPLETE ATTACK GRAPH ANALYSIS")
 
         try:
@@ -1787,8 +2087,8 @@ class AttackGraphAnalyzer:
             plt.figure(figsize=(20, 15))
             plt.suptitle(f'All Paths: {source} → {target}', 
                         fontsize=18, fontweight='bold')
-            # Pseudo-hierarchical layout for the combined graph
-            pos = self._create_pseudo_hierarchical_layout(combined_graph)
+            # Hierarchical layout: source at top, target at bottom
+            pos = self._create_hierarchical_source_target_layout(combined_graph, source, target)
 
             # Node colors based on role
             node_colors = []
@@ -1831,13 +2131,13 @@ class AttackGraphAnalyzer:
                                      arrowstyle='->')
             
                        
-            # Path information
+            # Path information - moved to top left
             paths_info = f"Percorsi trovati: {len(all_paths)}\n"
             for i, path in enumerate(all_paths, 1):
                 paths_info += f"#{i}: {len(path)} nodi\n"
             
-            plt.figtext(0.02, 0.02, paths_info, fontsize=10,
-                       bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray"))
+            plt.figtext(0.02, 0.98, paths_info, fontsize=10, verticalalignment='top',
+                       bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.9))
 
             # Legend
             legend_elements = [
@@ -1947,34 +2247,232 @@ class AttackGraphAnalyzer:
             # Fallback: spring layout
             self.output.log(f"⚠️ Error with pseudo-hierarchical layout: {e}. Using spring layout")
             return nx.spring_layout(graph, k=3, iterations=50)
+
+    def _create_hierarchical_source_target_layout(self, graph, source, target):
+        """
+        Create a hierarchical layout with source at top and target at bottom
+        
+        Args:
+            graph: The NetworkX graph to layout
+            source: Source node (placed at top)
+            target: Target node (placed at bottom)
+            
+        Returns:
+            dict: A dictionary of node positions
+        """
+        try:
+            import networkx as nx
+            
+            pos = {}
+            
+            # Get all nodes from all paths
+            all_nodes = set(graph.nodes())
+            
+            # Calculate distances from source
+            try:
+                distances_from_source = nx.single_source_shortest_path_length(graph, source)
+            except:
+                distances_from_source = {node: 0 for node in all_nodes}
+            
+            # Calculate distances to target (reverse graph)
+            try:
+                reverse_graph = graph.reverse()
+                distances_to_target = nx.single_source_shortest_path_length(reverse_graph, target)
+            except:
+                distances_to_target = {node: 0 for node in all_nodes}
+            
+            # Organize nodes by level (distance from source)
+            levels = {}
+            max_level = 0
+            for node in all_nodes:
+                level = distances_from_source.get(node, 0)
+                max_level = max(max_level, level)
+                if level not in levels:
+                    levels[level] = []
+                levels[level].append(node)
+            
+            # Position nodes hierarchically
+            level_height = 4.0  # Vertical spacing between levels
+            node_spacing = 3.0  # Horizontal spacing between nodes
+            
+            for level, nodes in levels.items():
+                # Y position: source at top (high Y), target at bottom (low Y)
+                y = (max_level - level) * level_height
+                
+                # Sort nodes by distance to target for better visual flow
+                nodes_sorted = sorted(nodes, key=lambda n: distances_to_target.get(n, 999))
+                
+                # X positions: center the nodes at each level
+                num_nodes = len(nodes_sorted)
+                if num_nodes == 1:
+                    x_positions = [0]
+                else:
+                    total_width = (num_nodes - 1) * node_spacing
+                    x_positions = [i * node_spacing - total_width/2 for i in range(num_nodes)]
+                
+                for i, node in enumerate(nodes_sorted):
+                    pos[node] = (x_positions[i], y)
+            
+            # Force source at top and target at bottom
+            if source in pos and target in pos:
+                # Ensure source is at the highest Y
+                max_y = max(pos[node][1] for node in pos)
+                pos[source] = (pos[source][0], max_y + level_height)
+                
+                # Ensure target is at the lowest Y  
+                min_y = min(pos[node][1] for node in pos if node != source)
+                pos[target] = (pos[target][0], min_y - level_height)
+            
+            return pos
+            
+        except Exception as e:
+            self.output.log(f"⚠️ Error with hierarchical source-target layout: {e}. Using spring layout")
+            return nx.spring_layout(graph, k=3, iterations=50)
+
+    def _create_hierarchical_threat_connections_layout(self, graph, central_threat, predecessors, successors):
+        """
+        Create a hierarchical layout for threat connections:
+        - Central threat in the center
+        - Predecessors on the left
+        - Successors on the right
+        
+        Args:
+            graph: The NetworkX graph to layout
+            central_threat: The central threat node
+            predecessors: List of predecessor nodes
+            successors: List of successor nodes
+            
+        Returns:
+            dict: A dictionary of node positions
+        """
+        try:
+            import networkx as nx
+            
+            pos = {}
+            
+            # Constants for layout
+            center_x = 0
+            center_y = 0
+            left_x_base = -8
+            right_x_base = 8
+            vertical_spacing = 3.0
+            horizontal_spacing = 4.0
+            
+            # Place central threat at center
+            if central_threat in graph.nodes():
+                pos[central_threat] = (center_x, center_y)
+            
+            # Position predecessors on the left
+            if predecessors:
+                # Organize predecessors in levels based on distance from central threat
+                left_levels = self._organize_nodes_by_distance(graph, central_threat, predecessors, reverse=True)
+                
+                for level, nodes in left_levels.items():
+                    x_pos = left_x_base - (level * horizontal_spacing / 2)
+                    
+                    # Vertical positioning for nodes at same level
+                    num_nodes = len(nodes)
+                    if num_nodes == 1:
+                        y_positions = [center_y]
+                    else:
+                        y_start = center_y + ((num_nodes - 1) * vertical_spacing) / 2
+                        y_positions = [y_start - (i * vertical_spacing) for i in range(num_nodes)]
+                    
+                    for i, node in enumerate(nodes):
+                        pos[node] = (x_pos, y_positions[i])
+            
+            # Position successors on the right
+            if successors:
+                # Organize successors in levels based on distance from central threat
+                right_levels = self._organize_nodes_by_distance(graph, central_threat, successors, reverse=False)
+                
+                for level, nodes in right_levels.items():
+                    x_pos = right_x_base + (level * horizontal_spacing / 2)
+                    
+                    # Vertical positioning for nodes at same level
+                    num_nodes = len(nodes)
+                    if num_nodes == 1:
+                        y_positions = [center_y]
+                    else:
+                        y_start = center_y + ((num_nodes - 1) * vertical_spacing) / 2
+                        y_positions = [y_start - (i * vertical_spacing) for i in range(num_nodes)]
+                    
+                    for i, node in enumerate(nodes):
+                        # Add nodes that are both predecessors and successors twice
+                        if node in predecessors:
+                            # Create a duplicate node name for the right side
+                            duplicate_node_name = f"{node}_successor_copy"
+                            pos[duplicate_node_name] = (x_pos, y_positions[i])
+                        else:
+                            # Normal successor positioning
+                            pos[node] = (x_pos, y_positions[i])
+            
+            # Add any remaining nodes not categorized
+            remaining_nodes = set(graph.nodes()) - {central_threat} - set(predecessors) - set(successors)
+            if remaining_nodes:
+                # Place them at the bottom center
+                y_bottom = center_y - 6
+                num_remaining = len(remaining_nodes)
+                if num_remaining == 1:
+                    x_positions = [center_x]
+                else:
+                    x_start = center_x - ((num_remaining - 1) * 2.0) / 2
+                    x_positions = [x_start + (i * 2.0) for i in range(num_remaining)]
+                
+                for i, node in enumerate(remaining_nodes):
+                    if node not in pos:
+                        pos[node] = (x_positions[i], y_bottom)
+            
+            return pos
+            
+        except Exception as e:
+            self.output.log(f"⚠️ Error with hierarchical threat connections layout: {e}. Using spring layout")
+            return nx.spring_layout(graph, k=3, iterations=50)
+
+    def _organize_nodes_by_distance(self, graph, central_node, nodes, reverse=False):
+        """
+        Organize nodes by their distance from the central node
+        
+        Args:
+            graph: NetworkX graph
+            central_node: Central reference node
+            nodes: List of nodes to organize
+            reverse: If True, use reverse graph (for predecessors)
+            
+        Returns:
+            dict: Dictionary with levels as keys and lists of nodes as values
+        """
+        try:
+            import networkx as nx
+            
+            if reverse:
+                work_graph = graph.reverse()
+            else:
+                work_graph = graph
+            
+            levels = {}
+            
+            for node in nodes:
+                try:
+                    if reverse:
+                        # For predecessors, calculate distance from node to central
+                        distance = nx.shortest_path_length(work_graph, central_node, node)
+                    else:
+                        # For successors, calculate distance from central to node
+                        distance = nx.shortest_path_length(work_graph, central_node, node)
+                except nx.NetworkXNoPath:
+                    distance = 1  # Default distance if no path
+                
+                if distance not in levels:
+                    levels[distance] = []
+                levels[distance].append(node)
+            
+            return levels
+            
+        except Exception as e:
+            # Fallback: all nodes at level 1
+            return {1: list(nodes)}
     
-
-#def print_configuration():
-#    """Print the current configuration for verification."""
-    ##print("\n" + "="*70)
-    ##print("🔧 CONFIGURATION ATTACK GRAPH ANALYZER")
-    ##print("="*70)
-
-    ##print(f"\n📂 THREAT FILE CONFIGURATED:")
-    ##print(f"   {THREAT_FILE_NAME}")
-
-    ##print(f"\n📍 MAIN PATH:")
-    ##print(f"   From: {SPECIFIC_PATH_ANALYSIS['source_threat']}")
-    ##print(f"   To:  {SPECIFIC_PATH_ANALYSIS['target_threat']}")
-    ##print(f"   Max length: {SPECIFIC_PATH_ANALYSIS['max_path_length']}")
-
-#    if MULTIPLE_PATH_ANALYSIS:
-        ##print(f"\n📍 MULTIPLE PATHS ({len(MULTIPLE_PATH_ANALYSIS)}):")
-#        for i, path in enumerate(MULTIPLE_PATH_ANALYSIS, 1):
-            ##print(f"   {i}. {path['description']}")
-            ##print(f"      {path['source']} → {path['target']}")
-
-    ##print(f"\n⚙️ ANALYSIS PARAMETERS:")
-#    for key, value in ANALYSIS_PARAMETERS.items():
-        ##print(f"   {key}: {value}")
-    
-    ##print("="*70)
-
 
 def modify_configuration():
     """
@@ -2113,8 +2611,156 @@ def main():
         output_file=f"attack_graph_analysis_{timestamp}.txt"
     )
 
-    # Run complete analysis
-    analyzer.run_complete_analysis()
+    # Ask user for analysis mode using GUI
+    def ask_analysis_mode():
+        """Ask user to choose analysis mode using an enhanced GUI dialog"""
+        root = tk.Tk()
+        root.withdraw()  # Hide the root window
+        
+        class ModeSelectionDialog:
+            def __init__(self):
+                self.choice = None
+                self.root = tk.Toplevel()
+                self.root.title("🚀 CRAAL Space Threat Analyzer")
+                self.root.geometry("600x400")
+                self.root.resizable(False, False)
+                
+                # Center the window
+                self.root.transient()
+                self.root.grab_set()
+                
+                # Force window to front and keep on top
+                self.root.attributes('-topmost', True)
+                self.root.lift()
+                self.root.focus_force()
+                
+                # Remove topmost after 2 seconds to avoid annoying behavior
+                self.root.after(2000, lambda: self.root.attributes('-topmost', False))
+                
+                # Set window icon and style
+                try:
+                    self.root.iconbitmap()  # Use default
+                except:
+                    pass
+                
+                self.setup_ui()
+                
+            def setup_ui(self):
+                # Main frame with gradient-like effect
+                main_frame = tk.Frame(self.root, bg='#f0f8ff', relief='raised', bd=2)
+                main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+                
+                # Header with title and icon
+                header_frame = tk.Frame(main_frame, bg='#1e3a8a', height=80)
+                header_frame.pack(fill=tk.X, padx=5, pady=5)
+                header_frame.pack_propagate(False)
+                
+                title_label = tk.Label(header_frame, 
+                                      text="🛰️ CRAAL Space Threat Analyzer", 
+                                      font=('Arial', 18, 'bold'),
+                                      fg='white', bg='#1e3a8a')
+                title_label.pack(expand=True)
+                
+                subtitle_label = tk.Label(header_frame, 
+                                         text="Cybersecurity Risk Assessment & Attack Learning", 
+                                         font=('Arial', 10, 'italic'),
+                                         fg='#bfdbfe', bg='#1e3a8a')
+                subtitle_label.pack()
+                
+                # Content frame
+                content_frame = tk.Frame(main_frame, bg='#f0f8ff')
+                content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+                
+                # Instructions
+                instruction_label = tk.Label(content_frame, 
+                                            text="Choose your analysis mode:",
+                                            font=('Arial', 14, 'bold'),
+                                            bg='#f0f8ff', fg='#1e3a8a')
+                instruction_label.pack(pady=(0, 20))
+                
+                # Buttons frame
+                buttons_frame = tk.Frame(content_frame, bg='#f0f8ff')
+                buttons_frame.pack(pady=20)
+                
+                # Interactive mode button
+                interactive_btn = tk.Button(buttons_frame, 
+                                           text="🎮 Interactive Analysis\n(Choose threats manually with GUI)",
+                                           font=('Arial', 12, 'bold'),
+                                           bg='#10b981', fg='white',
+                                           relief='raised', bd=3,
+                                           width=25, height=3,
+                                           cursor='hand2',
+                                           command=lambda: self.set_choice(True))
+                interactive_btn.pack(pady=10)
+                
+                # Auto mode button  
+                auto_btn = tk.Button(buttons_frame, 
+                                    text="🤖 Automatic Analysis\n(Uses pre-configured settings)",
+                                    font=('Arial', 12, 'bold'),
+                                    bg='#3b82f6', fg='white',
+                                    relief='raised', bd=3,
+                                    width=25, height=3,
+                                    cursor='hand2',
+                                    command=lambda: self.set_choice(False))
+                auto_btn.pack(pady=10)
+                
+                # Cancel button
+                cancel_btn = tk.Button(buttons_frame, 
+                                      text="❌ Cancel",
+                                      font=('Arial', 11),
+                                      bg='#ef4444', fg='white',
+                                      relief='raised', bd=2,
+                                      width=15, height=1,
+                                      cursor='hand2',
+                                      command=lambda: self.set_choice(None))
+                cancel_btn.pack(pady=10)
+                
+                # Footer
+                footer_frame = tk.Frame(main_frame, bg='#e5e7eb', height=40)
+                footer_frame.pack(fill=tk.X, side=tk.BOTTOM, padx=5, pady=5)
+                footer_frame.pack_propagate(False)
+                
+                footer_label = tk.Label(footer_frame, 
+                                       text="💡 Interactive mode allows you to manually select specific threats for detailed analysis",
+                                       font=('Arial', 9),
+                                       bg='#e5e7eb', fg='#6b7280')
+                footer_label.pack(expand=True)
+                
+                # Bind hover effects
+                self.add_hover_effects(interactive_btn, '#059669', '#10b981')
+                self.add_hover_effects(auto_btn, '#2563eb', '#3b82f6')
+                self.add_hover_effects(cancel_btn, '#dc2626', '#ef4444')
+                
+            def add_hover_effects(self, button, hover_color, normal_color):
+                def on_enter(e):
+                    button.config(bg=hover_color)
+                def on_leave(e):
+                    button.config(bg=normal_color)
+                    
+                button.bind("<Enter>", on_enter)
+                button.bind("<Leave>", on_leave)
+                
+            def set_choice(self, choice):
+                self.choice = choice
+                self.root.destroy()
+        
+        dialog = ModeSelectionDialog()
+        root.wait_window(dialog.root)
+        root.destroy()
+        
+        return dialog.choice
+    
+    mode_choice = ask_analysis_mode()
+    
+    if mode_choice is None:  # User clicked Cancel
+        messagebox.showinfo("Cancelled", "Analysis cancelled by user")
+        return
+    elif mode_choice:  # User clicked Yes (Interactive)
+        messagebox.showinfo("Interactive Mode", "Starting interactive analysis with GUI threat selection...")
+        analyzer.run_complete_analysis(interactive_mode=True)
+    else:  # User clicked No (Automatic)
+        messagebox.showinfo("Automatic Mode", "Starting automatic analysis with pre-configured settings...")
+        analyzer.run_complete_analysis(interactive_mode=False)
 
     # Generate visualizations (if matplotlib works)
     try:
@@ -2134,6 +2780,302 @@ def main():
         return
         ##print(f"⚠️  Error in visualizations: {e}")
         ##print("Textual analysis has been completed and saved to the file.")
+
+
+def interactive_threat_selection(graph_nodes, selection_type="threat"):
+    """
+    Allows user to interactively select a threat using a GUI dialog.
+    
+    Args:
+        graph_nodes (list): List of available threat nodes
+        selection_type (str): Type of selection ("threat", "source", "target")
+        
+    Returns:
+        str: Selected threat name or None if cancelled
+    """
+    import tkinter as tk
+    from tkinter import ttk, messagebox
+    import random
+
+    if not graph_nodes:
+        messagebox.showerror("Error", f"No threats available for {selection_type} selection")
+        return None
+    
+    
+    # Sort threats alphabetically for easier browsing
+    sorted_threats = sorted(graph_nodes)
+    
+    class ThreatSelectorDialog:
+        def __init__(self, threats, selection_type):
+            self.threats = threats
+            self.selection_type = selection_type
+            self.selected_threat = None
+            self.filtered_threats = threats.copy()
+            
+            # Create main window with enhanced styling
+            self.root = tk.Toplevel()
+            self.root.title(f"🎯 Select {selection_type.capitalize()} Threat")
+            self.root.geometry("900x700")
+            self.root.resizable(True, True)
+            self.root.configure(bg='#f8fafc')
+            
+            # Center the window
+            self.root.transient()
+            self.root.grab_set()
+            
+            # Force window to front and keep on top
+            self.root.attributes('-topmost', True)
+            self.root.lift()
+            self.root.focus_force()
+            
+            # Remove topmost after 2 seconds to avoid annoying behavior
+            self.root.after(2000, lambda: self.root.attributes('-topmost', False))
+            
+            self.setup_ui()
+            
+        def setup_ui(self):
+            # Header frame with gradient-like effect
+            header_frame = tk.Frame(self.root, bg='#1e40af', height=70)
+            header_frame.pack(fill=tk.X, padx=0, pady=0)
+            header_frame.pack_propagate(False)
+            
+            # Header title with icon
+            icon_dict = {'source': '🚀', 'target': '🎯', 'central': '⭐', 'threat': '🔍'}
+            icon = icon_dict.get(self.selection_type, '🔍')
+            
+            title_label = tk.Label(header_frame, 
+                                  text=f"{icon} Select {self.selection_type.capitalize()} Threat",
+                                  font=('Arial', 18, 'bold'),
+                                  fg='white', bg='#1e40af')
+            title_label.pack(expand=True)
+            
+            # Main content frame
+            content_frame = tk.Frame(self.root, bg='#f8fafc')
+            content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            
+            # Info panel
+            info_frame = tk.Frame(content_frame, bg='#e0f2fe', relief='ridge', bd=2)
+            info_frame.pack(fill=tk.X, pady=(0, 15))
+            
+            info_text = f"📊 Available threats: {len(self.threats)}   |   💡 Use search to filter   |   🎲 Random selection available"
+            info_label = tk.Label(info_frame, text=info_text,
+                                 font=('Arial', 10), bg='#e0f2fe', fg='#0c4a6e',
+                                 pady=8)
+            info_label.pack()
+            
+            # Search frame with enhanced styling
+            search_frame = tk.LabelFrame(content_frame, text="🔍 Search & Filter", 
+                                        font=('Arial', 11, 'bold'),
+                                        bg='#f8fafc', fg='#1e40af',
+                                        relief='groove', bd=2)
+            search_frame.pack(fill=tk.X, pady=(0, 15))
+            
+            search_inner = tk.Frame(search_frame, bg='#f8fafc')
+            search_inner.pack(fill=tk.X, padx=10, pady=10)
+            
+            tk.Label(search_inner, text="Search:", font=('Arial', 10, 'bold'),
+                    bg='#f8fafc', fg='#374151').pack(side=tk.LEFT, padx=(0, 8))
+            
+            self.search_var = tk.StringVar()
+            search_entry = tk.Entry(search_inner, textvariable=self.search_var,
+                                   font=('Arial', 11), relief='solid', bd=1,
+                                   highlightthickness=2, highlightcolor='#3b82f6')
+            search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
+            search_entry.bind('<KeyRelease>', self.filter_threats)
+            
+            clear_btn = tk.Button(search_inner, text="Clear", 
+                                 font=('Arial', 9), bg='#6b7280', fg='white',
+                                 relief='raised', bd=2, cursor='hand2',
+                                 command=self.clear_search)
+            clear_btn.pack(side=tk.RIGHT)
+            
+            # Main selection frame
+            selection_frame = tk.LabelFrame(content_frame, text="🎯 Threat Selection",
+                                           font=('Arial', 11, 'bold'),
+                                           bg='#f8fafc', fg='#1e40af',
+                                           relief='groove', bd=2)
+            selection_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+            
+            # Listbox frame
+            list_container = tk.Frame(selection_frame, bg='#f8fafc')
+            list_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            
+            # Scrollbars with custom styling
+            v_scrollbar = tk.Scrollbar(list_container, orient=tk.VERTICAL)
+            h_scrollbar = tk.Scrollbar(list_container, orient=tk.HORIZONTAL)
+            
+            # Enhanced listbox
+            self.listbox = tk.Listbox(list_container,
+                                     yscrollcommand=v_scrollbar.set,
+                                     xscrollcommand=h_scrollbar.set,
+                                     font=('Consolas', 10),
+                                     selectbackground='#3b82f6',
+                                     selectforeground='white',
+                                     activestyle='dotbox',
+                                     relief='solid', bd=1)
+            
+            # Configure scrollbars
+            v_scrollbar.config(command=self.listbox.yview)
+            h_scrollbar.config(command=self.listbox.xview)
+            
+            # Grid layout for listbox and scrollbars
+            self.listbox.grid(row=0, column=0, sticky="news")
+            v_scrollbar.grid(row=0, column=1, sticky="ns")
+            h_scrollbar.grid(row=1, column=0, sticky="we")
+            
+            list_container.grid_columnconfigure(0, weight=1)
+            list_container.grid_rowconfigure(0, weight=1)
+            
+            # Double-click to select
+            self.listbox.bind('<Double-Button-1>', self.on_double_click)
+            
+            # Enhanced buttons frame
+            button_frame = tk.Frame(content_frame, bg='#f8fafc')
+            button_frame.pack(fill=tk.X, pady=(10, 0))
+            
+            # Button styling
+            button_style = {
+                'font': ('Arial', 11, 'bold'),
+                'relief': 'raised',
+                'bd': 3,
+                'cursor': 'hand2',
+                'width': 12,
+                'height': 2
+            }
+            
+            random_btn = tk.Button(button_frame, text="🎲 Random", 
+                                  bg='#8b5cf6', fg='white',
+                                  command=self.select_random, **button_style)
+            random_btn.pack(side=tk.LEFT, padx=(0, 8))
+            
+            select_btn = tk.Button(button_frame, text="✅ Select", 
+                                  bg='#10b981', fg='white',
+                                  command=self.select_current, **button_style)
+            select_btn.pack(side=tk.LEFT, padx=(0, 8))
+            
+            skip_btn = tk.Button(button_frame, text="⏭️ Skip (Auto)", 
+                                bg='#f59e0b', fg='white',
+                                command=self.skip_selection, **button_style)
+            skip_btn.pack(side=tk.LEFT, padx=(0, 8))
+            
+            cancel_btn = tk.Button(button_frame, text="❌ Cancel", 
+                                  bg='#ef4444', fg='white',
+                                  command=self.cancel, **button_style)
+            cancel_btn.pack(side=tk.RIGHT)
+            
+            # Add hover effects
+            self.add_hover_effects(random_btn, '#7c3aed', '#8b5cf6')
+            self.add_hover_effects(select_btn, '#059669', '#10b981')
+            self.add_hover_effects(skip_btn, '#d97706', '#f59e0b')
+            self.add_hover_effects(cancel_btn, '#dc2626', '#ef4444')
+            self.add_hover_effects(clear_btn, '#4b5563', '#6b7280')
+            
+            # Populate the list initially
+            self.update_listbox()
+            
+            # Set focus to search entry
+            search_entry.focus()
+            
+        def add_hover_effects(self, button, hover_color, normal_color):
+            def on_enter(e):
+                button.config(bg=hover_color)
+            def on_leave(e):
+                button.config(bg=normal_color)
+                
+            button.bind("<Enter>", on_enter)
+            button.bind("<Leave>", on_leave)
+            
+        def filter_threats(self, event=None):
+            search_term = self.search_var.get().lower()
+            if search_term:
+                self.filtered_threats = [t for t in self.threats if search_term in t.lower()]
+            else:
+                self.filtered_threats = self.threats.copy()
+            self.update_listbox()
+            
+        def clear_search(self):
+            self.search_var.set("")
+            self.filtered_threats = self.threats.copy()
+            self.update_listbox()
+            
+        def update_listbox(self):
+            self.listbox.delete(0, tk.END)
+            for threat in self.filtered_threats:
+                self.listbox.insert(tk.END, threat)
+                
+        def on_double_click(self, event=None):
+            self.select_current()
+            
+        def select_current(self):
+            selection = self.listbox.curselection()
+            if selection:
+                self.selected_threat = self.filtered_threats[selection[0]]
+                self.root.destroy()
+            else:
+                messagebox.showwarning("No Selection", "Please select a threat from the list")
+                
+        def select_random(self):
+            if self.filtered_threats:
+                self.selected_threat = random.choice(self.filtered_threats)
+                self.root.destroy()
+            else:
+                messagebox.showwarning("No Threats", "No threats available for random selection")
+                
+        def skip_selection(self):
+            self.selected_threat = None
+            self.root.destroy()
+            
+        def cancel(self):
+            self.selected_threat = None
+            self.root.destroy()
+    
+    # Create dialog
+    dialog = ThreatSelectorDialog(sorted_threats, selection_type)
+    dialog.root.wait_window()
+    
+    return dialog.selected_threat
+
+
+def interactive_path_selection(graph_nodes):
+    """
+    Allows user to interactively select source and target threats using GUI dialogs.
+    
+    Args:
+        graph_nodes (list): List of available threat nodes
+        
+    Returns:
+        tuple: (source_threat, target_threat) or (None, None) if cancelled
+    """
+    # First, select source threat
+    source_threat = interactive_threat_selection(graph_nodes, "source")
+    
+    if source_threat is None:
+        return None, None
+    
+    # Select target (excluding the source)
+    available_targets = [node for node in graph_nodes if node != source_threat]
+    if not available_targets:
+        messagebox.showerror("Error", f"No target threats available after excluding source '{source_threat}'")
+        return source_threat, None
+    
+    # Show confirmation of source selection
+    result = messagebox.askquestion("Source Selected", 
+                                   f"Source threat selected: {source_threat}\n\nProceed to select target threat?",
+                                   icon='question')
+    if result == 'no':
+        return None, None
+    
+    # Select target threat
+    target_threat = interactive_threat_selection(available_targets, "target")
+    
+    if target_threat is None:
+        return source_threat, None
+    
+    # Show final confirmation
+    messagebox.showinfo("Path Analysis Configured", 
+                       f"Path Analysis Setup Complete:\n\nSource: {source_threat}\nTarget: {target_threat}")
+    
+    return source_threat, target_threat
 
 
 if __name__ == "__main__":

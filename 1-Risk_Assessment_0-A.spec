@@ -9,7 +9,7 @@ a = Analysis(
         ('Asset.json', '.'),
         ('Threat.csv', '.'),
         ('export_import_functions.py', '.'),
-        ('logo.png', '.'),
+        ('logo.ico', '.'),
     ],
     hiddenimports=[
         'tkinter',

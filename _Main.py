@@ -149,7 +149,7 @@ class MainInterface:
         logo_label = None
         if PIL_AVAILABLE:
             try:
-                logo_path = os.path.join(get_base_path(), "logo.png")
+                logo_path = os.path.join(get_base_path(), "logo.ico")
                 if os.path.exists(logo_path):
                     # Load and resize logo
                     logo_image = Image.open(logo_path)

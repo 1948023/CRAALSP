@@ -6,12 +6,13 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('attack_graph_threat_relations.csv', '.'), 
         ('Asset.json', '.'), 
         ('Control.csv', '.'), 
         ('Legacy.csv', '.'), 
-        ('Threat.csv', '.'),
-        ('logo.png', '.')
+        ('Threat.csv', '.'), 
+        ('export_import_functions.py', '.'),
+        ('logo.ico', '.'),
+        ('attack_graph_threat_relations.csv', '.')
     ],
     hiddenimports=[
         'tkinter',
@@ -59,4 +60,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='logo.ico',
 )

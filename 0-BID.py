@@ -924,10 +924,10 @@ class BIDOptimized:
 1. EVALUATION PROCESS:
    • For each of the 11 cybersecurity criteria, assess the quality of requirements in the ITT (Invitation to Tender)
    • Rate each criterion from 1 to 4 based on how well it is defined in the tender documents:
-     - Score 1 (Low): Well-defined, detailed requirements with clear specifications
-     - Score 2 (Significative): Partially defined with some details but lacking specificity
-     - Score 3 (Moderate): Vague or unclear requirements with minimal guidance
-     - Score 4 (High): No mention or very poor definition of the requirement
+     - Score 1 (Low Risk): Well-defined, detailed requirements with clear specifications
+     - Score 2 (Significative Risk): Partially defined with some details but lacking specificity
+     - Score 3 (Moderate Risk): Vague or unclear requirements with minimal guidance
+     - Score 4 (High Risk): No mention or very poor definition of the requirement
 
 2. WEIGHTING SYSTEM:
    • Each criterion has a predefined weight based on its importance to overall cybersecurity

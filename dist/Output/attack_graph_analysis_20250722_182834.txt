@@ -1,0 +1,20 @@
+=== ATTACK GRAPH ANALYSIS - 2025-07-22 18:28:34 ===
+
+Data loaded successfully: 177 relationships found
+Columns: ['Source Threat', 'Target Threat', 'Source Category', 'Target Category', 'Relation Type']
+❌ Error loading subset: [Errno 2] No such file or directory: 'C:\\Users\\39348\\AppData\\Local\\Temp\\_MEI153762\\'
+   Details: [Errno 2] No such file or directory: 'C:\\Users\\39348\\AppData\\Local\\Temp\\_MEI153762\\'
+Graph created with 59 nodes and 171 edges
+⚠️  No filter applied: subset file not available or empty graph
+
+🔧 CALCULATING DYNAMIC CONFIGURATIONS
+   Graph size: 59 nodes, 171 edges
+   📍 Dynamic source selected: Malicious code/ software/activity: Malicious injection
+   🎯 Dynamic target selected: Unauthorized access
+   ⭐ Dynamic center threat selected: Unauthorized access
+   ✅ Dynamic configuration completed:
+      - Top centrality nodes: 14
+      - Max paths per pair: 3
+      - Max path length: 5
+      - Top critical paths: 20
+      - Multiple paths configured: 5

@@ -1,0 +1,27 @@
+# CRAALSP Attack Graph Analyzer - Comando PyInstaller
+# Comando completo per generare l'eseguibile
+
+# Prima installa PyInstaller se non è già installato:
+# pip install pyinstaller
+
+# Comando PyInstaller completo:
+pyinstaller --onefile --windowed --name "CRAALSP_AttackGraphAnalyzer" --add-data "Asset.json;." --add-data "Control.csv;." --add-data "Legacy.csv;." --add-data "Threat.csv;." --add-data "attack_graph_threat_relations.csv;." --add-data "export_import_functions.py;." --add-data "0-BID.py;." --add-data "1-Risk_Assessment_0-A.py;." --add-data "2-Risk_Assessment.py;." --add-data "requirements.txt;." --hidden-import=tkinter --hidden-import=tkinter.ttk --hidden-import=tkinter.messagebox --hidden-import=matplotlib --hidden-import=matplotlib.pyplot --hidden-import=networkx --hidden-import=pandas --hidden-import=numpy --hidden-import=PIL --hidden-import=PIL.Image --hidden-import=docx --hidden-import=scipy --collect-all=matplotlib --collect-all=networkx --collect-all=tkinter _Main.py
+
+# Spiegazione dei parametri:
+# --onefile: Crea un singolo file eseguibile
+# --windowed: Non mostra la console (per app GUI)
+# --name: Nome dell'eseguibile finale
+# --add-data: Include i file di dati necessari
+# --hidden-import: Include moduli che potrebbero non essere rilevati automaticamente
+# --collect-all: Include tutti i submoduli delle librerie specificate
+
+# NOTA: Su Windows, usa il punto e virgola (;) per separare i percorsi in --add-data
+# Su Linux/Mac, usa i due punti (:) invece del punto e virgola
+
+# Comando alternativo più semplice (ma potrebbe non includere tutti i file necessari):
+# pyinstaller --onefile --windowed _Main.py
+
+# Per debug (mantiene la console visibile):
+# pyinstaller --onefile --console _Main.py
+
+pyinstaller --clean 2-Risk_Assessment.spec
