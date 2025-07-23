@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox, filedialog
 import math
 import os
 import sys
+import csv
 from datetime import datetime
 
 # Configure environment for UTF-8 compatibility
@@ -42,12 +43,48 @@ class RiskAssessmentTool:
         "Jamming", "Denial-of-Service", "Masquerade/Spoofing", "Replay",
         "Software Threats", "Unauthorized Access/Hijacking", 
         "Tainted hardware components", "Supply Chain"    ]
-    # Standard asset categories
-    ASSET_CATEGORIES = [
-        ("Ground", "Ground Stations"), ("Ground", "Mission Control"),
-        ("Ground", "Data Processing Centers"), ("Ground", "Remote Terminals"),
-        ("Ground", "User Ground Segment"), ("Space", "Platform"),
-        ("Space", "Payload"), ("Link", "Link"), ("User", "User")    ]
+    
+    def load_asset_categories_from_csv(self):
+        """Load asset categories from Asset.csv (only categories and subcategories, no duplicates)"""
+        assets_file = os.path.join(get_base_path(), "Asset.csv")
+        asset_categories = []
+        seen_combinations = set()
+        
+        try:
+            with open(assets_file, 'r', encoding='utf-8') as csvfile:
+                reader = csv.DictReader(csvfile, delimiter=';')
+                for row in reader:
+                    category = row.get('categories', '').strip()
+                    subcategory = row.get('subCategories', '').strip()
+                    
+                    # Create tuple for category-subcategory combination
+                    combination = (category, subcategory)
+                    
+                    # Add only if not already seen (avoid duplicates)
+                    if combination not in seen_combinations and category and subcategory:
+                        seen_combinations.add(combination)
+                        asset_categories.append(combination)
+            
+            print(f"✅ Loaded {len(asset_categories)} unique asset categories from {assets_file}")
+            return asset_categories
+            
+        except FileNotFoundError:
+            print(f"❌ File not found: {assets_file}")
+            # Fallback asset categories
+            return [
+                ("Ground", "Ground Stations"), ("Ground", "Mission Control"),
+                ("Ground", "Data Processing Centers"), ("Ground", "Remote Terminals"),
+                ("Ground", "User Ground Segment"), ("Space", "Platform"),
+                ("Space", "Payload"), ("Link", "Link"), ("User", "User")
+            ]
+        except Exception as e:
+            print(f"❌ Error loading asset categories: {e}")
+            return [
+                ("Ground", "Ground Stations"), ("Ground", "Mission Control"),
+                ("Ground", "Data Processing Centers"), ("Ground", "Remote Terminals"),
+                ("Ground", "User Ground Segment"), ("Space", "Platform"),
+                ("Space", "Payload"), ("Link", "Link"), ("User", "User")
+            ]
     
     # Criteria table data (5x6 + header)
     CRITERIA_DATA = [
@@ -141,6 +178,10 @@ class RiskAssessmentTool:
         self.root.title("Risk Assessment Tool - Phase 0-A")
         self.root.state('zoomed')        
         self.root.configure(bg=self.COLORS['white'])
+        
+        # Load asset categories from CSV
+        self.ASSET_CATEGORIES = self.load_asset_categories_from_csv()
+        
         # Data for threats and calculations
         self.threat_data = {}  # Saved data for threat
         self.combo_vars = {}   # ComboBox variables
@@ -457,8 +498,8 @@ class RiskAssessmentTool:
         self.impact_entries = {}
         self.combo_vars = {}
         
-        # Assessment Rows (9 Rows: 1 for each category)
-        for i in range(9):
+        # Assessment Rows - Dynamic based on loaded asset categories
+        for i in range(len(self.ASSET_CATEGORIES)):
             category, subcategory = self.ASSET_CATEGORIES[i]
             asset_key = f"{i+1}_probability"  # Unique key for asset
             # Category (read-only)

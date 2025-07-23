@@ -1,0 +1,35 @@
+categories;subCategories;asset
+Ground;Ground Stations;Tracking
+Ground;Ground Stations;Ranging
+Ground;Ground Stations;Transmission
+Ground;Ground Stations;Reception
+Ground;Mission Control;Telemetry processing
+Ground;Mission Control;Commanding
+Ground;Mission Control;Analysis and support
+Ground;Data Processing Centers;Mission Analysis
+Ground;Data Processing Centers;Payload processing
+Ground;Remote Terminals;Network access
+Ground;Remote Terminals;Software access
+Ground;User Ground Segment;Development
+Ground;User Ground Segment;Supportive
+Ground;User Ground Segment;Operations
+Space;Platform;Electrical power
+Space;Platform;Attitude control
+Space;Platform;Communication
+Space;Platform;Command and data handling
+Space;Platform;Telemetry
+Space;Platform;Tracking
+Space;Payload;Payload Data Handling Systems
+Space;Payload;Payload Communication Module
+Space;Payload;Untrusted Data Handling Systems
+Link;Link;Between Platform and Payload
+Link;Link;Components in a Ground Segment
+Link;Link;Two Space systems
+Link;Link;Two Ground WANs
+Link;Link;Space segment and Ground Segment
+Link;Link;Space segment and User Segment
+Link;Link;Ground Segment and User Segment
+Link;Link;Two Users
+User;User;Transmission
+User;User;Reception
+User;User;Processing

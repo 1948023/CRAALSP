@@ -148,7 +148,8 @@ class RiskAssessmentTool:
 
         # Load external data
         self.load_threats_from_csv()
-        self.load_assets_from_json()
+        # Load assets from CSV
+        self.load_assets_from_csv()
         
         # Setup custom styles
         self.setup_combobox_styles()
@@ -184,46 +185,46 @@ class RiskAssessmentTool:
             #print(f"❌ Error loading threats: {e}")
             self.THREATS = []
 
-    def load_assets_from_json(self):
-        """Load assets from Asset.json"""
-        assets_file = os.path.join(get_base_path(), "Asset.json")
+    def load_assets_from_csv(self):
+        """Load assets from Asset.csv"""
+        assets_file = os.path.join(get_base_path(), "Asset.csv")
         self.ASSET_CATEGORIES = []
         
         try:
-            with open(assets_file, 'r', encoding='utf-8') as jsonfile:
-                assets_data = json.load(jsonfile)
+            with open(assets_file, 'r', encoding='utf-8') as csvfile:
+                reader = csv.DictReader(csvfile, delimiter=';')
+                for row in reader:
+                    category = row.get('categories', '').strip()
+                    subcategory = row.get('subCategories', '').strip()
+                    asset = row.get('asset', '').strip()
+                    
+                    if category and subcategory and asset:
+                        self.ASSET_CATEGORIES.append((category, subcategory, asset))
             
-            # Convert JSON structure to the format expected by the interface
-            for category in assets_data.get('categories', []):
-                category_name = category.get('name', '')
-                
-                # Check if category has subCategories
-                if 'subCategories' in category:
-                    for sub_category in category['subCategories']:
-                        sub_name = sub_category.get('name', '')
-                        for asset in sub_category.get('asset', []):
-                            self.ASSET_CATEGORIES.append((category_name, sub_name, asset))
-                else:
-                    # Direct assets under category (like Link and User)
-                    for asset in category.get('asset', []):
-                        self.ASSET_CATEGORIES.append((category_name, "", asset))
-            
-            #print(f"✅ Loaded {len(self.ASSET_CATEGORIES)} asset categories from {assets_file}")
+            print(f"✅ Loaded {len(self.ASSET_CATEGORIES)} asset categories from {assets_file}")
             
         except FileNotFoundError:
-            #print(f"❌ File not found: {assets_file}")
+            print(f"❌ File not found: {assets_file}")
             # Fallback assets
             self.ASSET_CATEGORIES = [
                 ("Ground", "Ground Stations", "Tracking"), ("Ground", "Ground Stations", "Ranging"),
                 ("Ground", "Mission Control", "Telemetry processing"), ("Ground", "Mission Control", "Commanding"),
                 ("Ground", "Data Processing Centers", "Mission Analysis"), ("Ground", "Remote Terminals", "Network access"),
                 ("Ground", "User Ground Segment", "Development"), ("Space", "Platform", "Bus"),
-                ("Space", "Payload", "Instruments"), ("Link", "", "Uplink"), ("Link", "", "Downlink"),
-                ("User", "", "End User")
+                ("Space", "Payload", "Payload Data Handling Systems"), ("Link", "Link", "Between Platform and Payload"),
+                ("User", "User", "Transmission")
             ]
         except Exception as e:
-            #print(f"❌ Error loading assets: {e}")
-            self.ASSET_CATEGORIES = []
+            print(f"❌ Error loading assets: {e}")
+            # Fallback assets
+            self.ASSET_CATEGORIES = [
+                ("Ground", "Ground Stations", "Tracking"), ("Ground", "Ground Stations", "Ranging"),
+                ("Ground", "Mission Control", "Telemetry processing"), ("Ground", "Mission Control", "Commanding"),
+                ("Ground", "Data Processing Centers", "Mission Analysis"), ("Ground", "Remote Terminals", "Network access"),
+                ("Ground", "User Ground Segment", "Development"), ("Space", "Platform", "Bus"),
+                ("Space", "Payload", "Payload Data Handling Systems"), ("Link", "Link", "Between Platform and Payload"),
+                ("User", "User", "Transmission")
+            ]
 
     def create_interface(self):
         """Creates the main interface"""

@@ -16,7 +16,7 @@ Data leaks;Identity Theft;LEG;NAA;Leads-to
 Data leaks;Abuse of leaked data;LEG;NAA;Leads-to
 Data leaks;Unauthorized access to recycled or disposed media;LEG;LEG;Leads-to
 Data leaks;Supply Chain Compromise;LEG;NAA;Leads-to
-Data modification;Unauthorized Access;NAA;EIH;Enables
+Data modification;Unauthorized access;NAA;EIH;Enables
 Data modification;Compromising confidential information (data breaches): Exfiltration;NAA;NAA;Leads-to
 Data modification;Identity Theft;NAA;NAA;Enables
 Denial of Service (DoS);Personnel Absence;NAA;OUT;Causes
