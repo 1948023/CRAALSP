@@ -83,17 +83,25 @@ class MainInterface:
         self.running_processes = {}
         
     def create_rounded_image(self, image, radius):
-        """Create an image with rounded corners"""
-        # Create a mask with rounded corners
+        """Create an image with rounded corners using high-quality antialiasing"""
+        # Ensure we're working with RGBA for transparency
+        if image.mode != 'RGBA':
+            image = image.convert('RGBA')
+        
+        # Create a high-quality mask
         mask = Image.new('L', image.size, 0)
         draw = ImageDraw.Draw(mask)
         
-        # Draw rounded rectangle on mask
+        # Draw rounded rectangle with antialiasing
         draw.rounded_rectangle([(0, 0), image.size], radius=radius, fill=255)
         
-        # Apply mask to image
+        # Create output image with transparency
         output = Image.new('RGBA', image.size, (0, 0, 0, 0))
+        
+        # Paste the original image
         output.paste(image, (0, 0))
+        
+        # Apply the mask for rounded corners
         output.putalpha(mask)
         
         return output
@@ -149,32 +157,77 @@ class MainInterface:
         logo_label = None
         if PIL_AVAILABLE:
             try:
-                logo_path = os.path.join(get_base_path(), "logo.ico")
-                if os.path.exists(logo_path):
-                    # Load and resize logo
-                    logo_image = Image.open(logo_path)
-                    # Resize logo to fit header (max height 80px)
-                    logo_height = min(80, int(80 * self.scale_factor))
-                    logo_ratio = logo_height / logo_image.height
-                    logo_width = int(logo_image.width * logo_ratio)
-                    logo_image = logo_image.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
+                # Try to load high-resolution logo first, then fallback to standard
+                logo_path = os.path.join(get_base_path(), "logo.png")
+                
+                # Alternative paths for higher resolution logos
+                high_res_paths = [
+                    os.path.join(get_base_path(), "logo_hd.png"),
+                    os.path.join(get_base_path(), "logo_high.png"),
+                    logo_path  # fallback to original
+                ]
+                
+                logo_image = None
+                for path in high_res_paths:
+                    if os.path.exists(path):
+                        logo_image = Image.open(path)
+                        break
+                
+                if logo_image:
                     
-                    # Apply rounded corners
-                    radius = min(15, int(15 * self.scale_factor))  # Adjust radius based on scale
+                    # Convert to RGBA for better quality processing
+                    if logo_image.mode != 'RGBA':
+                        logo_image = logo_image.convert('RGBA')
+                    
+                    # Make the image square by cropping to the shorter dimension
+                    original_width, original_height = logo_image.size
+                    
+                    # Use the smaller dimension as the square size
+                    square_size = min(original_width, original_height)
+                    
+                    # Calculate the crop area to center the square
+                    left = (original_width - square_size) // 2
+                    top = (original_height - square_size) // 2
+                    right = left + square_size
+                    bottom = top + square_size
+                    
+                    # Crop the image to make it square
+                    logo_image = logo_image.crop((left, top, right, bottom))
+                    
+                    # Calculate target size maintaining square aspect ratio
+                    target_size = min(100, int(100 * self.scale_factor))  # Square size
+                    
+                    # High-quality resize with LANCZOS resampling
+                    # Use Image.Resampling.LANCZOS for newer Pillow versions,
+                    # fallback to constant value for compatibility
+                    try:
+                        resample_method = Image.Resampling.LANCZOS
+                    except AttributeError:
+                        # LANCZOS constant value for older Pillow versions
+                        resample_method = 1
+                    
+                    logo_image = logo_image.resize((target_size, target_size), resample_method)
+                    
+                    # Apply subtle rounded corners for better appearance
+                    radius = min(12, int(12 * self.scale_factor))
                     logo_image = self.create_rounded_image(logo_image, radius)
                     
+                    # Convert to PhotoImage with optimization
                     logo_photo = ImageTk.PhotoImage(logo_image)
                     
-                    # Create logo label
+                    # Create logo label with better positioning
                     logo_label = tk.Label(
                         title_container,
                         image=logo_photo,
-                        bg=self.COLORS['primary']
+                        bg=self.COLORS['primary'],
+                        relief='flat',
+                        borderwidth=0
                     )
                     logo_label.image = logo_photo  # type: ignore # Keep a reference
-                    logo_label.pack(side='left', padx=(0, 15))
+                    logo_label.pack(side='left', padx=(0, 20))
             except Exception as e:
                 print(f"Could not load logo: {e}")
+                print("Note: For best quality, place a high-resolution logo as 'logo_hd.png' in the application directory.")
         
         # Title text container
         title_text_frame = tk.Frame(title_container, bg=self.COLORS['primary'])

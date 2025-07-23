@@ -6,7 +6,6 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('Asset.json', '.'), 
         ('Control.csv', '.'), 
         ('Legacy.csv', '.'), 
         ('Threat.csv', '.'), 

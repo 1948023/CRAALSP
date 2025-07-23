@@ -65,11 +65,11 @@ class RiskAssessmentTool:
                         seen_combinations.add(combination)
                         asset_categories.append(combination)
             
-            print(f"✅ Loaded {len(asset_categories)} unique asset categories from {assets_file}")
+            #print(f"[OK] Loaded {len(asset_categories)} unique asset categories from {assets_file}")
             return asset_categories
             
         except FileNotFoundError:
-            print(f"❌ File not found: {assets_file}")
+            #print(f"[NO] File not found: {assets_file}")
             # Fallback asset categories
             return [
                 ("Ground", "Ground Stations"), ("Ground", "Mission Control"),
@@ -78,7 +78,7 @@ class RiskAssessmentTool:
                 ("Space", "Payload"), ("Link", "Link"), ("User", "User")
             ]
         except Exception as e:
-            print(f"❌ Error loading asset categories: {e}")
+            #print(f"[NO] Error loading asset categories: {e}")
             return [
                 ("Ground", "Ground Stations"), ("Ground", "Mission Control"),
                 ("Ground", "Data Processing Centers"), ("Ground", "Remote Terminals"),

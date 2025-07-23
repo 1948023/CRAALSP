@@ -6,7 +6,6 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('Asset.json', '.'),
         ('Threat.csv', '.'),
         ('export_import_functions.py', '.'),
         ('logo.ico', '.'),
@@ -59,4 +58,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='logo.ico',
 )

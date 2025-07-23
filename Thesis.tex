@@ -1,0 +1,2681 @@
+% !TeX encoding = UTF-8
+% !TeX program = pdflatex
+% !TeX spellcheck = en_US
+\documentclass[binding=0.6cm]{sapthesis}
+
+% ============================================================================
+% PACKAGES
+% ============================================================================
+\usepackage{microtype}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{amsmath}
+\usetikzlibrary{positioning, arrows.meta}
+
+% Mathematical packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Graphics and figures
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% Tables
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% Code listings
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Bibliography
+\usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+% Hyperlinks (load last)
+\usepackage{hyperref}
+\hypersetup{
+    pdftitle={A Standardized Framework for Cyber Risk Assessment Across the Lifecycle of Space Projects: Methodology and Automated Tool Development},
+    pdfauthor={Giuseppe Nonni},
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=red,
+    urlcolor=blue
+}
+
+% Code style configuration
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{green!50!black},
+    frame=single,
+    keywordstyle=\color{blue},
+    language=Python,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    showspaces=false,
+    showstringspaces=false,
+    stringstyle=\color{orange},
+    tabsize=2
+}
+
+% ============================================================================
+% THESIS INFORMATION
+% ============================================================================
+\title{A Standardized Framework for Cyber Risk Assessment Across the Lifecycle of Space Projects: Methodology and Automated Tool Development}
+\examdate{12/12/12}
+
+\author{Giuseppe Nonni}
+\IDnumber{1948023}
+\course{Cybersecurity}
+\courseorganizer{Information Engineering, Computer Science, and Statistics}
+\AcademicYear{2024/2025}
+\advisor{Prof. Marco Angelini}
+\authoremail{nonni.1948023@studenti.uniroma1.it}
+\copyyear{2025}
+\thesistype{Master thesis}
+
+% ============================================================================
+% DOCUMENT BEGIN
+% ============================================================================
+\begin{document}
+
+\frontmatter
+\maketitle
+
+\dedication{Dedicated to\\
+all the space explorers\\
+who dare to reach for the stars}
+
+\begin{abstract}
+Risk assessment is a fundamental component of space mission planning and operation, ensuring the identification, analysis, and mitigation of threats across all project phases. However, current risk assessment methodologies often lack standardization, leading to inefficiencies and inconsistencies, particularly when comparing risks across different projects. This thesis proposes a comprehensive framework for standardized risk assessment applicable to all phases of a space project, from the proposal phase to operational maintenance and end-of-life management.
+
+The proposed framework establishes a structured methodology that allows for systematic risk identification, assessment and monitoring across multiple projects, reducing redundancy and improving comparability. Additionally, this research includes the development of an automated tool suite that simplifies risk evaluation processes, enabling efficient and repeatable assessments, facilitating objective risk comparisons between projects and supporting decision-making and resource allocation.
+
+The developed Risk Assessment Tool Suite consists of four integrated components: a BID Phase assessment tool for initial project categorization, a preliminary risk assessment module for early-stage threat identification, a comprehensive risk evaluation system with detailed criteria analysis, and an attack graph analyzer for visualizing threat relationships in space systems. Each tool follows consistent methodological principles while addressing specific aspects of the risk assessment lifecycle.
+
+Through this approach, the thesis aims to enhance risk governance in the space sector, ensuring consistency, efficiency, and traceability in risk management activities. The framework and toolset developed contribute to a more resilient and predictable project lifecycle, ultimately improving security during all phases of the mission and its cost-effectiveness. The tools have been validated through practical implementation and demonstrate significant improvements in assessment accuracy, time efficiency, and standardization compared to traditional manual approaches.
+\end{abstract}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\mainmatter
+
+% ============================================================================
+% CHAPTER 1: INTRODUCTION
+% ============================================================================
+\chapter{Introduction}
+\label{ch:introduction}
+
+The space industry has experienced unprecedented growth in recent decades, with missions becoming increasingly complex and interconnected. From satellite constellations providing global communications to deep space exploration missions, the cybersecurity challenges facing space systems have evolved dramatically. Traditional risk assessment methodologies, often developed for terrestrial systems, prove inadequate when applied to the unique constraints and threat landscape of space missions.
+
+This thesis addresses the critical need for standardized cybersecurity risk assessment frameworks specifically designed for space projects. The research presents both theoretical foundations and practical implementations through the development of an integrated Risk Assessment Tool Suite.
+
+\section{Problem Statement}
+
+Current risk assessment practices in the space domain suffer from several critical limitations:
+
+\begin{itemize}
+    \item \textbf{Lack of Standardization}: Different organizations and projects employ varying methodologies, making cross-project comparisons and lessons learned difficult to apply.
+    \item \textbf{Phase-Specific Gaps}: Risk assessment approaches often focus on individual project phases without considering the full lifecycle from conception to end-of-life.
+    \item \textbf{Manual Processes}: Traditional assessment methods rely heavily on manual processes, leading to inconsistencies and time-intensive evaluations.
+    \item \textbf{Limited Threat Visibility}: Existing frameworks often fail to capture the complex interdependencies between threats in space systems.
+\end{itemize}
+
+\section{Research Objectives}
+
+This research aims to address these challenges through the following objectives:
+
+\begin{enumerate}
+    \item Develop a comprehensive framework for standardized cybersecurity risk assessment across all phases of space project lifecycles.
+    \item Create an integrated tool suite that automates and standardizes risk evaluation processes.
+    \item Establish methodologies for threat relationship analysis and attack path visualization specific to space systems.
+    \item Validate the framework and tools through practical implementation and case studies.
+    \item Provide guidelines for integration into existing space project management processes.
+\end{enumerate}
+
+\section{Methodology}
+
+The research methodology combines theoretical framework development with practical tool implementation:
+
+\begin{itemize}
+    \item \textbf{Literature Review}: Comprehensive analysis of existing risk assessment frameworks, cybersecurity standards, and space-specific security challenges.
+    \item \textbf{Framework Design}: Development of standardized methodologies based on industry best practices and space domain requirements.
+    \item \textbf{Tool Development}: Implementation of software tools that embody the framework principles and provide automated assessment capabilities.
+    \item \textbf{Validation}: Testing and refinement of tools through practical application scenarios.
+\end{itemize}
+
+\section{Contributions}
+
+This thesis makes several key contributions to the field of space cybersecurity:
+
+\begin{enumerate}
+    \item A novel standardized framework for lifecycle-based risk assessment in space projects.
+    \item An integrated software tool suite providing automated risk evaluation capabilities.
+    \item Methodologies for attack graph analysis tailored to space system architectures.
+    \item Validation of the framework through practical implementation and testing.
+    \item Guidelines for industry adoption and integration into existing processes.
+\end{enumerate}
+
+\section{Thesis Structure}
+
+The remainder of this thesis is organized as follows:
+
+\textbf{Chapter 2} provides background information on space systems security, existing risk assessment frameworks, and related work in the field.
+
+\textbf{Chapter 3} presents the theoretical foundation of the proposed standardized framework, including its underlying principles and methodological approach.
+
+\textbf{Chapter 4} details the design and implementation of the Risk Assessment Tool Suite, including architecture decisions and technical specifications.
+
+\textbf{Chapter 5} describes the individual components of the tool suite: BID Phase assessment, preliminary risk evaluation, comprehensive risk assessment, and attack graph analysis.
+
+\textbf{Chapter 6} presents the validation methodology and results from comprehensive testing of the framework and tools, including technical validation and lessons learned.
+
+\textbf{Chapter 7} discusses the AI training methodologies and development approaches used in the automated components of the Risk Assessment Tool Suite.
+
+\textbf{Chapter 8} discusses the implications of the research, technical challenges resolved, limitations of the current approach, and directions for future work.
+
+\textbf{Chapter 9} concludes the thesis with a summary of contributions and their significance for the space cybersecurity domain.
+
+% ============================================================================
+% CHAPTER 2: BACKGROUND AND RELATED WORK
+% ============================================================================
+\chapter{Background and Related Work}
+\label{ch:background}
+
+\section{Space Systems Security Landscape}
+
+Space systems present unique cybersecurity challenges that distinguish them from terrestrial information systems. The operating environment, communication constraints, and mission-critical nature of space assets create a complex threat landscape requiring specialized security approaches.
+
+\subsection{Space System Architecture}
+
+Modern space missions typically consist of four main segments:
+
+\begin{itemize}
+    \item \textbf{Space Segment}: Satellites, spacecraft, and orbital infrastructure
+    \item \textbf{Ground Segment}: Ground stations, mission control centers, and data processing facilities
+    \item \textbf{Link Segment}: Communication channels and data transmission pathways that interconnect all other segments, serving as the critical backbone for command, control, and data exchange between space and terrestrial assets
+    \item \textbf{User Segment}: End-user terminals and applications consuming space-based services
+\end{itemize}
+
+Each segment presents distinct security challenges and threat vectors that must be considered in comprehensive risk assessment frameworks. The link segment is particularly critical as it represents the primary attack surface for adversaries seeking to intercept communications, inject malicious commands, or disrupt mission operations through communication interference. Since all mission-critical data and control signals must traverse these communication pathways, the link segment often becomes the most vulnerable point in the entire system architecture, requiring specialized security measures such as encryption, authentication protocols, and anti-jamming techniques.
+
+\subsection{Threat Landscape}
+
+The threat landscape for space systems encompasses both traditional cybersecurity threats and space-specific attack vectors, as extensively documented in CCSDS security recommendations and the ENISA Space Threat Landscape analysis. The unique operational environment of space systems creates vulnerability patterns that differ significantly from terrestrial IT infrastructure, requiring specialized threat modeling approaches.
+
+\subsubsection{CCSDS-Identified Threat Categories}
+
+The Consultative Committee for Space Data Systems (CCSDS) has identified several critical threat categories that specifically target space mission components:
+
+\begin{itemize}
+    \item \textbf{Data Corruption}: Intentional or accidental modification of mission-critical data during transmission or storage
+    \item \textbf{Physical/Logical Attacks}: Direct targeting of space assets through kinetic means or sophisticated cyber intrusion techniques
+    \item \textbf{Interception/Eavesdropping}: Unauthorized monitoring of communication channels to extract sensitive mission data or operational intelligence
+    \item \textbf{Jamming}: Deliberate interference with radio frequency communications to disrupt command and control operations
+    \item \textbf{Denial-of-Service}: Overwhelming system resources to prevent legitimate access to critical space services
+    \item \textbf{Masquerade/Spoofing}: Impersonation attacks targeting command authentication systems and ground station interfaces
+    \item \textbf{Replay Attacks}: Retransmission of previously captured legitimate commands to trigger unauthorized spacecraft operations
+    \item \textbf{Software Threats}: Malicious code injection, firmware manipulation, and exploitation of software vulnerabilities in space-qualified systems
+    \item \textbf{Unauthorized Access/Hijacking}: Complete compromise of spacecraft control systems or ground segment infrastructure
+    \item \textbf{Tainted Hardware Components}: Supply chain compromise involving malicious modifications to space-qualified hardware
+    \item \textbf{Supply Chain Vulnerabilities}: Risks introduced through third-party vendors, contractors, and international partnerships
+\end{itemize}
+
+\subsubsection{ENISA Space Threat Assessment}
+
+The European Union Agency for Cybersecurity (ENISA) Space Threat Landscape provides additional insights into emerging risks facing the European space sector. Key findings include:
+
+\begin{itemize}
+    \item \textbf{Nefarious Activity/Abuse (NAA)}: Intended actions that target ICT systems, infrastructure and network by means of malicious acts with the aim to either steal, alter or destroy a specified target
+    \item \textbf{Eavesdropping/Interception/Hijacking (EIH)}: Actions aiming to listen, interrupt or seize control of a third party communication without consent
+    \item \textbf{Physical Attacks (PA)}: Actions which aim to destroy, exposure, alter, disable, steal or gain unauthorised access to a physical asset such infrastructure, hardware or interconnection
+    \item \textbf{Unintentional Damage (UD)}: Unintentional actions causing desctruction, harm or injury of property or persons and results in a failure or reduction in usefulness
+    \item \textbf{Failures or malfunctions (FM)}: Partial or full insufficient functioning of an asset (hardware or software) 
+    \item \textbf{Outages (OUT)}: Unexpected disruption of service or decrease in quality falling below a required level 
+    \item \textbf{Disaster (DIS)}: A sudden accident or a natural catastrophe that causes great damage or loss of life
+    \item \textbf{Legal (LEG)}: Legal actions of third parties (contracting or otherwise) in order to prohibit actions or compensate for loss based on applicable law
+\end{itemize}
+
+The evolving threat landscape necessitates continuous adaptation of security measures and risk assessment methodologies to address both current and emerging risks. This dynamic environment reinforces the importance of standardized, comprehensive risk assessment frameworks that can accommodate the unique challenges facing space systems across all mission phases.
+
+\section{Existing Risk Assessment Frameworks}
+
+\subsection{Traditional IT Risk Assessment}
+
+Traditional IT risk assessment standards, such as ISO/IEC 27005 or NIST SP 800-30, are not fully adequate for conducting risk analysis in space programs due to the unique characteristics of the space domain. These standards are primarily designed for terrestrial IT environments and often fail to account for critical space-specific factors such as the harsh physical environment (radiation, temperature extremes, microgravity), the limited ability to perform physical maintenance or incident response in orbit, the high dependency on long-distance and delay-sensitive communication links, and the criticality of real-time operations. Moreover, the asset taxonomy, threat landscape, and impact evaluation criteria used in space missions differ significantly from conventional IT systems. As a result, applying traditional IT frameworks without significant adaptation may lead to underestimation of mission-critical risks or overlook threats unique to the space ecosystem.
+
+\subsubsection{ISO/IEC 27005 Information Security Risk Management}
+
+ISO/IEC 27005 provides a comprehensive approach to information security risk management but requires significant adaptation for space applications. The standard's strength lies in its systematic methodology for risk identification, analysis, and treatment. However, its terrestrial focus limits applicability to space systems in several key areas:
+
+\begin{itemize}
+    \item \textbf{Asset Classification}: The standard's asset taxonomy does not adequately address space-specific components such as spacecraft subsystems, orbital mechanics considerations, or ground-space communication links
+    \item \textbf{Threat Environment}: Limited consideration of space-specific threats such as radiation-induced errors, orbital debris impacts, or space weather effects
+    \item \textbf{Vulnerability Assessment}: Insufficient attention to unique space system vulnerabilities including long communication delays, limited bandwidth, and inability to perform physical maintenance
+    \item \textbf{Impact Analysis}: Terrestrial impact categories do not fully capture the consequences of space mission failures, including cascading effects on dependent services and scientific objectives
+\end{itemize}
+
+\subsubsection{NIST SP 800-30 Guide for Conducting Risk Assessments}
+
+The NIST Risk Management Framework provides structured methodologies for conducting risk assessments within the broader context of organizational risk management. While comprehensive in scope, several limitations emerge when applied to space systems:
+
+\begin{table}[H]
+\centering
+\caption{NIST SP 800-30 Adaptation Challenges for Space Systems}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Framework Component} & \textbf{Standard Approach} & \textbf{Space Domain Challenges} \\ \hline
+Risk Assessment Process & Sequential, iterative analysis & Requires parallel assessment across segments \\ \hline
+Threat Source Identification & IT-centric threat actors & Must include space-specific threats \\ \hline
+Vulnerability Assessment & Software/network focus & Hardware, environmental vulnerabilities \\ \hline
+Likelihood Determination & Historical data emphasis & Limited space incident data \\ \hline
+Impact Analysis & Confidentiality, integrity, availability & Mission success, safety considerations \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Space-Specific Standards}
+
+Industry standards such as CCSDS (Consultative Committee for Space Data Systems) security recommendations and ECSS (European Cooperation for Space Standardization) provide space-specific guidance that addresses the unique technical, operational, and environmental characteristics of space missions. These standards are crucial for defining consistent practices in areas such as data handling, ground-space communication protocols, system reliability, and interface specifications. However, while they offer important security and system design recommendations tailored to space systems, they often lack detailed and systematic methodologies for performing comprehensive cyber and physical risk assessments. In particular, they do not always include structured threat modeling techniques, quantitative risk metrics, or formalized impact-probability matrices adapted to the dynamic and interdependent nature of space assets. Consequently, organizations implementing these standards must often integrate additional frameworks or develop custom risk assessment processes to evaluate vulnerabilities, threats, and mitigation strategies effectively across all mission phases. This gap highlights the need for harmonizing space-domain expertise with advanced risk assessment methodologies to ensure robust protection of both space and ground segments.
+
+\subsubsection{CCSDS Security Framework}
+
+The Consultative Committee for Space Data Systems (CCSDS) has developed several security-related recommendations that provide foundational guidance for space mission security:
+
+\begin{itemize}
+    \item \textbf{CCSDS 350.0-G-3}: Space Communications Security Guidelines, which establish baseline security requirements for space-ground communications
+    \item \textbf{CCSDS 351.0-B-2}: Space Data Systems Security Specification, defining cryptographic algorithms and protocols for space applications
+    \item \textbf{CCSDS 352.0-B-2}: Space Communications Cross Support Security Specification, addressing multi-agency cooperation scenarios
+\end{itemize}
+
+While these standards provide essential technical specifications, they primarily focus on communication security rather than comprehensive risk assessment methodologies.
+
+\subsubsection{ECSS Standards for Space Systems}
+
+The European Cooperation for Space Standardization (ECSS) provides a comprehensive framework for space system development, including security considerations:
+
+\begin{itemize}
+    \item \textbf{ECSS-Q-ST-80}: Software Product Assurance, addressing software security throughout the development lifecycle
+    \item \textbf{ECSS-E-ST-40}: Software Engineering, including security requirements and verification approaches
+    \item \textbf{ECSS-M-ST-10}: Space Project Management, incorporating security considerations into project planning
+\end{itemize}
+
+These standards provide systematic approaches to space system development but require supplementation with dedicated risk assessment methodologies.
+
+\section{Related Work}
+
+Recent research in space cybersecurity has addressed various aspects of the security challenge, but few comprehensive frameworks exist for standardized risk assessment across project lifecycles. The academic and industrial communities have made significant contributions to understanding space system vulnerabilities and developing targeted security solutions, yet gaps remain in systematic risk assessment methodologies.
+
+\subsection{Academic Research Contributions}
+
+\subsubsection{Space System Vulnerability Analysis}
+
+Fundamental research has identified critical vulnerability patterns in space systems:
+
+\begin{itemize}
+    \item \textbf{Communication Security}: Pavur et al. (2020) demonstrated vulnerabilities in satellite communication protocols, highlighting the need for enhanced encryption and authentication mechanisms
+    \item \textbf{Ground Segment Security}: Santamarta (2014) revealed widespread vulnerabilities in satellite ground infrastructure, emphasizing the importance of terrestrial security measures
+    \item \textbf{Physical Layer Attacks}: Investigation of RF jamming, spoofing, and interception techniques targeting space communication links
+\end{itemize}
+
+\subsubsection{Threat Modeling Methodologies}
+
+Several researchers have developed specialized threat modeling approaches for space systems:
+
+\begin{itemize}
+    \item \textbf{Multi-Domain Threat Models}: Frameworks addressing threats across space, cyber, and terrestrial domains simultaneously
+    \item \textbf{Attack Graph Analysis}: Graph-theoretic approaches for modeling complex attack scenarios in distributed space systems
+    \item \textbf{Scenario-Based Assessment}: Risk assessment methodologies based on realistic attack scenarios derived from threat intelligence
+\end{itemize}
+
+\subsection{Industry Initiatives and Standards Development}
+
+\subsubsection{Commercial Space Security}
+
+The commercial space industry has driven several important security initiatives:
+
+\begin{itemize}
+    \item \textbf{Satellite Industry Association}: Development of cybersecurity best practices for commercial satellite operations
+    \item \textbf{Space Information Sharing and Analysis Center (Space ISAC)}: Industry collaboration platform for sharing threat intelligence and security practices
+    \item \textbf{Commercial Space Transportation Security}: FAA and industry collaboration on securing commercial launch and space transportation systems
+\end{itemize}
+
+\subsubsection{International Cooperation Efforts}
+
+Global efforts to address space security challenges include:
+
+\begin{itemize}
+    \item \textbf{United Nations Office for Outer Space Affairs (UNOOSA)}: Development of international guidelines for space system security
+    \item \textbf{Inter-Agency Space Debris Coordination Committee (IADC)}: Collaboration on space debris mitigation with security implications
+    \item \textbf{European Space Agency Security Office}: Development of European-wide space security policies and standards
+\end{itemize}
+
+\subsection{Research Gaps and Limitations}
+
+Despite significant progress, several critical gaps remain in space cybersecurity research:
+
+\begin{table}[H]
+\centering
+\caption{Current Research Gaps in Space Cybersecurity}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Research Area} & \textbf{Current State} & \textbf{Identified Gaps} \\ \hline
+Standardized Methodologies & Limited frameworks & Lack of lifecycle-integrated approaches \\ \hline
+Quantitative Metrics & Early development & Insufficient validation and benchmarking \\ \hline
+Tool Integration & Individual solutions & Lack of integrated assessment platforms \\ \hline
+Cross-Domain Analysis & Isolated assessments & Limited multi-domain risk correlation \\ \hline
+Validation Studies & Theoretical models & Insufficient real-world validation \\ \hline
+\end{tabular}
+\end{table}
+
+The identified gaps in existing research and industry practices highlight the need for comprehensive, standardized risk assessment frameworks that can address the full lifecycle of space projects while providing practical, implementable solutions for industry adoption.
+
+% ============================================================================
+% CHAPTER 3: THEORETICAL FRAMEWORK
+% ============================================================================
+\chapter{Theoretical Framework}
+\label{ch:framework}
+
+This chapter presents the theoretical foundation of the standardized risk assessment framework developed in this research. The framework is designed to address the unique challenges and requirements associated with space systems, while simultaneously ensuring methodological consistency, repeatability, and adaptability across the entire lifecycle of space projects. By combining domain-specific considerations with a structured and scalable approach, the proposed framework aims to bridge the gap between traditional IT-centric risk models and the operational realities of the space sector.
+
+\section{Framework Principles}
+
+The proposed framework is built upon a set of core principles that ensure its applicability, flexibility, and robustness in the context of space missions:
+
+\begin{itemize}
+    \item \textbf{Lifecycle Integration}: Risk assessment methodologies that span from project conception to end-of-life
+    \item \textbf{Standardization}: Consistent approaches enabling cross-project comparison and learning
+    \item \textbf{Automation}: Tool-supported processes reducing manual effort and improving consistency
+    \item \textbf{Scalability}: Methodologies applicable to projects of varying size and complexity
+    \item \textbf{Traceability}: Clear documentation and reasoning for all risk decisions
+\end{itemize}
+
+\section{Risk Assessment Phases}
+
+The framework identifies four distinct phases requiring specialized risk assessment approaches:
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{image.png}
+    \caption{The Steps and Cycles in the risk management process}
+    \label{fig:enter-label}
+\end{figure}
+
+\subsection{BID Phase Assessment}
+The BID Phase Assessment represents the earliest opportunity to integrate cybersecurity considerations into a space project. Conducted during the proposal or pre-feasibility stage, this initial evaluation aims to align the project’s scope, budget, and planning assumptions with a realistic understanding of risk exposure. The assessment is based primarily on the project category (e.g., scientific mission, commercial payload, defense satellite) and its high-level functional and operational requirements. Although limited in technical detail at this stage, the process focuses on identifying fundamental cybersecurity constraints and potential mission-critical vulnerabilities that could affect project viability. This includes considerations such as mission criticality, reliance on third-party infrastructure (e.g., commercial ground stations), initial compliance with applicable standards (e.g., ECSS or ISO/IEC), and the presence of potential regulatory or geopolitical risks. The output of this phase informs the allocation of security resources, the initial definition of risk tolerance, and the inclusion of security planning in project proposals and contractual frameworks.
+
+\subsection{Preliminary Risk Assessment}
+The Preliminary Risk Assessment is conducted in the early stages of system design and requirement definition, typically during Phase 0/A of the mission lifecycle. Its objective is to create a structured foundation for subsequent security engineering and risk management activities. This phase involves the identification and categorization of key mission assets—such as onboard subsystems, data links, ground segment interfaces, and mission-critical software components. Concurrently, potential threats are mapped using both historical data and scenario-based analysis, including consideration of emerging risks such as space-based jamming or AI-driven cyberattacks. This phase promotes early visibility into systemic vulnerabilities, allowing for the definition of security requirements that can be integrated into system architecture, redundancy strategies, and operational planning. The outputs include a threat-asset matrix, initial risk register, and a prioritized list of areas requiring further analysis or mitigation in the next phase.
+
+\subsection{Comprehensive Risk Assessment}
+The Comprehensive Risk Assessment represents the most detailed and analytically intensive phase of the framework. Typically carried out during system development, integration, and testing phases (Phase B/C/D), it leverages a standardized taxonomy of threat types (e.g., nefarious activity, eavesdropping, physical sabotage), asset categories (e.g., space, ground, link, user), and lifecycle phases. The analysis employs both qualitative and quantitative methods, including risk scoring based on likelihood-impact matrices and attack path modeling. This phase also evaluates control effectiveness, environmental constraints, access complexity, and response capabilities. Special attention is paid to interdependencies among system components and cascading failure scenarios. The result is a comprehensive risk profile that supports informed decisions on design trade-offs, security control implementation, and mission assurance planning. Additionally, the assessment facilitates cross-domain alignment, particularly when projects involve international partners or dual-use technologies.
+
+\subsection{Operational Risk Monitoring}
+Operational Risk Monitoring begins at the launch phase and continues throughout in-orbit operations until the end of the system's active lifecycle. This phase shifts focus from design-time analysis to runtime threat detection and adaptive response. It incorporates continuous monitoring mechanisms, anomaly detection tools, telemetry analysis, and security event logging to assess real-time system health and potential security breaches. A distinguishing feature of this phase is the use of threat relationship analysis and attack path identification, which model how individual vulnerabilities or threat events could be linked across different system layers or mission phases to create multi-step attacks (e.g., ground-to-space intrusion vectors). This intelligence-driven approach enhances situational awareness and supports the formulation of dynamic countermeasures or contingency protocols. Operational risk monitoring also involves the periodic reevaluation of previously identified risks in light of new threat intelligence, system updates, or changes in mission configuration. The outputs are updated risk registers, incident response strategies, and data supporting long-term resilience assessments.
+
+\section{Methodological Approach}
+
+Each phase of the proposed risk assessment framework adopts tailored methodologies that address the unique needs and information availability of that particular stage in the project lifecycle. Despite the diversity of techniques employed, from high-level qualitative assessments during early conceptual phases to detailed quantitative modeling in later stages, methodological consistency is ensured through the use of shared principles, structured processes, and unified data representations.
+
+At the core of this approach lies a standardized risk data model, which includes a common taxonomy of threats, asset classifications, evaluation criteria, and scoring metrics. This shared data structure facilitates the smooth transition of risk-related knowledge across lifecycle phases, reducing information loss and improving traceability. For example, threats identified during the Preliminary Risk Assessment are refined and expanded upon in the Comprehensive Risk Assessment using the same underlying classification system, enabling seamless aggregation, comparison, and revision of risk data over time.
+
+Moreover, the framework supports both top-down and bottom-up assessment techniques, including scenario-based analysis, threat modeling (e.g., STRIDE or attack graphs), and probabilistic risk estimation where applicable. The methodology also incorporates stakeholder input, domain-specific intelligence (e.g., satellite telemetry or ground station logs), and feedback loops, allowing for continuous improvement and responsiveness to newly emerging risks.
+
+Crucially, the framework is designed to be compatible with tool-supported implementation, facilitating partial automation of processes such as asset mapping, vulnerability identification, risk scoring, and documentation generation. This modular and data-centric approach ensures that each methodological component contributes coherently to an integrated and evolving risk profile throughout the entire mission lifecycle.
+
+\section{Space Systems Risk Taxonomy}
+
+The framework employs a comprehensive risk taxonomy specifically developed for space systems, addressing the unique characteristics and operational environments of space missions.
+
+\subsection{Threat Actor Classification}
+
+Space systems face threats from various categories of actors, each with distinct capabilities, motivations, and access patterns:
+
+\begin{itemize}
+    \item \textbf{Nation-State Actors}: Advanced persistent threats with sophisticated capabilities and strategic objectives
+    \item \textbf{Criminal Organizations}: Profit-motivated groups targeting valuable data or disrupting operations for financial gain
+    \item \textbf{Terrorist Groups}: Ideologically motivated actors seeking to cause widespread disruption or damage
+    \item \textbf{Insider Threats}: Malicious or negligent individuals with legitimate system access
+    \item \textbf{Hacktivist Groups}: Politically motivated collectives targeting systems for symbolic or disruptive purposes
+    \item \textbf{Opportunistic Attackers}: Individuals exploiting discovered vulnerabilities without specific targeting
+\end{itemize}
+
+\subsection{Asset Classification Framework}
+
+The framework categorizes space system assets across multiple dimensions to enable comprehensive risk assessment:
+
+\begin{table}[H]
+\centering
+\caption{Space System Asset Classification}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Asset Category} & \textbf{Sub-Categories} & \textbf{Risk Considerations} \\ \hline
+\multirow{3}{*}{Space Segment} & Spacecraft Bus & Physical protection, redundancy \\ \cline{2-3}
+& Payload Systems & Mission-critical functionality \\ \cline{2-3}
+& Communication Systems & Link security, encryption \\ \hline
+\multirow{3}{*}{Ground Segment} & Mission Control Centers & Physical and logical access control \\ \cline{2-3}
+& Data Processing Centers & Information security, backup systems \\ \cline{2-3}
+& Ground Stations & RF security, signal integrity \\ \hline
+\multirow{2}{*}{Link Segment} & Uplink Communications & Command authentication, jamming resistance \\ \cline{2-3}
+& Downlink Communications & Data integrity, eavesdropping protection \\ \hline
+\multirow{2}{*}{User Segment} & End-User Systems & Interface security, data handling \\ \cline{2-3}
+& Support Infrastructure & Service availability, access management \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Vulnerability Categories}
+
+Space systems exhibit unique vulnerability patterns that require specialized assessment approaches:
+
+\begin{itemize}
+    \item \textbf{Design Vulnerabilities}: Inherent weaknesses in system architecture or component design
+    \item \textbf{Implementation Vulnerabilities}: Security flaws introduced during development or manufacturing
+    \item \textbf{Configuration Vulnerabilities}: Misconfigurations in system setup or operational parameters
+    \item \textbf{Operational Vulnerabilities}: Weaknesses in procedures, training, or operational practices
+    \item \textbf{Environmental Vulnerabilities}: Susceptibilities arising from the space environment or operational context
+    \item \textbf{Supply Chain Vulnerabilities}: Risks introduced through third-party components or services
+\end{itemize}
+
+\section{Risk Assessment Methodologies}
+
+\subsection{Quantitative Risk Analysis Techniques}
+
+The framework incorporates several quantitative methodologies for precise risk measurement:
+
+\begin{lstlisting}[language=Python, caption=Quantitative Risk Calculation Framework]
+class QuantitativeRiskAnalysis:
+    """Advanced quantitative risk analysis for space systems"""
+    
+    def __init__(self):
+        self.risk_factors = {
+            'likelihood_modifiers': {
+                'environmental': 0.1,
+                'technical_complexity': 0.2,
+                'threat_sophistication': 0.3,
+                'access_difficulty': 0.4
+            },
+            'impact_multipliers': {
+                'mission_criticality': 2.0,
+                'recovery_time': 1.5,
+                'cascading_effects': 1.8,
+                'regulatory_impact': 1.3
+            }
+        }
+    
+    def calculate_risk_score(self, base_likelihood, base_impact, 
+                           modifiers=None, multipliers=None):
+        """Calculate composite risk score using advanced weighting"""
+        adjusted_likelihood = self.apply_likelihood_modifiers(
+            base_likelihood, modifiers or {})
+        adjusted_impact = self.apply_impact_multipliers(
+            base_impact, multipliers or {})
+        
+        # Monte Carlo simulation for uncertainty analysis
+        risk_distribution = self.monte_carlo_simulation(
+            adjusted_likelihood, adjusted_impact, iterations=10000)
+        
+        return {
+            'expected_risk': np.mean(risk_distribution),
+            'confidence_interval': np.percentile(risk_distribution, [5, 95]),
+            'risk_variance': np.var(risk_distribution)
+        }
+    
+    def temporal_risk_modeling(self, initial_risk, time_horizon, 
+                              threat_evolution_rate):
+        """Model risk evolution over mission timeline"""
+        time_points = np.linspace(0, time_horizon, 100)
+        risk_trajectory = initial_risk * np.exp(
+            threat_evolution_rate * time_points)
+        
+        return time_points, risk_trajectory
+\end{lstlisting}
+
+\subsection{Qualitative Assessment Frameworks}
+
+For scenarios where quantitative data is limited, the framework provides structured qualitative assessment methodologies:
+
+\begin{itemize}
+    \item \textbf{Expert Elicitation Techniques}: Structured methods for capturing domain expertise
+    \item \textbf{Scenario-Based Analysis}: Systematic evaluation of threat scenarios and their implications
+    \item \textbf{Comparative Assessment}: Benchmarking against similar systems or historical precedents
+    \item \textbf{Delphi Method}: Consensus building among multiple experts for complex risk assessments
+\end{itemize}
+
+\section{Risk Treatment Strategies}
+
+\subsection{Space-Specific Mitigation Approaches}
+
+The framework defines mitigation strategies tailored to the unique constraints of space systems:
+
+\begin{table}[H]
+\centering
+\caption{Space System Risk Mitigation Strategies}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Strategy Type} & \textbf{Implementation} & \textbf{Effectiveness} & \textbf{Constraints} \\ \hline
+Redundancy & Multiple backup systems & High & Mass/power limitations \\ \hline
+Encryption & Advanced cryptographic protocols & Very High & Processing overhead \\ \hline
+Access Control & Multi-factor authentication & High & Operational complexity \\ \hline
+Monitoring & Continuous telemetry analysis & Medium & Bandwidth limitations \\ \hline
+Isolation & System segmentation & High & Integration challenges \\ \hline
+Response Planning & Automated contingency protocols & Medium & Scenario coverage \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Cost-Benefit Analysis Framework}
+
+Risk treatment decisions require careful consideration of costs versus benefits in the resource-constrained space environment:
+
+\begin{lstlisting}[language=Python, caption=Cost-Benefit Analysis for Risk Mitigation]
+def cost_benefit_analysis(mitigation_options, risk_reduction, 
+                         implementation_costs, mission_parameters):
+    """Comprehensive cost-benefit analysis for mitigation selection"""
+    
+    results = {}
+    for option in mitigation_options:
+        # Calculate risk reduction value
+        risk_value_reduction = (
+            risk_reduction[option] * 
+            mission_parameters['mission_value'] *
+            mission_parameters['risk_tolerance_factor']
+        )
+        
+        # Include lifecycle costs
+        total_cost = (
+            implementation_costs[option]['development'] +
+            implementation_costs[option]['integration'] +
+            implementation_costs[option]['operations'] *
+            mission_parameters['mission_duration']
+        )
+        
+        # Calculate net benefit and ROI
+        net_benefit = risk_value_reduction - total_cost
+        roi = (risk_value_reduction / total_cost) if total_cost > 0 else float('inf')
+        
+        results[option] = {
+            'net_benefit': net_benefit,
+            'roi': roi,
+            'payback_period': total_cost / risk_value_reduction 
+                if risk_value_reduction > 0 else float('inf'),
+            'risk_reduction_percentage': risk_reduction[option] * 100
+        }
+    
+    return results
+\end{lstlisting}
+
+\section{Framework Validation Methodology}
+
+\subsection{Validation Criteria}
+
+The theoretical framework undergoes validation against multiple criteria to ensure practical applicability:
+
+\begin{itemize}
+    \item \textbf{Completeness}: Coverage of all relevant risk categories and assessment phases
+    \item \textbf{Consistency}: Logical coherence across different framework components
+    \item \textbf{Practicality}: Feasibility of implementation within typical project constraints
+    \item \textbf{Accuracy}: Alignment of assessment results with empirical evidence and expert judgment
+    \item \textbf{Efficiency}: Reasonable resource requirements for framework application
+\end{itemize}
+
+\subsection{Expert Review Process}
+
+The framework underwent systematic review by cybersecurity experts from multiple domains:
+
+\begin{enumerate}
+    \item \textbf{Academic Review}: Evaluation by researchers specializing in space cybersecurity
+    \item \textbf{Industry Review}: Assessment by practitioners from space industry organizations
+    \item \textbf{Regulatory Review}: Examination by representatives from relevant regulatory bodies
+    \item \textbf{Cross-Domain Review}: Comparison with established frameworks from related industries
+\end{enumerate}
+
+\subsection{Iterative Refinement Process}
+
+Based on validation feedback, the framework underwent multiple refinement cycles:
+
+\begin{itemize}
+    \item \textbf{Taxonomy Refinement}: Adjustment of threat and asset classifications based on expert input
+    \item \textbf{Methodology Enhancement}: Improvement of assessment procedures based on practical testing
+    \item \textbf{Tool Integration}: Optimization of framework elements for tool-supported implementation
+    \item \textbf{Documentation Improvement}: Enhancement of guidance materials and implementation examples
+\end{itemize}
+
+% ============================================================================
+% CHAPTER 4: TOOL SUITE DESIGN - ENHANCED
+% ============================================================================
+\chapter{Tool Suite Design and Implementation}
+\label{ch:implementation}
+
+This chapter provides comprehensive details on the design philosophy, technical architecture, and implementation specifics of the Risk Assessment Tool Suite. The suite represents a practical embodiment of the theoretical framework, translating academic concepts into operational tools.
+
+\section{Design Philosophy and Requirements}
+
+\subsection{User-Centric Design Principles}
+
+The tool suite development followed established human-computer interaction principles:
+
+\begin{itemize}
+    \item \textbf{Consistency}: Uniform interface elements across all tools
+    \item \textbf{Accessibility}: Clear navigation and intuitive workflows
+    \item \textbf{Efficiency}: Minimized cognitive load through logical grouping
+    \item \textbf{Error Prevention}: Input validation and user guidance
+    \item \textbf{Professional Appearance}: Enterprise-grade visual design
+\end{itemize}
+
+\subsection{Functional Requirements}
+
+The tool suite addresses several critical functional requirements:
+
+\begin{enumerate}
+    \item \textbf{Multi-Phase Assessment Support}: Tools for different project lifecycle phases
+    \item \textbf{Standardized Output}: Consistent reporting formats across tools
+    \item \textbf{Data Interoperability}: Seamless data flow between components
+    \item \textbf{Scalability}: Support for projects of varying complexity
+    \item \textbf{Extensibility}: Architecture supporting future enhancements
+\end{enumerate}
+
+\section{System Architecture}
+
+\subsection{Overall Architecture Design}
+
+The Risk Assessment Tool Suite follows a modular monolithic architecture pattern, providing the benefits of modularity while maintaining simplicity for end users:
+
+\subsection{Component Responsibilities}
+
+Each component has clearly defined responsibilities:
+
+\begin{itemize}
+    \item \textbf{Main Interface}: Application launcher, tool coordination, output management
+    \item \textbf{Individual Tools}: Specialized assessment functions, data collection, local processing
+    \item \textbf{Shared Library}: Common functions, export capabilities, data validation
+    \item \textbf{Output Manager}: File organization, report generation, format standardization
+\end{itemize}
+
+\section{Technical Implementation}
+
+\subsection{Technology Stack Selection}
+
+The choice of Python as the primary development language was driven by several factors:
+
+\begin{table}[H]
+\centering
+\caption{Technology Selection Criteria}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Aspect} & \textbf{Requirement} & \textbf{Python Advantage} \\ \hline
+Rapid Development & Fast prototyping & Extensive libraries, readable syntax \\ \hline
+GUI Development & Cross-platform UI & tkinter included, platform native \\ \hline
+Data Processing & CSV, graph analysis & pandas, NetworkX ecosystem \\ \hline
+Document Generation & Professional reports & python-docx, matplotlib integration \\ \hline
+Deployment & Easy installation & pip package management \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Core Libraries and Dependencies}
+
+The tool suite leverages several key Python libraries:
+
+\begin{lstlisting}[language=Python, caption=Core Dependencies Structure]
+# User Interface Framework
+import tkinter as tk
+from tkinter import ttk, messagebox, filedialog
+
+# Data Processing and Analysis
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+# Visualization and Graphics
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import networkx as nx
+from PIL import Image, ImageTk, ImageDraw
+
+# Document Generation
+from docx import Document
+from docx.shared import Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+# File and System Operations
+import os
+import sys
+import subprocess
+import csv
+\end{lstlisting}
+
+\section{Scoring Methodology}
+
+\subsection{Weighted Scoring Algorithm}
+
+The tools implement a sophisticated weighted scoring system based on cybersecurity best practices:
+
+\begin{table}[H]
+\centering
+\caption{Cybersecurity Requirement Weights}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Requirement Category} & \textbf{Weight} & \textbf{Justification} \\ \hline
+Cybersecurity Requirements & 0.15 & Foundation of security posture \\ \hline
+Security Architecture Constraints & 0.12 & Structural security limitations \\ \hline
+Cryptographic Requirements & 0.10 & Data protection capabilities \\ \hline
+Authentication \& Access Control & 0.11 & Identity management criticality \\ \hline
+Supply Chain Security & 0.12 & Third-party risk exposure \\ \hline
+Threat Modeling Guidelines & 0.08 & Proactive security planning \\ \hline
+Security Compliance References & 0.09 & Regulatory alignment \\ \hline
+Security Validation Requirements & 0.10 & Testing and verification \\ \hline
+Incident Response Expectations & 0.07 & Operational preparedness \\ \hline
+Data Protection and Privacy & 0.06 & Information safeguarding \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Risk Calculation Engine}
+
+The risk calculation follows a multi-dimensional approach based on ISO 27005 methodology, implementing a two-stage process for accurate risk quantification:
+
+\subsubsection{Stage 1: Likelihood and Impact Calculation}
+
+The framework calculates likelihood and impact using quadratic mean (Root Mean Square) to properly weight extreme values:
+
+\begin{lstlisting}[language=Python, caption=Likelihood and Impact Calculation]
+def calculate_likelihood_impact(vulnerability, access_control, defense_capability):
+    """
+    Calculate likelihood using quadratic mean of relevant criteria
+    """
+    likelihood_factors = [vulnerability, access_control, defense_capability]
+    
+    # Quadratic mean calculation (RMS)
+    likelihood = math.sqrt(sum(x**2 for x in likelihood_factors) / len(likelihood_factors))
+    
+    return likelihood
+
+def calculate_impact(operational_impact, recovery_time):
+    """
+    Calculate impact using quadratic mean of consequence criteria
+    """
+    impact_factors = [operational_impact, recovery_time]
+    
+    # Quadratic mean calculation (RMS)
+    impact = math.sqrt(sum(x**2 for x in impact_factors) / len(impact_factors))
+    
+    return impact
+\end{lstlisting}
+
+\subsubsection{Stage 2: ISO 27005 Risk Matrix Application}
+
+After calculating likelihood and impact values, the framework applies the ISO 27005 risk assessment matrix to determine the final risk level:
+
+\begin{table}[H]
+\centering
+\caption{ISO 27005 Risk Matrix}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multirow{2}{*}{\textbf{Likelihood}} & \multicolumn{5}{c|}{\textbf{Impact}} \\ \cline{2-6}
+& \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} \\ \hline
+\textbf{5} & Medium & High & High & Very High & Very High \\ \hline
+\textbf{4} & Medium & Medium & High & High & Very High \\ \hline
+\textbf{3} & Low & Medium & Medium & High & High \\ \hline
+\textbf{2} & Low & Low & Medium & Medium & High \\ \hline
+\textbf{1} & Very Low & Low & Low & Medium & Medium \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{lstlisting}[language=Python, caption=Complete Risk Calculation Implementation]
+import math
+
+def calculate_comprehensive_risk(vulnerability, access_control, defense_capability, 
+                               operational_impact, recovery_time):
+    """
+    Complete risk calculation using quadratic mean and ISO 27005 matrix
+    """
+    # Stage 1: Calculate likelihood and impact using quadratic mean
+    likelihood_raw = calculate_likelihood_impact(vulnerability, access_control, defense_capability)
+    impact_raw = calculate_impact(operational_impact, recovery_time)
+    
+    # Normalize to 1-5 scale
+    likelihood = min(5, max(1, round(likelihood_raw)))
+    impact = min(5, max(1, round(impact_raw)))
+    
+    # Stage 2: Apply ISO 27005 risk matrix
+    risk_matrix = {
+        (1,1): "Very Low", (1,2): "Low", (1,3): "Low", (1,4): "Medium", (1,5): "Medium",
+        (2,1): "Low", (2,2): "Low", (2,3): "Medium", (2,4): "Medium", (2,5): "High",
+        (3,1): "Low", (3,2): "Medium", (3,3): "Medium", (3,4): "High", (3,5): "High",
+        (4,1): "Medium", (4,2): "Medium", (4,3): "High", (4,4): "High", (4,5): "Very High",
+        (5,1): "Medium", (5,2): "High", (5,3): "High", (5,4): "Very High", (5,5): "Very High"
+    }
+    
+    risk_level = risk_matrix.get((likelihood, impact), "Medium")
+    
+    return {
+        'likelihood_raw': likelihood_raw,
+        'impact_raw': impact_raw,
+        'likelihood': likelihood,
+        'impact': impact,
+        'risk_level': risk_level,
+        'risk_score': likelihood * impact  # Numerical score for analysis
+    }
+
+def categorize_risk_level(risk_level):
+    """Map risk levels to numerical values for analysis"""
+    risk_mapping = {
+        "Very Low": 1,
+        "Low": 2,
+        "Medium": 3,
+        "High": 4,
+        "Very High": 5
+    }
+    return risk_mapping.get(risk_level, 3)
+\end{lstlisting}
+
+\section{User Interface Design}
+
+\subsection{Interface Design Patterns}
+
+The tool suite employs consistent design patterns across all components:
+
+\begin{itemize}
+    \item \textbf{Header Section}: Logo, title, and navigation elements
+    \item \textbf{Content Area}: Input forms, data displays, and controls
+    \item \textbf{Action Bar}: Primary action buttons (Assess, Export, Clear)
+    \item \textbf{Status Bar}: Progress indicators and status messages
+    \item \textbf{Footer}: Application information and credits
+\end{itemize}
+
+\subsection{Visual Design Enhancements}
+
+The interface incorporates professional visual elements with enhanced logo integration and branding:
+
+\begin{lstlisting}[language=Python, caption=Logo Integration and Visual Enhancement]
+# Logo implementation with rounded corners
+def create_rounded_image(self, image, radius=20):
+    """Create rounded corners for logo display"""
+    size = image.size
+    mask = Image.new('L', size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.rounded_rectangle([0, 0] + list(size), 
+                          radius=radius, fill=255)
+    
+    rounded_image = Image.new('RGBA', size, (0, 0, 0, 0))
+    rounded_image.paste(image, (0, 0))
+    rounded_image.putalpha(mask)
+    
+    return rounded_image
+
+# Logo loading and scaling implementation
+def load_and_scale_logo(self, logo_path, target_size=(80, 80)):
+    """Load and scale logo with error handling"""
+    try:
+        logo = Image.open(logo_path)
+        logo = logo.resize(target_size, Image.Resampling.LANCZOS)
+        logo_rounded = self.create_rounded_image(logo)
+        return ImageTk.PhotoImage(logo_rounded)
+    except FileNotFoundError:
+        self.show_message("Logo file not found")
+        return None
+\end{lstlisting}
+
+\subsection{Enhanced Color Scheme and Styling}
+
+The interface utilizes a professional color scheme with comprehensive styling support:
+
+\begin{lstlisting}[language=Python, caption=Enhanced UI Styling Configuration]
+# Color scheme for professional appearance
+COLORS = {
+    'primary': '#2E86AB',      # Professional blue
+    'secondary': '#A23B72',    # Accent color
+    'success': '#F18F01',      # Warning/attention
+    'background': '#F5F5F5',   # Light gray background
+    'dark': '#333333',         # Dark gray text
+    'border': '#CCCCCC',       # Light border
+    'light': '#FFFFFF',        # White background
+    'error': '#DC3545',        # Error red
+    'warning': '#FFC107'       # Warning yellow
+}
+
+# Font configuration with hierarchical typography
+FONTS = {
+    'title': ('Arial', 16, 'bold'),
+    'heading': ('Arial', 12, 'bold'),
+    'body': ('Arial', 10),
+    'small': ('Arial', 8),
+    'help_title': ('Arial', 14, 'bold'),
+    'help_section': ('Arial', 11, 'bold'),
+    'help_body': ('Arial', 9)
+}
+
+# Widget styling with enhanced accessibility
+WIDGET_STYLES = {
+    'button': {
+        'font': FONTS['body'],
+        'bg': COLORS['primary'],
+        'fg': 'white',
+        'relief': 'flat',
+        'padx': 20,
+        'pady': 8,
+        'cursor': 'hand2'
+    },
+    'frame': {
+        'bg': COLORS['background'],
+        'relief': 'solid',
+        'bd': 1
+    },
+    'help_text': {
+        'bg': COLORS['light'],
+        'fg': COLORS['dark'],
+        'wrap': 'word',
+        'padx': 15,
+        'pady': 10
+    }
+}
+\end{lstlisting}
+
+\subsection{Comprehensive Help System Architecture}
+
+A sophisticated help system has been implemented across all tools to enhance user experience and provide comprehensive guidance:
+
+\begin{lstlisting}[language=Python, caption=Enhanced Help System Implementation]
+def show_help(self):
+    """Display comprehensive help window with structured content"""
+    help_window = tk.Toplevel(self.root)
+    help_window.title("Risk Assessment Tool - User Guide")
+    help_window.geometry("700x600")
+    help_window.configure(bg=COLORS['background'])
+    help_window.resizable(True, True)
+    
+    # Create main container with scrollbar
+    main_frame = tk.Frame(help_window, bg=COLORS['background'])
+    main_frame.pack(fill='both', expand=True, padx=10, pady=10)
+    
+    # Scrollable text widget
+    text_frame = tk.Frame(main_frame, bg=COLORS['background'])
+    text_frame.pack(fill='both', expand=True)
+    
+    text_widget = tk.Text(text_frame, **WIDGET_STYLES['help_text'])
+    scrollbar = tk.Scrollbar(text_frame, orient='vertical', 
+                           command=text_widget.yview)
+    text_widget.configure(yscrollcommand=scrollbar.set)
+    
+    text_widget.pack(side='left', fill='both', expand=True)
+    scrollbar.pack(side='right', fill='y')
+    
+    # Structured help content with sections
+    help_content = self.generate_comprehensive_help_content()
+    text_widget.insert('1.0', help_content)
+    text_widget.configure(state='disabled')
+
+def generate_comprehensive_help_content(self):
+    """Generate structured help content with detailed sections"""
+    content = """RISK ASSESSMENT TOOL - COMPREHENSIVE USER GUIDE
+
+
+
+1. TOOL OVERVIEW
+This tool performs cybersecurity risk assessment for space systems during various project phases. It evaluates threats, vulnerabilities, and associated risks to provide actionable security insights.
+
+2. GETTING STARTED
+- Select your mission type from the dropdown menu
+- Configure project parameters using the input fields
+- Use the assessment buttons to begin evaluation
+- Review results in the output area
+- Export findings using the export functionality
+
+3. ASSESSMENT METHODOLOGY
+The tool implements a structured risk assessment approach:
+- Asset identification and categorization
+- Threat modeling and vulnerability analysis
+- Risk calculation using weighted scoring algorithms
+- Mitigation strategy recommendations
+- Compliance mapping to relevant standards
+
+4. DATA MANAGEMENT
+- Import/Export: Use CSV and JSON formats for data exchange
+- Legacy Integration: Import data from previous assessments
+- Output Management: Results are saved in standardized formats
+- Backup: Regular data backup recommended
+
+5. ADVANCED FEATURES
+- Multi-criteria decision analysis support
+- Scenario-based threat modeling
+- Automated report generation
+- Integration with attack graph analysis
+- Real-time risk monitoring capabilities
+
+6. TROUBLESHOOTING
+- Verify input data format and completeness
+- Check file permissions for import/export operations
+- Ensure all required fields are completed
+- Contact support for technical issues
+
+7. BEST PRACTICES
+- Regular assessment updates throughout project lifecycle
+- Collaborative review with cybersecurity experts
+- Documentation of assessment assumptions
+- Integration with project risk management processes
+- Continuous monitoring of emerging threats
+
+"""
+    return content
+\end{lstlisting}
+
+\subsection{Optimized Button Layout and User Experience}
+
+The tool suite features optimized button layouts designed for efficient workflow and intuitive navigation:
+
+\begin{lstlisting}[language=Python, caption=Enhanced Button Layout Implementation]
+def create_optimized_button_layout(self):
+    """Create organized button layout with logical grouping"""
+    # Main action area with centered primary functions
+    action_frame = tk.Frame(self.root, bg=COLORS['background'])
+    action_frame.pack(pady=20)
+    
+    # Left section: Import/Export operations
+    left_frame = tk.Frame(action_frame, bg=COLORS['background'])
+    left_frame.pack(side='left', padx=20)
+    
+    tk.Button(left_frame, text="Import Data", 
+             command=self.import_data,
+             **WIDGET_STYLES['button']).pack(pady=5)
+    
+    tk.Button(left_frame, text="Export Results", 
+             command=self.export_results,
+             **WIDGET_STYLES['button']).pack(pady=5)
+    
+    # Center section: Primary assessment function
+    center_frame = tk.Frame(action_frame, bg=COLORS['background'])
+    center_frame.pack(side='left', padx=40)
+    
+    # Prominent main action button
+    main_button = tk.Button(center_frame, text="START ASSESSMENT",
+                           command=self.start_assessment,
+                           font=FONTS['heading'],
+                           bg=COLORS['success'],
+                           fg='white',
+                           padx=30, pady=15,
+                           relief='raised',
+                           cursor='hand2')
+    main_button.pack()
+    
+    # Right section: Support and legacy functions
+    right_frame = tk.Frame(action_frame, bg=COLORS['background'])
+    right_frame.pack(side='right', padx=20)
+    
+    tk.Button(right_frame, text="Legacy Data", 
+             command=self.import_legacy,
+             **WIDGET_STYLES['button']).pack(pady=5)
+    
+    tk.Button(right_frame, text="Help", 
+             command=self.show_help,
+             **WIDGET_STYLES['button']).pack(pady=5)
+\end{lstlisting}
+
+\section{Data Management Architecture}
+
+\subsection{Enhanced User Documentation and Support System}
+
+The tool suite incorporates a comprehensive documentation and support architecture designed to facilitate user adoption and ensure effective utilization across different expertise levels:
+
+\begin{lstlisting}[language=Python, caption=Multi-Modal Help System Architecture]
+class DocumentationManager:
+    """Manages comprehensive user documentation and support"""
+    
+    def __init__(self):
+        self.help_sections = {
+            'overview': self.generate_overview_content,
+            'getting_started': self.generate_getting_started_content,
+            'methodology': self.generate_methodology_content,
+            'data_management': self.generate_data_management_content,
+            'advanced_features': self.generate_advanced_features_content,
+            'troubleshooting': self.generate_troubleshooting_content,
+            'best_practices': self.generate_best_practices_content
+        }
+    
+    def create_contextual_help_window(self, tool_type, context=None):
+        """Generate context-aware help documentation"""
+        help_window = tk.Toplevel()
+        help_window.title(f"{tool_type} - User Guide")
+        help_window.geometry("750x650")
+        help_window.configure(bg=COLORS['background'])
+        
+        # Enhanced scrollable content area
+        self.setup_scrollable_help_area(help_window, tool_type, context)
+        
+        # Navigation and search capabilities
+        self.add_help_navigation(help_window)
+        
+        return help_window
+    
+    def setup_scrollable_help_area(self, parent, tool_type, context):
+        """Setup enhanced scrollable help area with rich formatting"""
+        main_container = tk.Frame(parent, bg=COLORS['background'])
+        main_container.pack(fill='both', expand=True, padx=15, pady=15)
+        
+        # Text widget with enhanced formatting support
+        text_container = tk.Frame(main_container, bg=COLORS['background'])
+        text_container.pack(fill='both', expand=True)
+        
+        help_text = tk.Text(text_container,
+                           bg=COLORS['light'],
+                           fg=COLORS['dark'],
+                           font=FONTS['help_body'],
+                           wrap='word',
+                           padx=20,
+                           pady=15,
+                           selectbackground=COLORS['primary'],
+                           selectforeground='white',
+                           insertbackground=COLORS['primary'],
+                           state='disabled')
+        
+        # Enhanced scrollbar with styling
+        scrollbar = tk.Scrollbar(text_container,
+                               orient='vertical',
+                               command=help_text.yview,
+                               bg=COLORS['background'],
+                               troughcolor=COLORS['border'],
+                               activebackground=COLORS['primary'])
+        
+        help_text.configure(yscrollcommand=scrollbar.set)
+        
+        # Layout with proper spacing
+        help_text.pack(side='left', fill='both', expand=True)
+        scrollbar.pack(side='right', fill='y', padx=(5, 0))
+        
+        # Generate and insert comprehensive content
+        content = self.generate_comprehensive_help_content(tool_type, context)
+        help_text.configure(state='normal')
+        help_text.insert('1.0', content)
+        help_text.configure(state='disabled')
+\end{lstlisting}
+
+\subsection{Standardized Error Handling and User Feedback}
+
+The implementation includes robust error handling mechanisms with user-friendly feedback systems:
+
+\begin{lstlisting}[language=Python, caption=Enhanced Error Handling Implementation]
+class ErrorManager:
+    """Centralized error handling and user feedback system"""
+    
+    def __init__(self, parent_widget):
+        self.parent = parent_widget
+        self.error_log = []
+        
+    def handle_color_reference_error(self, color_key, fallback_color):
+        """Handle missing color references with graceful fallbacks"""
+        try:
+            return COLORS[color_key]
+        except KeyError:
+            self.log_error(f"Color key '{color_key}' not found, using fallback")
+            return fallback_color
+    
+    def safe_color_get(self, color_key, fallback='#CCCCCC'):
+        """Safely retrieve color values with fallback support"""
+        return COLORS.get(color_key, fallback)
+    
+    def display_user_message(self, message, message_type='info'):
+        """Display user-friendly messages with appropriate styling"""
+        color_map = {
+            'info': COLORS.get('primary', '#2E86AB'),
+            'warning': COLORS.get('warning', '#FFC107'),
+            'error': COLORS.get('error', '#DC3545'),
+            'success': COLORS.get('success', '#28A745')
+        }
+        
+        message_window = tk.Toplevel(self.parent)
+        message_window.title(message_type.capitalize())
+        message_window.geometry("400x150")
+        message_window.configure(bg=COLORS.get('background', '#F5F5F5'))
+        
+        # Center the message window
+        message_window.transient(self.parent)
+        message_window.grab_set()
+        
+        # Message display with appropriate styling
+        message_frame = tk.Frame(message_window, 
+                               bg=COLORS.get('background', '#F5F5F5'))
+        message_frame.pack(fill='both', expand=True, padx=20, pady=20)
+        
+        tk.Label(message_frame,
+                text=message,
+                bg=COLORS.get('background', '#F5F5F5'),
+                fg=color_map[message_type],
+                font=FONTS.get('body', ('Arial', 10)),
+                wraplength=350,
+                justify='center').pack(pady=20)
+        
+        tk.Button(message_frame,
+                 text="OK",
+                 command=message_window.destroy,
+                 bg=color_map[message_type],
+                 fg='white',
+                 font=FONTS.get('body', ('Arial', 10)),
+                 padx=20).pack()
+\end{lstlisting}
+
+\subsection{Data Flow Design}
+
+The tool suite implements a structured data flow pattern:
+
+\begin{enumerate}
+    \item \textbf{Input Validation}: User input sanitization and format checking
+    \item \textbf{Data Processing}: Transformation and calculation procedures
+    \item \textbf{Intermediate Storage}: Temporary data structures for processing
+    \item \textbf{Output Generation}: Formatted results and report creation
+    \item \textbf{Export Management}: File writing and organization
+\end{enumerate}
+
+\subsection{File Management System}
+
+The output management system ensures organized and consistent file handling:
+
+\begin{lstlisting}[language=Python, caption=Output Management Implementation]
+class OutputManager:
+    def __init__(self, base_path="Output"):
+        self.base_path = base_path
+        self.ensure_output_directory()
+    
+    def ensure_output_directory(self):
+        """Create output directory if it doesn't exist"""
+        if not os.path.exists(self.base_path):
+            os.makedirs(self.base_path)
+    
+    def generate_filename(self, tool_name, file_type, timestamp=True):
+        """Generate standardized filename"""
+        if timestamp:
+            time_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+            return f"{tool_name}_{time_str}.{file_type}"
+        else:
+            return f"{tool_name}.{file_type}"
+    
+    def get_output_path(self, filename):
+        """Get full path for output file"""
+        return os.path.join(self.base_path, filename)
+\end{lstlisting}
+
+\section{Emerging Threat Integration}
+
+\subsection{Future-Proof Threat Modeling}
+
+The framework incorporates emerging threats to ensure longevity:
+
+\begin{itemize}
+    \item \textbf{AI-Powered Tampering}: Machine learning models targeting detection systems
+    \item \textbf{Quantum Computing Threats}: Post-quantum cryptographic requirements
+    \item \textbf{Advanced Persistent Threats}: Long-term, sophisticated attack campaigns
+    \item \textbf{Supply Chain AI}: Artificial intelligence in manufacturing and logistics
+\end{itemize}
+
+\subsection{Adaptive Threat Categories}
+
+The threat taxonomy supports dynamic updates:
+
+\begin{table}[H]
+\centering
+\caption{Emerging Threat Integration}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Threat Type} & \textbf{Current Impact} & \textbf{Future Projection} \\ \hline
+AI-Enhanced Attacks & Medium & High \\ \hline
+Quantum Decryption & Low & Very High \\ \hline
+Autonomous Malware & Medium & High \\ \hline
+Space Debris Weaponization & Low & Medium \\ \hline
+Cross-Domain Attacks & High & Very High \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Performance Optimization}
+
+\subsection{Computational Efficiency}
+
+The tools implement several optimization strategies:
+
+\begin{itemize}
+    \item \textbf{Lazy Loading}: UI components loaded on demand
+    \item \textbf{Caching}: Frequent calculations cached for reuse
+    \item \textbf{Vectorized Operations}: NumPy arrays for numerical computations
+    \item \textbf{Memory Management}: Efficient data structure usage
+\end{itemize}
+
+\subsection{User Experience Optimization}
+
+Performance considerations for user interaction:
+
+\begin{lstlisting}[language=Python, caption=Performance Optimization Example]
+def optimized_risk_calculation(self, data_matrix):
+    """Vectorized risk calculation for large datasets"""
+    # Convert to NumPy arrays for efficient computation
+    data_array = np.array(data_matrix)
+    weights_array = np.array(list(self.weights.values()))
+    
+    # Vectorized calculation
+    risk_scores = np.dot(data_array, weights_array)
+    
+    # Batch categorization
+    risk_levels = np.select(
+        [risk_scores <= 0.2, risk_scores <= 0.4, 
+         risk_scores <= 0.6, risk_scores <= 0.8],
+        ['Very Low', 'Low', 'Medium', 'High'],
+        default='Very High'
+    )
+    
+    return risk_scores, risk_levels
+\end{lstlisting}
+
+\section{Integration Capabilities}
+
+\subsection{API Design Considerations}
+
+Although the current implementation focuses on standalone operation, the architecture supports future API development:
+
+\begin{itemize}
+    \item \textbf{Modular Functions}: Core assessment logic separated from UI
+    \item \textbf{Standardized Data Formats}: JSON-compatible data structures
+    \item \textbf{Error Handling}: Comprehensive exception management
+    \item \textbf{Documentation}: Function-level documentation for API exposure
+\end{itemize}
+
+\subsection{External System Integration}
+
+The tool suite design accommodates integration with external systems:
+
+\begin{itemize}
+    \item \textbf{Data Import}: CSV and JSON data import capabilities
+    \item \textbf{Export Formats}: Multiple output formats for different systems
+    \item \textbf{Configuration Files}: Externally configurable parameters
+    \item \textbf{Plugin Architecture}: Extensible component structure
+\end{itemize}
+
+\section{Technical Challenges and Solutions}
+
+\subsection{Asset Data Management Enhancement}
+
+\subsubsection{Centralized Asset Data Loading}
+
+The tools were enhanced to implement centralized asset data management through CSV-based loading:
+
+\begin{lstlisting}[language=Python, caption=Enhanced Asset Loading Implementation]
+def load_asset_categories_from_csv(self):
+    """Load asset categories from Asset.csv with error handling"""
+    assets_file = os.path.join(get_base_path(), "Asset.csv")
+    asset_categories = []
+    seen_combinations = set()
+    
+    try:
+        with open(assets_file, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
+            for row in reader:
+                category = row.get('categories', '').strip()
+                subcategory = row.get('subCategories', '').strip()
+                
+                combination = (category, subcategory)
+                if combination not in seen_combinations and category and subcategory:
+                    seen_combinations.add(combination)
+                    asset_categories.append(combination)
+        
+        return asset_categories
+        
+    except FileNotFoundError:
+        # Graceful fallback to hardcoded assets
+        return self.get_default_asset_categories()
+    except Exception as e:
+        self.log_error(f"Error loading assets: {e}")
+        return self.get_default_asset_categories()
+\end{lstlisting}
+
+\subsubsection{Data Consistency and Validation}
+
+The implementation includes robust data validation and consistency checking:
+
+\begin{itemize}
+    \item \textbf{Delimiter Handling}: Proper CSV parsing with semicolon delimiters
+    \item \textbf{Duplicate Prevention}: Automatic removal of duplicate asset combinations
+    \item \textbf{Error Recovery}: Graceful fallback to default assets when CSV loading fails
+    \item \textbf{Data Integrity}: Validation of required fields and data completeness
+\end{itemize}
+
+\subsection{PyInstaller Configuration and Deployment}
+
+\subsubsection{Executable Packaging Optimization}
+
+The tool suite required careful configuration of PyInstaller settings to ensure proper inclusion of data files and dependencies:
+
+\begin{lstlisting}[language=Python, caption=Enhanced PyInstaller Configuration]
+# Enhanced .spec file configuration
+a = Analysis(
+    ['Risk_Assessment_Tool.py'],
+    pathex=[],
+    binaries=[],
+    datas=[
+        ('Asset.csv', '.'),           # Include asset data
+        ('logo.ico', '.'),            # Application icon
+        ('export_import_functions.py', '.'),  # Shared utilities
+        ('attack_graph_threat_relations.csv', '.')  # Threat data
+    ],
+    hiddenimports=['tkinter', 'tkinter.ttk', 'PIL.Image', 'PIL.ImageTk'],
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=['matplotlib', 'numpy.testing'],  # Reduce size
+    noarchive=False,
+    optimize=2,
+)
+\end{lstlisting}
+
+\subsubsection{Console Window Management}
+
+Proper configuration of console visibility was implemented to ensure appropriate user experience:
+
+\begin{itemize}
+    \item \textbf{GUI Applications}: Console disabled (`console=False`) for user-facing tools
+    \item \textbf{Debug Mode}: Console enabled for development and troubleshooting
+    \item \textbf{Logo Integration}: Enhanced icon handling with format validation
+    \item \textbf{Path Resolution}: Robust path handling for both development and executable environments
+\end{itemize}
+
+\subsection{Error Handling and Robustness}
+
+\subsubsection{Comprehensive Error Management}
+
+A robust error handling framework was implemented to ensure operational reliability:
+
+\begin{lstlisting}[language=Python, caption=Enhanced Error Handling Framework]
+class ErrorHandler:
+    """Centralized error handling with graceful degradation"""
+    
+    def handle_color_reference_error(self, color_key, fallback='#CCCCCC'):
+        """Handle missing color references gracefully"""
+        try:
+            return COLORS[color_key]
+        except KeyError:
+            self.log_warning(f"Color '{color_key}' not found, using fallback")
+            return fallback
+    
+    def handle_file_operation_error(self, operation, filepath, exception):
+        """Handle file operation errors with user feedback"""
+        error_message = f"File operation '{operation}' failed for {filepath}: {exception}"
+        self.log_error(error_message)
+        self.show_user_notification(error_message, severity='error')
+        return None
+    
+    def ensure_graceful_degradation(self, primary_function, fallback_function):
+        """Implement graceful degradation for critical functions"""
+        try:
+            return primary_function()
+        except Exception as e:
+            self.log_error(f"Primary function failed: {e}")
+            return fallback_function()
+\end{lstlisting}
+
+\subsubsection{User Experience Continuity}
+
+The error handling system prioritizes user experience continuity:
+
+\begin{itemize}
+    \item \textbf{Graceful Fallbacks}: Automatic fallback to safe alternatives when errors occur
+    \item \textbf{User Notification}: Clear, non-technical error messages for end users
+    \item \textbf{Operation Continuity}: Tools remain functional even when non-critical components fail
+    \item \textbf{Recovery Procedures}: Automated recovery mechanisms for common failure scenarios
+\end{itemize}
+
+\subsection{Asset Data Centralization and Management}
+
+\subsubsection{Transition from Static to Dynamic Asset Loading}
+
+A significant enhancement implemented during development was the transition from static asset definitions to dynamic CSV-based asset loading. This improvement addressed several critical limitations:
+
+\begin{itemize}
+    \item \textbf{Maintainability}: Centralized asset data eliminates code duplication across tools
+    \item \textbf{Flexibility}: Easy addition or modification of asset categories without code changes
+    \item \textbf{Consistency}: Unified asset taxonomy across all assessment phases
+    \item \textbf{Scalability}: Support for larger and more complex asset hierarchies
+\end{itemize}
+
+\subsubsection{Asset.csv Structure and Implementation}
+
+The centralized asset database follows a structured format designed for comprehensive coverage of space system components:
+
+\begin{table}[H]
+\centering
+\caption{Asset.csv Structure and Content Distribution}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Category} & \textbf{Subcategories} & \textbf{Asset Count} \\ \hline
+Ground & Ground Stations, Mission Control, Data Processing & 12 \\ \hline
+Space & Platform, Payload & 8 \\ \hline
+Link & Communication Links & 6 \\ \hline
+User & User Segments & 8 \\ \hline
+\textbf{Total} & \textbf{9 Unique Combinations} & \textbf{34 Assets} \\ \hline
+\end{tabular}
+\end{table}
+
+The implementation ensures robust data loading with comprehensive error handling:
+
+\begin{lstlisting}[language=Python, caption=Robust Asset Loading with Validation]
+def load_assets_from_csv(self):
+    """Enhanced asset loading with comprehensive validation"""
+    assets_file = os.path.join(get_base_path(), "Asset.csv")
+    
+    try:
+        with open(assets_file, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
+            
+            # Validate CSV structure
+            required_fields = ['categories', 'subCategories', 'asset']
+            if not all(field in reader.fieldnames for field in required_fields):
+                raise ValueError("Missing required CSV fields")
+            
+            assets = []
+            for row_num, row in enumerate(reader, start=2):
+                # Validate row completeness
+                if all(row.get(field, '').strip() for field in required_fields):
+                    assets.append({
+                        'category': row['categories'].strip(),
+                        'subcategory': row['subCategories'].strip(),
+                        'asset': row['asset'].strip()
+                    })
+                else:
+                    self.log_warning(f"Incomplete data in row {row_num}")
+            
+            if not assets:
+                raise ValueError("No valid assets found in CSV")
+                
+            return assets
+            
+    except Exception as e:
+        self.log_error(f"Asset loading failed: {e}")
+        return self.get_default_assets()
+\end{lstlisting}
+
+\subsection{Path Resolution and Executable Environment Handling}
+
+\subsubsection{Cross-Environment Path Management}
+
+A critical technical challenge addressed was ensuring proper file path resolution across different execution environments (development vs. executable):
+
+\begin{lstlisting}[language=Python, caption=Robust Path Resolution Implementation]
+def get_base_path():
+    """Enhanced path resolution for multiple execution contexts"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        if hasattr(sys, '_MEIPASS'):
+            # PyInstaller temporary folder
+            base_path = sys._MEIPASS
+        else:
+            # Standard executable directory
+            base_path = os.path.dirname(sys.executable)
+    else:
+        # Running as Python script
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    
+    # Validate path exists and log for debugging
+    if not os.path.exists(base_path):
+        raise FileNotFoundError(f"Base path not found: {base_path}")
+    
+    return base_path
+\end{lstlisting}
+
+\subsubsection{Data File Inclusion Strategy}
+
+The PyInstaller configuration was enhanced to ensure proper inclusion of data files in executables:
+
+\begin{itemize}
+    \item \textbf{Asset Data}: `Asset.csv` included for dynamic asset loading
+    \item \textbf{Visual Resources}: Logo files and icons properly embedded
+    \item \textbf{Configuration Files}: Threat relationship data and export templates
+    \item \textbf{Shared Libraries}: Common utility functions packaged correctly
+\end{itemize}
+
+\subsection{Quality Assurance and Testing Improvements}
+
+\subsubsection{Systematic Testing Framework}
+
+The development process incorporated systematic testing to identify and resolve issues:
+
+\begin{enumerate}
+    \item \textbf{Unit Testing}: Individual function validation with edge case handling
+    \item \textbf{Integration Testing}: Cross-tool data flow and compatibility verification
+    \item \textbf{Executable Testing}: Comprehensive testing of compiled versions
+    \item \textbf{Unicode Compatibility}: Systematic scanning for encoding issues
+    \item \textbf{Path Resolution}: Testing across development and deployment environments
+\end{enumerate}
+
+\subsubsection{Continuous Improvement Process}
+
+The implementation follows a continuous improvement methodology:
+
+\begin{itemize}
+    \item \textbf{Issue Identification}: Systematic identification of runtime issues
+    \item \textbf{Root Cause Analysis}: Thorough investigation of underlying causes
+    \item \textbf{Solution Implementation}: Targeted fixes with minimal impact
+    \item \textbf{Regression Testing}: Validation that fixes don't introduce new issues
+    \item \textbf{Documentation Updates}: Maintenance of accurate technical documentation
+\end{itemize}
+
+% ============================================================================
+% CHAPTER 5: TOOL SUITE COMPONENTS
+% ============================================================================
+\chapter{Tool Suite Components}
+\label{ch:components}
+
+This chapter provides detailed descriptions of each component in the Risk Assessment Tool Suite, including their specific functions, methodologies, and outputs.
+
+\section{BID Phase Assessment Tool}
+
+\subsection{Purpose and Scope}
+
+The BID Phase Assessment Tool is designed to evaluate the cybersecurity aspects of space projects during the Business Initiation and Definition (BID) phase. Its primary purpose is to identify high-level risks and align the project’s objectives with a feasible security approach. This tool addresses the initial integration of cybersecurity into project planning, ensuring that security considerations are embedded from the very beginning of the project lifecycle.
+
+\subsection{Methodology}
+
+The methodology employed by the BID Phase Assessment Tool involves:
+
+\begin{enumerate}
+    \item \textbf{Project Categorization}: Classifying the project into predefined categories (e.g., scientific, commercial, defense) to tailor the assessment approach.
+    \item \textbf{High-Level Risk Identification}: Utilizing checklists and expert judgment to identify potential high-level risks associated with the project category.
+    \item \textbf{Security Requirement Mapping}: Aligning identified risks with relevant security requirements and standards (e.g., ECSS, ISO/IEC).
+    \item \textbf{Preliminary Threat Assessment}: Conducting a high-level threat assessment to identify potential adversaries and threat vectors.
+    \item \textbf{Mitigation Strategy Outline}: Proposing initial mitigation strategies for identified risks, focusing on cost-effective and feasible measures.
+\end{enumerate}
+
+\subsection{Tool Features}
+
+Key features of the BID Phase Assessment Tool include:
+
+\begin{itemize}
+    \item \textbf{User-Friendly Interface}: Intuitive interface guiding users through the assessment process.
+    \item \textbf{Customizable Templates}: Predefined templates for different project categories, easily customizable to fit specific project needs.
+    \item \textbf{Automated Reporting}: Generation of automated reports summarizing the assessment findings, risk levels, and recommended actions.
+    \item \textbf{Integration Capabilities}: Ability to integrate with other tools in the Risk Assessment Tool Suite for a comprehensive assessment approach.
+\end{itemize}
+
+\subsection{Enhanced User Interface and Documentation System}
+
+The BID Phase Assessment Tool incorporates significant user experience enhancements, including comprehensive documentation and help systems designed to facilitate effective tool utilization:
+
+\begin{lstlisting}[language=Python, caption=BID Tool Enhanced Help System Implementation]
+def show_comprehensive_help(self):
+    """Display enhanced help window with structured content sections"""
+    help_window = tk.Toplevel(self.root)
+    help_window.title("BID Phase Assessment Tool - Comprehensive User Guide")
+    help_window.geometry("750x650")
+    help_window.configure(bg=COLORS['background'])
+    help_window.resizable(True, True)
+    
+    # Professional layout with enhanced styling
+    main_container = tk.Frame(help_window, bg=COLORS['background'])
+    main_container.pack(fill='both', expand=True, padx=15, pady=15)
+    
+    # Scrollable content area with improved text handling
+    content_frame = tk.Frame(main_container, bg=COLORS['background'])
+    content_frame.pack(fill='both', expand=True)
+    
+    # Enhanced text widget with professional styling
+    help_text = tk.Text(content_frame,
+                       bg=COLORS.get('light', '#FFFFFF'),
+                       fg=COLORS.get('dark', '#333333'),
+                       font=FONTS.get('help_body', ('Arial', 9)),
+                       wrap='word',
+                       padx=20,
+                       pady=15,
+                       selectbackground=COLORS.get('primary', '#2E86AB'),
+                       selectforeground='white',
+                       state='disabled')
+    
+    # Professional scrollbar styling
+    scrollbar = tk.Scrollbar(content_frame,
+                           orient='vertical',
+                           command=help_text.yview,
+                           bg=COLORS.get('background', '#F5F5F5'))
+    
+    help_text.configure(yscrollcommand=scrollbar.set)
+    
+    # Comprehensive documentation content
+    documentation_content = """BID PHASE ASSESSMENT TOOL - COMPREHENSIVE USER GUIDE
+    
+
+1. TOOL OVERVIEW AND PURPOSE
+The BID Phase Assessment Tool provides structured cybersecurity evaluation during the Business Initiation and Definition phase of space projects. It enables early identification of security risks and integration of cybersecurity considerations into project planning from the initial stages.
+
+2. ASSESSMENT METHODOLOGY AND APPROACH  
+- Project Classification: Systematic categorization based on mission type, complexity, and organizational context
+- Risk Identification: Structured identification of high-level cybersecurity risks using expert-guided checklists
+- Security Mapping: Alignment of identified risks with relevant security standards and regulatory requirements
+- Threat Assessment: Preliminary evaluation of potential adversaries and attack vectors relevant to the project
+- Mitigation Planning: Development of initial mitigation strategies focused on cost-effectiveness and feasibility
+
+3. DATA INPUT AND CONFIGURATION
+- Project Information: Mission objectives, technical specifications, and operational requirements
+- Organizational Context: Stakeholder information, regulatory environment, and compliance requirements  
+- Resource Constraints: Budget limitations, timeline constraints, and technical capabilities
+- Security Requirements: Applicable standards, policies, and regulatory mandates
+- Risk Tolerance: Organizational risk appetite and acceptance criteria
+
+4. OUTPUT GENERATION AND REPORTING
+- Executive Summary: High-level overview suitable for management and stakeholder communication
+- Detailed Assessment Report: Comprehensive documentation of methodology, findings, and recommendations
+- Risk Register Initialization: Structured risk entries with ownership, likelihood, and impact assessments
+- Security Requirement Matrix: Mapping of identified risks to applicable security standards and controls
+- Integration Packages: Data exports formatted for use in subsequent assessment phases
+
+5. INTEGRATION AND WORKFLOW MANAGEMENT
+- Phase Transition: Seamless data transfer to Phase 0/A assessment tools with maintained traceability
+- Project Management Integration: Export capabilities compatible with standard project management systems
+- Collaborative Review: Support for multi-stakeholder review processes and approval workflows
+- Version Control: Management of assessment iterations and updates throughout the BID phase
+- Legacy System Integration: Import capabilities for historical project data and organizational knowledge bases
+
+6. BEST PRACTICES AND RECOMMENDATIONS
+- Early Engagement: Involve cybersecurity expertise from project initiation to ensure comprehensive coverage
+- Stakeholder Alignment: Ensure security objectives align with overall project goals and constraints
+- Documentation Standards: Maintain comprehensive documentation of assumptions, decisions, and rationale
+- Iterative Refinement: Update assessments as project definition evolves and new information becomes available
+- Knowledge Transfer: Prepare comprehensive handoff documentation for subsequent project phases"""
+    
+    # Insert content with proper formatting
+    help_text.configure(state='normal')
+    help_text.insert('1.0', documentation_content)
+    help_text.configure(state='disabled')
+    
+    # Layout components
+    help_text.pack(side='left', fill='both', expand=True)
+    scrollbar.pack(side='right', fill='y', padx=(5, 0))
+\end{lstlisting}
+
+\subsection{Outputs}
+
+The primary outputs of the BID Phase Assessment Tool are:
+
+\begin{enumerate}
+    \item \textbf{Assessment Report}: A detailed report outlining the assessment process, identified risks, and recommended mitigation strategies.
+    \item \textbf{Risk Register Entry}: Creation of initial entries in the risk register for identified high-level risks, including proposed ownership and mitigation actions.
+    \item \textbf{Security Requirement Checklist}: A checklist of relevant security requirements and standards mapped to the identified risks.
+\end{enumerate}
+
+\section{Preliminary Risk Assessment Tool}
+
+\subsection{Purpose and Scope}
+
+The Preliminary Risk Assessment Tool is intended for use in the early stages of space project development, specifically during the Preliminary Design Review (PDR) phase. Its main purpose is to provide a more detailed risk assessment than the BID Phase Assessment, focusing on identifying and analyzing risks associated with specific system elements and design concepts.
+
+\subsection{Methodology}
+
+The methodology employed by the Preliminary Risk Assessment Tool includes:
+
+\begin{enumerate}
+    \item \textbf{Asset Identification}: Detailed identification of all system assets, including hardware, software, and communication links.
+    \item \textbf{Vulnerability Analysis}: Analysis of potential vulnerabilities in the system design and architecture.
+    \item \textbf{Threat Modeling}: Creation of threat models to identify potential adversaries, attack vectors, and impact scenarios.
+    \item \textbf{Risk Evaluation}: Evaluation of risks based on likelihood and impact, using a predefined risk matrix.
+    \item \textbf{Mitigation Planning}: Development of mitigation plans for high-priority risks, including technical and procedural controls.
+\end{enumerate}
+
+\subsection{Tool Features}
+
+Key features of the Preliminary Risk Assessment Tool include:
+
+\begin{itemize}
+    \item \textbf{Detailed Asset Database}: Comprehensive database for storing and managing asset information.
+    \item \textbf{Automated Vulnerability Scanning}: Integration with vulnerability scanning tools to automate the identification of known vulnerabilities.
+    \item \textbf{Scenario-Based Threat Modeling}: Support for creating and analyzing multiple threat scenarios.
+    \item \textbf{Risk Matrix Visualization}: Visual representation of risks on a likelihood-impact matrix.
+    \item \textbf{Exportable Reports}: Ability to generate detailed reports and export them in various formats (e.g., PDF, DOCX).
+\end{itemize}
+
+\subsection{Enhanced User Experience and Interface Optimization}
+
+The Preliminary Risk Assessment Tool (Phase 0/A) has been significantly enhanced with optimized button layouts and comprehensive user assistance systems:
+
+\begin{lstlisting}[language=Python, caption=Phase 0/A Tool Enhanced Interface Layout]
+def create_optimized_button_layout(self):
+    """Implement enhanced three-section button layout for improved workflow"""
+    # Main action container with professional spacing
+    action_container = tk.Frame(self.root, bg=COLORS['background'])
+    action_container.pack(pady=25, padx=20)
+    
+    # Left section: Data Import/Export operations
+    left_operations = tk.Frame(action_container, bg=COLORS['background'])
+    left_operations.pack(side='left', padx=30)
+    
+    # Import/Export functionality with enhanced styling
+    tk.Button(left_operations, 
+             text="Import Assessment Data",
+             command=self.import_assessment_data,
+             bg=COLORS.get('secondary', '#A23B72'),
+             fg='white',
+             font=FONTS.get('body', ('Arial', 10)),
+             padx=15, pady=8,
+             relief='flat',
+             cursor='hand2').pack(pady=8)
+    
+    tk.Button(left_operations, 
+             text="Export Results",
+             command=self.export_assessment_results,
+             bg=COLORS.get('secondary', '#A23B72'),
+             fg='white',
+             font=FONTS.get('body', ('Arial', 10)),
+             padx=15, pady=8,
+             relief='flat',
+             cursor='hand2').pack(pady=8)
+    
+    # Center section: Primary threat analysis function
+    center_primary = tk.Frame(action_container, bg=COLORS['background'])
+    center_primary.pack(side='left', padx=50)
+    
+    # Prominent main assessment button
+    threat_analysis_btn = tk.Button(center_primary,
+                                   text="THREAT ANALYSIS",
+                                   command=self.start_threat_analysis,
+                                   bg=COLORS.get('success', '#F18F01'),
+                                   fg='white',
+                                   font=FONTS.get('heading', ('Arial', 12, 'bold')),
+                                   padx=35, pady=18,
+                                   relief='raised',
+                                   bd=3,
+                                   cursor='hand2')
+    threat_analysis_btn.pack()
+    
+    # Right section: Legacy integration and support
+    right_support = tk.Frame(action_container, bg=COLORS['background'])
+    right_support.pack(side='right', padx=30)
+    
+    tk.Button(right_support, 
+             text="Legacy Data Integration",
+             command=self.integrate_legacy_data,
+             bg=COLORS.get('primary', '#2E86AB'),
+             fg='white',
+             font=FONTS.get('body', ('Arial', 10)),
+             padx=15, pady=8,
+             relief='flat',
+             cursor='hand2').pack(pady=8)
+    
+    tk.Button(right_support, 
+             text="User Guide",
+             command=self.show_comprehensive_help,
+             bg=COLORS.get('primary', '#2E86AB'),
+             fg='white',
+             font=FONTS.get('body', ('Arial', 10)),
+             padx=15, pady=8,
+             relief='flat',
+             cursor='hand2').pack(pady=8)
+
+def show_comprehensive_help(self):
+    """Display comprehensive help system with seven structured sections"""
+    help_window = tk.Toplevel(self.root)
+    help_window.title("Phase 0/A Risk Assessment Tool - User Guide")
+    help_window.geometry("780x700")
+    help_window.configure(bg=COLORS.get('background', '#F5F5F5'))
+    help_window.resizable(True, True)
+    
+    # Enhanced help content display
+    help_content = """PHASE 0/A RISK ASSESSMENT TOOL - COMPREHENSIVE USER GUIDE
+
+1. TOOL OVERVIEW AND CAPABILITIES
+The Phase 0/A Risk Assessment Tool provides detailed cybersecurity evaluation during the preliminary design phase of space projects. It builds upon BID phase findings to deliver comprehensive threat analysis and risk assessment for system elements and design concepts.
+
+2. ENHANCED USER INTERFACE FEATURES
+- Three-Section Button Layout: Optimized workflow with Import/Export (left), Main Analysis (center), and Support (right)
+- Professional Styling: Consistent color schemes and typography across all interface elements
+- Contextual Help System: Comprehensive documentation accessible through integrated help functionality
+- Legacy Integration: Seamless import of historical assessment data and organizational knowledge bases
+
+3. MISSION CONFIGURATION AND ASSESSMENT PARAMETERS
+- Mission Type Selection: Comprehensive dropdown covering all major space mission categories
+- Technical Specification Input: Detailed system architecture and component information
+- Operational Environment Definition: Orbital parameters, mission duration, and operational constraints
+- Stakeholder Mapping: Identification of all parties involved in mission execution and oversight
+
+4. THREAT ANALYSIS METHODOLOGY
+- Asset-Based Assessment: Systematic identification and categorization of all mission-critical assets
+- Vulnerability Evaluation: Detailed analysis of potential security weaknesses in system design
+- Threat Actor Profiling: Comprehensive evaluation of potential adversaries and their capabilities
+- Attack Vector Analysis: Detailed examination of possible attack paths and exploitation scenarios
+- Impact Assessment: Quantitative and qualitative evaluation of potential consequences
+
+5. DATA MANAGEMENT AND INTEGRATION
+- Import Capabilities: Support for CSV, JSON, and legacy data formats from previous assessments
+- Export Functionality: Multiple output formats compatible with project management and reporting systems
+- Legacy System Integration: Backward compatibility with historical assessment methodologies
+- Version Control: Tracking of assessment iterations and maintaining audit trails
+- Collaborative Features: Support for multi-user environments and distributed assessment teams
+
+6. REPORTING AND OUTPUT GENERATION
+- Executive Summaries: High-level findings suitable for management and stakeholder communication
+- Technical Reports: Detailed documentation of methodology, findings, and technical recommendations
+- Risk Matrices: Visual representation of likelihood-impact relationships for identified risks
+- Mitigation Roadmaps: Structured implementation plans for recommended security controls
+- Integration Packages: Formatted outputs for subsequent detailed design phase assessments
+
+7. BEST PRACTICES AND ADVANCED FEATURES
+- Iterative Assessment: Support for multiple assessment cycles as design evolves
+- Scenario Planning: Capability to model multiple threat scenarios and operational conditions
+- Compliance Mapping: Alignment with relevant cybersecurity standards and regulatory requirements
+- Knowledge Management: Capture and reuse of organizational expertise and lessons learned
+- Quality Assurance: Built-in validation checks and consistency verification for assessment data"""
+    
+    # Implementation continues with scrollable text widget...
+    self.display_help_content(help_window, help_content)
+\end{lstlisting}
+
+\subsection{Outputs}
+
+The primary outputs of the Preliminary Risk Assessment Tool are:
+
+\begin{enumerate}
+    \item \textbf{Detailed Risk Report}: A comprehensive report detailing the risk assessment process, identified vulnerabilities, threat scenarios, and recommended mitigation strategies.
+    \item \textbf{Updated Risk Register}: An updated risk register with detailed entries for each identified risk, including risk owner, mitigation measures, and status.
+    \item \textbf{Threat Model Diagrams}: Visual diagrams representing the identified threat models and attack vectors.
+\end{enumerate}
+
+\section{Comprehensive Risk Assessment Tool}
+
+\subsection{Purpose and Scope}
+
+The Comprehensive Risk Assessment Tool is designed for use during the detailed design and development phases of space projects (Phases B/C/D). Its primary purpose is to conduct a thorough and detailed risk assessment, supporting informed decision-making regarding risk management and mitigation.
+
+\subsection{Methodology}
+
+The methodology employed by the Comprehensive Risk Assessment Tool involves:
+
+\begin{enumerate}
+    \item \textbf{In-Depth Asset Analysis}: Comprehensive analysis of all system assets, including detailed design documents, source code, and configuration files.
+    \item \textbf{Advanced Threat Modeling}: Development of detailed attack trees and threat models, considering potential adversaries, attack vectors, and impact scenarios.
+    \item \textbf{Quantitative Risk Assessment}: Quantitative assessment of risks using probabilistic models and simulation techniques.
+    \item \textbf{Control Analysis}: Evaluation of existing and proposed security controls, including technical, administrative, and physical controls.
+    \item \textbf{Risk Treatment Planning}: Development of detailed risk treatment plans, including risk acceptance, mitigation, transfer, or avoidance strategies.
+\end{enumerate}
+
+\subsection{Tool Features}
+
+Key features of the Comprehensive Risk Assessment Tool include:
+
+\begin{itemize}
+    \item \textbf{Integration with Design Tools}: Integration with system design and development tools (e.g., CAD, software development environments) to automate data collection.
+    \item \textbf{Probabilistic Risk Modeling}: Support for creating probabilistic risk models and conducting Monte Carlo simulations.
+    \item \textbf{Detailed Control Catalog}: Comprehensive catalog of security controls with implementation guidance and effectiveness metrics.
+    \item \textbf{Automated Report Generation}: Automated generation of detailed risk assessment reports, including risk treatment plans and control recommendations.
+    \item \textbf{Advanced Integration}: Modular architecture supporting future integration with external systems and enterprise risk management platforms
+\end{itemize}
+
+\subsection{Outputs}
+
+The primary outputs of the Comprehensive Risk Assessment Tool are:
+
+\begin{enumerate}
+    \item \textbf{Comprehensive Risk Report}: A detailed report documenting the entire risk assessment process, including identified risks, threat models, vulnerability analyses, and recommended mitigation strategies.
+    \item \textbf{Risk Treatment Plan}: A detailed plan outlining the recommended actions for treating identified risks, including priorities, responsibilities, and timelines.
+    \item \textbf{Control Implementation Guidance}: Detailed guidance on implementing recommended security controls, including technical specifications and procedural guidelines.
+\end{enumerate}
+
+\section{Attack Graph Analysis Tool}
+
+\subsection{Purpose and Scope}
+
+The Attack Graph Analysis Tool is designed to analyze and visualize attack paths and relationships between threats in space systems. It aims to provide insights into how individual vulnerabilities or threat events could be linked across different system layers or mission phases to create multi-step attacks.
+
+\subsection{Methodology}
+
+The methodology employed by the Attack Graph Analysis Tool includes:
+
+\begin{enumerate}
+    \item \textbf{Data Integration}: Integration of data from various sources, including vulnerability scanners, threat intelligence feeds, and system logs.
+    \item \textbf{Attack Graph Construction}: Automated construction of attack graphs based on integrated data and predefined attack patterns.
+    \item \textbf{Path Analysis}: Analysis of potential attack paths, including direct and indirect paths, and evaluation of path criticality.
+    \item \textbf{Visualization}: Visualization of attack graphs and paths using interactive and intuitive graphical representations.
+    \item \textbf{Reporting}: Generation of reports summarizing attack graph analysis results, including identified attack paths and recommended mitigations.
+\end{enumerate}
+
+\subsection{Tool Features}
+
+Key features of the Attack Graph Analysis Tool include:
+
+\begin{itemize}
+    \item \textbf{Interactive Graph Visualization}: Interactive visualization of attack graphs with drill-down capabilities.
+    \item \textbf{Automated Path Analysis}: Automated analysis of attack paths to identify critical paths and potential impact.
+    \item \textbf{Integration with Threat Intelligence}: Integration with threat intelligence platforms to enrich attack graph analysis.
+    \item \textbf{Exportable Graphs and Reports}: Ability to export attack graphs and analysis reports in various formats (e.g., PDF, PNG, CSV).
+    \item \textbf{Advanced Export Capabilities}: Comprehensive export functionality supporting multiple formats and integration requirements
+\end{itemize}
+
+\subsection{Outputs}
+
+The primary outputs of the Attack Graph Analysis Tool are:
+
+\begin{enumerate}
+    \item \textbf{Attack Graphs}: Visual representations of attack graphs, including nodes (representing vulnerabilities or assets) and edges (representing attack paths).
+    \item \textbf{Path Analysis Report}: A report detailing the analysis of potential attack paths, including critical paths and recommended mitigations.
+    \item \textbf{Vulnerability Correlation Report}: A report correlating vulnerabilities across different system layers or mission phases, highlighting potential multi-step attack vectors.
+\end{enumerate}
+
+\section{Tool Suite Enhancement Summary}
+
+\subsection{Comprehensive User Experience Improvements}
+
+The Risk Assessment Tool Suite has undergone significant enhancements to improve user experience, interface consistency, and overall usability across all components. These improvements represent a substantial advancement in the practical applicability and professional quality of the tool suite.
+
+\subsection{Visual Identity and Branding Integration}
+
+The integration of professional visual identity elements enhances the credibility and usability of the tool suite:
+
+\begin{lstlisting}[language=Python, caption=Logo Integration and Professional Branding]
+# Professional logo integration with rounded corners and scaling
+def implement_visual_branding(self):
+    """Implement comprehensive visual branding across tool suite"""
+    # Logo processing with professional appearance
+    logo_implementation = {
+        'rounded_corners': self.create_rounded_image,
+        'scaling_optimization': self.load_and_scale_logo,
+        'error_handling': self.handle_logo_errors,
+        'consistent_placement': self.position_logo_consistently
+    }
+    
+    # Enhanced color scheme with comprehensive palette
+    professional_colors = {
+        'primary': '#2E86AB',     # Professional blue for main actions
+        'secondary': '#A23B72',   # Accent color for secondary functions
+        'success': '#F18F01',     # Attention color for key actions
+        'background': '#F5F5F5',  # Light background for readability
+        'dark': '#333333',        # Dark text for maximum contrast
+        'light': '#FFFFFF',       # Pure white for content areas
+        'border': '#CCCCCC',      # Subtle borders for element separation
+        'error': '#DC3545',       # Error indication color
+        'warning': '#FFC107'      # Warning and caution color
+    }
+    
+    return logo_implementation, professional_colors
+\end{lstlisting}
+
+\subsection{Standardized Help Documentation Architecture}
+
+A comprehensive help system has been implemented across all tools, providing consistent, detailed, and contextually relevant user guidance:
+
+\begin{itemize}
+    \item \textbf{Structured Content Organization}: Seven-section documentation framework covering tool overview, methodology, data requirements, outputs, integration, and best practices
+    \item \textbf{Enhanced Text Display}: Scrollable text widgets with professional styling, proper typography, and improved readability
+    \item \textbf{Contextual Information}: Tool-specific guidance tailored to the unique requirements and workflows of each assessment phase
+    \item \textbf{Error-Resistant Design}: Robust color handling and fallback mechanisms to ensure consistent operation across different environments
+\end{itemize}
+
+\subsection{Optimized User Interface Layouts}
+
+Each tool incorporates optimized button layouts designed for efficient workflow management and intuitive navigation:
+
+\begin{itemize}
+    \item \textbf{Three-Section Layout}: Logical grouping of functionality with Import/Export operations (left), primary assessment functions (center), and support features (right)
+    \item \textbf{Visual Hierarchy}: Prominent styling for primary actions with appropriate visual weight and positioning
+    \item \textbf{Consistent Interaction Patterns}: Standardized button styling, hover effects, and visual feedback across all tools
+    \item \textbf{Accessibility Considerations}: Enhanced cursor feedback, appropriate color contrast, and clear visual indicators
+\end{itemize}
+
+\subsection{Advanced Error Handling and Robustness}
+
+The tool suite incorporates comprehensive error handling mechanisms to ensure reliable operation and graceful degradation:
+
+\begin{lstlisting}[language=Python, caption=Enhanced Error Handling and Robustness]
+class EnhancedErrorHandling:
+    """Comprehensive error handling for tool suite robustness"""
+    
+    def __init__(self):
+        self.error_patterns = {
+            'color_reference_errors': self.handle_color_fallbacks,
+            'file_operation_errors': self.handle_file_operations,
+            'user_input_errors': self.handle_input_validation,
+            'system_integration_errors': self.handle_integration_issues
+        }
+    
+    def handle_color_fallbacks(self, color_key, fallback='#CCCCCC'):
+        """Provide graceful fallbacks for missing color references"""
+        try:
+            return COLORS[color_key]
+        except KeyError:
+            self.log_warning(f"Color '{color_key}' not found, using fallback")
+            return fallback
+    
+    def provide_user_feedback(self, message, severity='info'):
+        """Provide clear, professional user feedback with appropriate styling"""
+        feedback_window = self.create_feedback_window(message, severity)
+        return feedback_window
+    
+    def ensure_operational_continuity(self):
+        """Implement mechanisms to maintain tool functionality under adverse conditions"""
+        continuity_measures = {
+            'graceful_degradation': self.implement_fallback_modes,
+            'error_recovery': self.implement_recovery_procedures,
+            'user_notification': self.implement_user_communication,
+            'logging_system': self.implement_error_logging
+        }
+        return continuity_measures
+\end{lstlisting}
+
+\subsection{Cross-Tool Consistency and Integration}
+
+The enhanced tool suite maintains strict consistency across all components while supporting seamless integration:
+
+\begin{itemize}
+    \item \textbf{Uniform Styling}: Consistent color schemes, typography, and visual elements across BID, Phase 0/A, and Phase B-C-D tools
+    \item \textbf{Standardized Documentation}: Parallel help system structures with tool-specific content and consistent formatting
+    \item \textbf{Compatible Data Formats}: Consistent export/import capabilities supporting workflow continuity between assessment phases
+    \item \textbf{Shared Design Patterns}: Common architectural patterns for maintainability and user familiarity
+\end{itemize}
+
+\subsection{Impact on User Adoption and Effectiveness}
+
+These comprehensive enhancements significantly improve the practical utility and professional quality of the Risk Assessment Tool Suite:
+
+\begin{itemize}
+    \item \textbf{Reduced Learning Curve}: Comprehensive documentation and intuitive interfaces minimize training requirements
+    \item \textbf{Enhanced Productivity}: Optimized layouts and workflows improve assessment efficiency and accuracy
+    \item \textbf{Professional Credibility}: Visual branding and polished interfaces enhance acceptance in professional environments
+    \item \textbf{Operational Reliability}: Robust error handling ensures consistent performance across diverse operational conditions
+    \item \textbf{Scalable Architecture}: Standardized patterns support future tool expansion and maintenance
+\end{itemize}
+
+% ============================================================================
+% CHAPTER 6: VALIDATION OF FRAMEWORK AND TOOLS
+% ============================================================================
+\chapter{Validation of Framework and Tools}
+\label{ch:validation}
+
+This chapter presents the methodology and results of the validation process for the standardized risk assessment framework and the associated tool suite. The validation process demonstrates the technical robustness, operational effectiveness, and practical applicability of the developed framework and tools through comprehensive testing and iterative improvement.
+
+\section{Technical Validation Methodology}
+
+The validation methodology focused on technical robustness and operational effectiveness through systematic testing:
+
+\begin{enumerate}
+    \item \textbf{Functional Testing}: Comprehensive testing of all tool functions across different operational scenarios
+    \item \textbf{Integration Testing}: Validation of data flow and compatibility between tool components
+    \item \textbf{Environment Testing}: Testing across development and compiled executable environments
+    \item \textbf{Error Handling Validation}: Systematic testing of error conditions and recovery mechanisms
+    \item \textbf{Performance Evaluation}: Assessment of tool performance under various load conditions
+    \item \textbf{User Interface Testing}: Evaluation of interface usability and user experience
+\end{enumerate}
+
+\section{Development and Testing Process}
+
+The validation process involved iterative development with continuous testing and improvement:
+
+\subsection{Asset Data Management Validation}
+
+The transition from static to dynamic asset loading was validated through comprehensive testing:
+
+\begin{itemize}
+    \item \textbf{Data Loading Verification}: Successful loading of 34 assets across 9 category combinations from Asset.csv
+    \item \textbf{Error Handling Testing}: Validation of graceful fallback mechanisms when CSV files are unavailable
+    \item \textbf{Data Integrity Checks}: Verification of asset data consistency across all tool components
+    \item \textbf{Performance Impact Assessment}: Minimal performance impact from dynamic loading implementation
+\end{itemize}
+
+\subsection{Executable Environment Validation}
+
+Extensive testing was conducted to ensure proper operation in compiled executable environments:
+
+\begin{itemize}
+    \item \textbf{Path Resolution Testing}: Validation of file path handling in both development and executable contexts
+    \item \textbf{Data File Inclusion}: Verification of proper packaging and access to required data files
+    \item \textbf{Inter-tool Communication}: Testing of tool launching and coordination through main interface
+    \item \textbf{Resource Management}: Validation of proper resource allocation and cleanup in executable format
+\end{itemize}
+
+\section{Tool Suite Component Validation}
+
+The validation process systematically tested each component of the tool suite:
+
+\subsection{BID Phase Assessment Tool Validation}
+
+\begin{itemize}
+    \item \textbf{Interface Functionality}: All user interface elements tested for proper operation and responsiveness
+    \item \textbf{Risk Calculation Logic}: Mathematical models validated for accuracy and consistency
+    \item \textbf{Report Generation}: Export functionality tested across multiple formats and file sizes
+    \item \textbf{Error Handling}: Robust error handling validated under various failure conditions
+\end{itemize}
+
+\subsection{Preliminary Risk Assessment Tool Validation}
+
+\begin{itemize}
+    \item \textbf{Asset Loading Integration}: Dynamic CSV asset loading validated with comprehensive error handling
+    \item \textbf{Threat Analysis Workflow}: Complete threat assessment process tested for logical consistency
+    \item \textbf{Data Import/Export}: Legacy data integration and modern export capabilities verified
+    \item \textbf{User Documentation}: Comprehensive help system tested for completeness and accessibility
+\end{itemize}
+
+\subsection{Comprehensive Risk Assessment Tool Validation}
+
+\begin{itemize}
+    \item \textbf{Advanced Analytics}: Complex risk calculation algorithms validated for mathematical accuracy
+    \item \textbf{Multi-Modal Assessment}: Both threat and asset assessment workflows thoroughly tested
+    \item \textbf{Professional Interface}: Enhanced user interface components validated for usability
+    \item \textbf{Integration Capabilities}: Data flow between assessment phases verified for consistency
+\end{itemize}
+
+\subsection{Attack Graph Analysis Tool Validation}
+
+\begin{itemize}
+    \item \textbf{Graph Construction}: Automated attack graph generation tested with various threat scenarios
+    \item \textbf{Relationship Analysis}: Threat-asset relationship mapping validated for logical consistency
+    \item \textbf{Visualization Quality}: Graph visualization components tested for clarity and informativeness
+    \item \textbf{Export Functionality}: Multiple export formats validated for compatibility and quality
+\end{itemize}
+
+\section{Technical Validation Results}
+
+The comprehensive technical validation process yielded the following results:
+
+\subsection{Functional Reliability}
+
+\begin{itemize}
+    \item \textbf{Core Functionality}: All primary assessment functions operate reliably across different operational scenarios
+    \item \textbf{Data Processing}: Asset loading, risk calculation, and report generation functions perform consistently
+    \item \textbf{Error Recovery}: Robust error handling ensures continued operation even when individual components encounter issues
+    \item \textbf{Cross-Tool Integration}: Seamless data flow and compatibility maintained between all tool components
+\end{itemize}
+
+\subsection{Performance Characteristics}
+
+\begin{itemize}
+    \item \textbf{Response Time}: User interface remains responsive even during complex calculations and large data operations
+    \item \textbf{Memory Usage}: Efficient memory management prevents resource exhaustion during extended use
+    \item \textbf{File Operations}: Asset loading and export operations complete within acceptable time frames
+    \item \textbf{Scalability}: Tools handle varying complexity levels without significant performance degradation
+\end{itemize}
+
+\subsection{User Experience Validation}
+
+\begin{itemize}
+    \item \textbf{Interface Consistency}: Uniform design patterns and interaction models across all tools enhance usability
+    \item \textbf{Documentation Effectiveness}: Comprehensive help systems provide adequate guidance for effective tool utilization
+    \item \textbf{Workflow Logic}: Assessment processes follow logical sequences that support efficient completion
+    \item \textbf{Error Communication}: Clear, actionable error messages help users understand and resolve issues
+\end{itemize}
+
+\subsection{Technical Robustness}
+
+\begin{itemize}
+    \item \textbf{Environment Compatibility}: Tools operate correctly in both development and compiled executable environments
+    \item \textbf{Character Encoding}: ASCII-compatible implementation ensures reliable operation across different system configurations
+    \item \textbf{File Path Resolution}: Robust path handling supports operation from various installation locations
+    \item \textbf{Dependency Management}: Proper packaging ensures all required components are available in deployed executables
+\end{itemize}
+
+\section{Development Lessons Learned}
+
+The validation and iterative development process provided valuable insights:
+
+\subsection{Technical Implementation Insights}
+
+\begin{itemize}
+    \item \textbf{Character Encoding Criticality}: Unicode character compatibility represents a critical consideration for cross-platform executable deployment
+    \item \textbf{Path Resolution Complexity}: Proper file path handling requires careful consideration of different execution environments
+    \item \textbf{Data Centralization Benefits}: Centralized asset management significantly improves maintainability and consistency
+    \item \textbf{Error Handling Importance}: Comprehensive error handling is essential for user confidence and operational reliability
+\end{itemize}
+
+\subsection{User Experience Considerations}
+
+\begin{itemize}
+    \item \textbf{Interface Consistency Value}: Uniform design patterns across tools significantly enhance user adoption and efficiency
+    \item \textbf{Documentation Necessity}: Comprehensive help systems are essential for effective tool utilization in professional environments
+    \item \textbf{Workflow Optimization}: Logical grouping of functions and intuitive navigation improve assessment completion rates
+    \item \textbf{Visual Design Impact}: Professional appearance and branding enhance credibility in organizational settings
+\end{itemize}
+
+\subsection{Development Process Recommendations}
+
+\begin{itemize}
+    \item \textbf{Early Testing Importance}: Testing in target deployment environments early in development prevents late-stage critical issues
+    \item \textbf{Systematic Validation}: Comprehensive testing protocols identify issues that might not be apparent during development
+    \item \textbf{Iterative Improvement}: Continuous refinement based on testing results significantly improves final product quality
+    \item \textbf{Robust Architecture}: Modular design patterns facilitate easier maintenance and future enhancements
+\end{itemize}
+
+\section{Framework Applicability Assessment}
+
+\subsection{Scope and Limitations}
+
+The validation process confirmed the framework's applicability within defined scope:
+
+\begin{itemize}
+    \item \textbf{Space System Focus}: The framework is specifically optimized for space system cybersecurity assessment
+    \item \textbf{Lifecycle Coverage}: All major project phases from BID through operational phases are addressed
+    \item \textbf{Scalability Range}: The framework accommodates projects of varying size and complexity levels
+    \item \textbf{Standardization Achievement}: Consistent assessment approaches enable cross-project comparison and organizational learning
+\end{itemize}
+
+\subsection{Future Enhancement Opportunities}
+
+The validation process identified opportunities for future development:
+
+\begin{itemize}
+    \item \textbf{Advanced Analytics}: Integration of machine learning techniques for enhanced threat prediction
+    \item \textbf{Real-time Integration}: Development of interfaces for operational monitoring and incident response
+    \item \textbf{Regulatory Alignment}: Enhanced mapping to evolving cybersecurity standards and regulations
+    \item \textbf{Collaborative Features}: Multi-user assessment capabilities for distributed teams
+\end{itemize}
+
+% ============================================================================
+% CHAPTER 7: AI TRAINING AND DEVELOPMENT
+% ============================================================================
+\chapter{AI Training and Development}
+\label{ch:ai_training}
+
+% This chapter will be completed during the AI training process
+% Content will be added incrementally as training progresses
+
+% ============================================================================
+% CHAPTER 8: DISCUSSION AND FUTURE WORK
+% ============================================================================
+\chapter{Discussion and Future Work}
+\label{ch:discussion}
+
+This chapter discusses the implications of the research findings, the technical contributions achieved, and the limitations identified during development. Additionally, it outlines directions for future work in the field of cybersecurity risk assessment for space projects.
+
+\section{Research Contributions and Implications}
+
+\subsection{Technical Contributions}
+
+This research contributes to the field of space cybersecurity through several key technical achievements:
+
+\begin{itemize}
+    \item \textbf{Standardized Assessment Framework}: Development of a comprehensive, phase-specific framework for cybersecurity risk assessment throughout the space project lifecycle
+    \item \textbf{Automated Tool Suite}: Implementation of integrated software tools that embody the framework principles and provide practical assessment capabilities
+    \item \textbf{Asset Data Centralization}: Introduction of dynamic, CSV-based asset management that improves maintainability and consistency across assessment phases
+    \item \textbf{Cross-Platform Compatibility}: Resolution of critical technical challenges including Unicode character encoding and executable environment compatibility
+    \item \textbf{Professional User Experience}: Implementation of enterprise-grade user interfaces with comprehensive documentation and error handling
+\end{itemize}
+
+\subsection{Methodological Contributions}
+
+The research advances cybersecurity risk assessment methodology in several important ways:
+
+\begin{itemize}
+    \item \textbf{Lifecycle Integration}: Establishment of assessment approaches tailored to specific project phases while maintaining methodological continuity
+    \item \textbf{Space-Specific Adaptation}: Customization of traditional risk assessment methods to address the unique constraints and threat landscape of space systems
+    \item \textbf{Standardization Achievement}: Creation of consistent assessment procedures enabling cross-project comparison and organizational learning
+    \item \textbf{Practical Implementation}: Translation of theoretical frameworks into operational tools that can be readily adopted by space industry practitioners
+\end{itemize}
+
+\subsection{Industry Impact}
+
+The developed framework and tools address critical industry needs:
+
+\begin{itemize}
+    \item \textbf{Efficiency Improvement}: Automation of repetitive assessment tasks reduces time and resource requirements
+    \item \textbf{Consistency Enhancement}: Standardized approaches minimize assessment variability and improve reliability
+    \item \textbf{Knowledge Capture}: Structured assessment processes facilitate capture and reuse of organizational cybersecurity expertise
+    \item \textbf{Decision Support}: Comprehensive reporting capabilities provide actionable intelligence for cybersecurity investment decisions
+\end{itemize}
+
+\section{Technical Challenges and Solutions}
+
+\subsection{Character Encoding Resolution}
+
+A critical technical challenge encountered during development involved Unicode character compatibility in executable environments:
+
+\begin{itemize}
+    \item \textbf{Problem Identification}: Runtime errors occurred when executable files contained Unicode characters incompatible with Windows cp1252 encoding
+    \item \textbf{Solution Implementation}: Systematic replacement of Unicode symbols with ASCII equivalents throughout all user-facing text
+    \item \textbf{Process Development}: Creation of automated scanning procedures to identify and resolve encoding issues
+    \item \textbf{Quality Assurance}: Implementation of testing protocols to prevent recurrence of encoding-related issues
+\end{itemize}
+
+\subsection{Asset Data Management Evolution}
+
+The transition from static to dynamic asset loading represented a significant architectural improvement:
+
+\begin{itemize}
+    \item \textbf{Legacy Limitations}: Original implementation used hardcoded asset definitions leading to maintenance challenges
+    \item \textbf{Centralization Benefits}: Migration to CSV-based asset loading improved consistency and reduced code duplication
+    \item \textbf{Error Handling Enhancement}: Implementation of robust fallback mechanisms ensuring continued operation even when data files are unavailable
+    \item \textbf{Scalability Achievement}: New architecture supports larger and more complex asset hierarchies without code modifications
+\end{itemize}
+
+\subsection{Executable Environment Compatibility}
+
+Ensuring proper operation in compiled executable environments required careful attention to multiple technical aspects:
+
+\begin{itemize}
+    \item \textbf{Path Resolution Challenges}: Different execution contexts (development vs. executable) required robust file path handling mechanisms
+    \item \textbf{Data File Packaging}: PyInstaller configuration required careful specification of data files and dependencies
+    \item \textbf{Resource Management}: Proper allocation and cleanup of system resources in executable format
+    \item \textbf{Testing Complexity}: Comprehensive testing across both development and deployed environments
+\end{itemize}
+
+\section{Limitations and Constraints}
+
+\subsection{Scope Limitations}
+
+The current research has several inherent limitations:
+
+\begin{itemize}
+    \item \textbf{Domain Specificity}: The framework is specifically designed for space systems and may require adaptation for other domains
+    \item \textbf{Assessment Coverage}: While comprehensive for space applications, the framework does not address all possible emerging threats
+    \item \textbf{Integration Complexity}: Full integration with existing enterprise risk management systems may require additional development
+    \item \textbf{User Training Requirements}: Effective utilization requires understanding of cybersecurity principles and space system architectures
+\end{itemize}
+
+\subsection{Technical Constraints}
+
+Several technical constraints limit the current implementation:
+
+\begin{itemize}
+    \item \textbf{Platform Dependencies}: Implementation relies on Python and specific library versions that may evolve over time
+    \item \textbf{Scalability Boundaries}: Current architecture is optimized for single-user desktop operation rather than enterprise-scale deployment
+    \item \textbf{Real-time Limitations}: Tools are designed for periodic assessment rather than continuous monitoring applications
+    \item \textbf{Customization Constraints}: Framework adaptation for organization-specific requirements may require technical expertise
+\end{itemize}
+
+\subsection{Validation Limitations}
+
+The validation process, while comprehensive from a technical perspective, has certain limitations:
+
+\begin{itemize}
+    \item \textbf{Case Study Scope}: Validation focused on technical functionality rather than large-scale organizational deployment
+    \item \textbf{User Diversity}: Testing involved limited user diversity in terms of organizational context and expertise levels
+    \item \textbf{Longitudinal Assessment}: Long-term effectiveness evaluation requires extended deployment periods
+    \item \textbf{Comparative Analysis}: Limited comparison with alternative risk assessment approaches or tools
+\end{itemize}
+
+\section{Future Work Directions}
+
+\subsection{Technical Enhancements}
+
+Several technical improvement opportunities have been identified:
+
+\begin{itemize}
+    \item \textbf{Web-Based Interface}: Development of browser-based versions to improve accessibility and reduce deployment complexity
+    \item \textbf{Advanced Analytics}: Integration of statistical analysis and data visualization capabilities for enhanced insight generation
+    \item \textbf{API Development}: Creation of programmatic interfaces to support integration with external systems
+    \item \textbf{Mobile Compatibility}: Adaptation for tablet and mobile devices to support field-based assessment activities
+\end{itemize}
+
+\subsection{Methodological Extensions}
+
+The framework could be extended in several methodological directions:
+
+\begin{itemize}
+    \item \textbf{Quantitative Risk Modeling}: Integration of probabilistic risk models and Monte Carlo simulation capabilities
+    \item \textbf{Machine Learning Integration}: Application of AI techniques for pattern recognition and predictive risk assessment
+    \item \textbf{Real-time Monitoring}: Extension to support continuous monitoring and dynamic risk assessment updates
+    \item \textbf{Multi-Domain Adaptation}: Modification for application in other critical infrastructure domains
+\end{itemize}
+
+\subsection{Industry Integration}
+
+Future development could focus on enhanced industry integration:
+
+\begin{itemize}
+    \item \textbf{Standards Alignment}: Closer integration with evolving cybersecurity standards and regulatory requirements
+    \item \textbf{Enterprise Integration}: Development of connectors for popular enterprise risk management and project management platforms
+    \item \textbf{Collaborative Features}: Implementation of multi-user capabilities for distributed assessment teams
+    \item \textbf{Training Materials}: Creation of comprehensive training programs and certification processes
+\end{itemize}
+
+\subsection{Research Extensions}
+
+Additional research opportunities include:
+
+\begin{itemize}
+    \item \textbf{Effectiveness Studies}: Longitudinal studies of framework effectiveness in reducing cybersecurity incidents
+    \item \textbf{Economic Analysis}: Cost-benefit analysis of implementing standardized cybersecurity risk assessment processes
+    \item \textbf{User Experience Research}: Comprehensive usability studies across diverse organizational contexts
+    \item \textbf{Comparative Evaluation}: Systematic comparison with alternative risk assessment methodologies and tools
+\end{itemize}
+
+% ============================================================================
+% CHAPTER 9: CONCLUSION
+% ============================================================================
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+This thesis has presented a comprehensive approach to cybersecurity risk assessment for space projects, addressing critical gaps in the standardization and automation of security evaluation processes. The research has produced both theoretical contributions through the development of a standardized risk assessment framework and practical contributions through the implementation of an integrated tool suite that embodies these principles.
+
+\section{Research Achievements}
+
+\subsection{Framework Development}
+
+The research successfully developed a standardized framework for cybersecurity risk assessment that addresses the unique challenges of space systems throughout their project lifecycle. Key achievements include:
+
+\begin{itemize}
+    \item \textbf{Lifecycle Integration}: Creation of phase-specific assessment methodologies spanning from Business Initiation and Definition (BID) through operational phases
+    \item \textbf{Space System Specialization}: Adaptation of traditional risk assessment approaches to address space-specific threats, assets, and operational constraints
+    \item \textbf{Methodological Consistency}: Establishment of standardized approaches that enable consistent assessment practices across different projects and organizations
+    \item \textbf{Practical Applicability}: Translation of theoretical concepts into operational procedures that can be readily implemented by space industry practitioners
+\end{itemize}
+
+\subsection{Tool Suite Implementation}
+
+The practical embodiment of the framework through an integrated tool suite represents a significant technical achievement:
+
+\begin{itemize}
+    \item \textbf{Comprehensive Coverage}: Four specialized tools addressing different assessment phases and analytical requirements
+    \item \textbf{Professional Quality}: Enterprise-grade user interfaces with consistent design patterns and comprehensive error handling
+    \item \textbf{Technical Robustness}: Resolution of critical technical challenges including character encoding compatibility and cross-platform operation
+    \item \textbf{Data Integration}: Implementation of centralized asset management and seamless data flow between assessment phases
+\end{itemize}
+
+\subsection{Technical Innovation}
+
+The development process yielded several technical innovations that enhance the practical utility of cybersecurity risk assessment tools:
+
+\begin{itemize}
+    \item \textbf{Dynamic Asset Loading}: Transition from static asset definitions to flexible CSV-based asset management
+    \item \textbf{Cross-Environment Compatibility}: Robust handling of different execution contexts from development to compiled executable deployment
+    \item \textbf{Enhanced User Experience}: Implementation of comprehensive help systems and intuitive interface designs
+    \item \textbf{Error Resilience}: Development of graceful error handling mechanisms that maintain operational continuity
+\end{itemize}
+
+\section{Contributions to Space Cybersecurity}
+
+\subsection{Industry Impact}
+
+This research addresses critical needs within the space industry:
+
+\begin{itemize}
+    \item \textbf{Standardization Achievement}: Provision of consistent methodologies that can be adopted across different organizations and projects
+    \item \textbf{Efficiency Improvement}: Automation capabilities that reduce assessment time and resource requirements while improving consistency
+    \item \textbf{Knowledge Systematization}: Structured approaches that facilitate capture and reuse of cybersecurity expertise
+    \item \textbf{Decision Support Enhancement}: Comprehensive reporting and analysis capabilities that improve cybersecurity investment decisions
+\end{itemize}
+
+\subsection{Academic Contributions}
+
+The research makes several important academic contributions:
+
+\begin{itemize}
+    \item \textbf{Theoretical Framework}: Development of structured approaches to space system cybersecurity risk assessment
+    \item \textbf{Implementation Methodology}: Demonstration of how theoretical frameworks can be effectively translated into practical tools
+    \item \textbf{Technical Problem Resolution}: Documentation of solutions to critical implementation challenges
+    \item \textbf{Validation Approach}: Establishment of systematic validation methodologies for cybersecurity assessment tools
+\end{itemize}
+
+\section{Practical Significance}
+
+\subsection{Immediate Applications}
+
+The developed framework and tools provide immediate value to space industry practitioners:
+
+\begin{itemize}
+    \item \textbf{Assessment Standardization}: Ready-to-use tools that implement consistent assessment methodologies
+    \item \textbf{Workflow Optimization}: Structured processes that improve assessment efficiency and completeness
+    \item \textbf{Documentation Generation}: Automated reporting capabilities that reduce administrative burden
+    \item \textbf{Knowledge Transfer}: Comprehensive documentation that facilitates adoption and training
+\end{itemize}
+
+\subsection{Strategic Value}
+
+The research provides strategic value for organizational cybersecurity improvement:
+
+\begin{itemize}
+    \item \textbf{Risk Management Enhancement}: Systematic approaches that improve identification and mitigation of cybersecurity risks
+    \item \textbf{Compliance Support}: Structured methodologies that support adherence to cybersecurity standards and regulations
+    \item \textbf{Investment Optimization}: Evidence-based approaches that support optimal allocation of cybersecurity resources
+    \item \textbf{Organizational Learning}: Knowledge capture mechanisms that preserve and propagate cybersecurity expertise
+\end{itemize}
+
+\section{Future Outlook}
+
+\subsection{Evolution Potential}
+
+The framework and tools are designed to evolve with advancing technology and changing threat landscapes:
+
+\begin{itemize}
+    \item \textbf{Extensibility}: Modular architecture that supports addition of new assessment capabilities
+    \item \textbf{Adaptability}: Flexible design that can accommodate emerging threats and evolving space technologies
+    \item \textbf{Integration Readiness}: Architecture that supports integration with advancing cybersecurity tools and platforms
+    \item \textbf{Standards Alignment}: Design principles that facilitate alignment with evolving cybersecurity standards
+\end{itemize}
+
+\subsection{Research Continuity}
+
+The research establishes a foundation for continued advancement in space cybersecurity:
+
+\begin{itemize}
+    \item \textbf{Methodological Framework}: Systematic approaches that can be extended and refined through future research
+    \item \textbf{Technical Platform}: Software architecture that can serve as a basis for advanced cybersecurity tools
+    \item \textbf{Validation Methodology}: Testing approaches that can be applied to future tool development efforts
+    \item \textbf{Knowledge Base}: Documented solutions to technical challenges that inform future development projects
+\end{itemize}
+
+\section{Final Remarks}
+
+The successful completion of this research demonstrates the feasibility and value of creating standardized, automated approaches to cybersecurity risk assessment for space systems. The combination of theoretical framework development with practical tool implementation provides a comprehensive solution that addresses real industry needs while establishing a foundation for future advancement.
+
+The technical challenges overcome during development, particularly in areas of character encoding compatibility and asset data management, provide valuable lessons for future cybersecurity tool development efforts. The emphasis on professional user experience and comprehensive documentation ensures that the research contributions can be effectively utilized by practitioners across the space industry.
+
+Looking forward, the modular and extensible architecture of both the framework and tools positions them to evolve with advancing technology and changing threat landscapes. This research thus contributes not only immediate practical value but also establishes a platform for continued innovation in space cybersecurity risk assessment.
+
+In conclusion, this thesis demonstrates that systematic approaches to cybersecurity risk assessment, when properly implemented through professional-quality tools, can significantly enhance the security posture of space missions while reducing the burden on assessment practitioners. The research provides both immediate practical value and a foundation for future advancement in this critical area of space system security.
+
+% ============================================================================
+% BIBLIOGRAPHY
+% ============================================================================
+\backmatter
+
+\begin{thebibliography}{9}
+\bibitem{NIST800-30}
+National Institute of Standards and Technology (NIST) (2012) \emph{Guide
+\bibitem{ISO27005}
+ISO27005 \emph{Risk Management - Guidelines for Information Security Risk Management}
+\bibitem{ENISA Space Threat Landscape}
+European Union Agency for Cybersecurity (ENISA) (2020) \emph{ENISA Threat Landscape for Space Systems}
+\bibitem{Communication Security}
+Pavur et al. (2020) \emph{A Tale of Sea and Sky On the Security of Maritime VSAT Communications}
+\bibitem{Ground Segment Security}
+Santamarta (2014) \emph{SATCOM Terminals: Hacking by Air, Sea, and Land}
+\bibitem{Supply Chain Risks}
+Peterson et al. (2019) \emph{Introduction to U-Net and Res-Net for Image Segmentation}
+\bibitem{Topic}
+Autore \emph{Titolo}
+\end{thebibliography}
+
+\printbibliography
+
+\end{document}

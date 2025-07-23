@@ -201,10 +201,10 @@ class RiskAssessmentTool:
                     if category and subcategory and asset:
                         self.ASSET_CATEGORIES.append((category, subcategory, asset))
             
-            print(f"✅ Loaded {len(self.ASSET_CATEGORIES)} asset categories from {assets_file}")
+            print(f"[OK] Loaded {len(self.ASSET_CATEGORIES)} asset categories from {assets_file}")
             
         except FileNotFoundError:
-            print(f"❌ File not found: {assets_file}")
+            print(f"[ERROR] File not found: {assets_file}")
             # Fallback assets
             self.ASSET_CATEGORIES = [
                 ("Ground", "Ground Stations", "Tracking"), ("Ground", "Ground Stations", "Ranging"),
@@ -215,7 +215,7 @@ class RiskAssessmentTool:
                 ("User", "User", "Transmission")
             ]
         except Exception as e:
-            print(f"❌ Error loading assets: {e}")
+            print(f"[ERROR] Error loading assets: {e}")
             # Fallback assets
             self.ASSET_CATEGORIES = [
                 ("Ground", "Ground Stations", "Tracking"), ("Ground", "Ground Stations", "Ranging"),
