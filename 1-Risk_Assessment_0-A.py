@@ -86,14 +86,14 @@ class RiskAssessmentTool:
                 ("Space", "Payload"), ("Link", "Link"), ("User", "User")
             ]
     
-    # Criteria table data (5x6 + header)
+    # Criteria table data (5x6 + header) - Transposed format
     CRITERIA_DATA = [
-        ["Criteria", "Score 1 (Very Low)", "Score 2 (Low)", "Score 3 (Moderate)", "Score 4 (High)", "Score 5 (Very High)"],
-        ["Vulnerability Level", "No know or already resolved vulnerabilities", "Know vulnerability, mitigate throught hardening and patches", "Know vulnerability, but only partially mitigated", "Known vulnerability, with no effective mitigation", "Actively exploitable vulnerability, with no defense"],
-        ["Access Control", "Access strongly protected by physical/logical measures and isolated environment", "Moderately protected access with some isolation controls", "Standard access protection with basic controls", "Access easily accessible by remote attackers", "Completely open or physically accessible access"],
-        ["Defense Capability", "Multi-level validated countermeasures with real-time automated detection", "Robust countermeasures with automated but decentralized detection", "Limited countermeasures with manual detection only", "Weak countermeasure with occasional detection", "No countermeasures or detection capabilities"],
-        ["Operational Impact", "No impact thanks to redundancy with predefined automated response", "Negligible impact, quick response and system easily restored", "Medium impact with manual response, but mission continues", "Serious impact with slow response, mission temporarily interrupted", "Permanent loss of assets or mission with no response capability"],
-        ["Recovery Time", "Immediate restoration with automated procedures", "Quick recovery within hours to days using standard procedures", "Manual recovery requiring weeks of coordinated effort", "Complex recovery requiring months of specialized intervention", "Impossible recovery or permanent system loss"]    ]
+        ["Score", "Vulnerability Level", "Access Control", "Defense Capability", "Operational Impact", "Recovery Time"],
+        ["Score 1 (Very Low)", "No know or already resolved vulnerabilities", "Access strongly protected by physical/logical measures and isolated environment", "Multi-level validated countermeasures with real-time automated detection", "No impact thanks to redundancy with predefined automated response", "Immediate restoration with automated procedures"],
+        ["Score 2 (Low)", "Know vulnerability, mitigate throught hardening and patches", "Moderately protected access with some isolation controls", "Robust countermeasures with automated but decentralized detection", "Negligible impact, quick response and system easily restored", "Quick recovery within hours to days using standard procedures"],
+        ["Score 3 (Moderate)", "Know vulnerability, but only partially mitigated", "Standard access protection with basic controls", "Limited countermeasures with manual detection only", "Medium impact with manual response, but mission continues", "Manual recovery requiring weeks of coordinated effort"],
+        ["Score 4 (High)", "Known vulnerability, with no effective mitigation", "Access easily accessible by remote attackers", "Weak countermeasure with occasional detection", "Serious impact with slow response, mission temporarily interrupted", "Complex recovery requiring months of specialized intervention"],
+        ["Score 5 (Very High)", "Actively exploitable vulnerability, with no defense", "Completely open or physically accessible access", "No countermeasures or detection capabilities", "Permanent loss of assets or mission with no response capability", "Impossible recovery or permanent system loss"]    ]
     
     # Risk matrix
     RISK_MATRIX = {
@@ -191,6 +191,97 @@ class RiskAssessmentTool:
         self.mission_type_var = tk.StringVar(value=self.MISSION_TYPES[0])
         
         self.create_interface()
+    
+    def disable_mousewheel_on_combobox(self, combo):
+        """Intelligently handle mouse wheel on combobox to prevent accidental value changes while allowing scroll"""
+        def on_mousewheel(event):
+            # Check if the combobox dropdown is open
+            try:
+                if combo.tk.call('ttk::combobox::PopdownIsVisible', combo):
+                    # If dropdown is open, allow normal combobox behavior
+                    return
+                else:
+                    # If dropdown is closed, prevent value changes but allow window scrolling
+                    # Find the parent canvas to continue scrolling
+                    widget = event.widget
+                    # Walk up the widget hierarchy to find a canvas
+                    while widget:
+                        if isinstance(widget, tk.Canvas):
+                            widget.yview_scroll(int(-1*(event.delta/120)), "units")
+                            break
+                        widget = widget.master
+                    return "break"  # Prevent combobox value change
+            except:
+                # Fallback: prevent value changes but allow window scrolling
+                widget = event.widget
+                while widget:
+                    if isinstance(widget, tk.Canvas):
+                        widget.yview_scroll(int(-1*(event.delta/120)), "units")
+                        break
+                    widget = widget.master
+                return "break"  # Prevent combobox value change
+        
+        combo.bind("<MouseWheel>", on_mousewheel)
+
+    def setup_global_mousewheel(self, widget, canvas):
+        """Setup global mouse wheel scrolling for any widget relative to a canvas"""
+        def on_global_mousewheel(event):
+            # Scroll the canvas when mouse wheel is used anywhere in the widget
+            try:
+                canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            except:
+                pass  # Ignore errors if canvas is not scrollable
+        
+        # Bind to the widget and all its children recursively
+        def bind_mousewheel_recursive(w):
+            # Always bind to non-combobox widgets
+            if not isinstance(w, ttk.Combobox):
+                w.bind("<MouseWheel>", on_global_mousewheel)
+            
+            # Recursively bind to all children
+            for child in w.winfo_children():
+                bind_mousewheel_recursive(child)
+        
+        # Start recursive binding
+        bind_mousewheel_recursive(widget)
+        
+        # Also bind directly to the main widget and canvas for safety
+        widget.bind("<MouseWheel>", on_global_mousewheel)
+        canvas.bind("<MouseWheel>", on_global_mousewheel)
+
+    def ensure_mousewheel_on_table_cells(self):
+        """Ensure all threat table cells have mouse wheel scrolling - for non-scrollable tables"""
+        def on_cell_mousewheel(event):
+            # For non-scrollable main tables, we can add a gentle visual feedback
+            # or just ignore since there's no scroll needed
+            pass
+        
+        # Apply to all threat cells in main table
+        for threat, cell in self.threat_cells.items():
+            # For main table without scroll, we don't need special handling
+            # but we can still bind for consistency
+            pass
+
+    def setup_asset_table_mousewheel(self, canvas):
+        """Setup mouse wheel scrolling for asset table in threat analysis window"""
+        def on_asset_table_mousewheel(event):
+            try:
+                canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            except:
+                pass
+        
+        # Apply to all combo boxes and cells in asset assessment table
+        for asset_key in self.combo_vars:
+            for combo_idx, combo_var in self.combo_vars[asset_key].items():
+                # We don't bind directly to comboboxes since they have their own handler
+                pass
+        
+        # Apply to calculated cells
+        for asset_key in self.impact_entries:
+            for col_idx, widget in self.impact_entries[asset_key].items():
+                if hasattr(widget, 'bind') and not isinstance(widget, ttk.Combobox):
+                    widget.bind("<MouseWheel>", on_asset_table_mousewheel)
+    
     def create_interface(self):
         """Creates the main interface"""
         # Header
@@ -234,6 +325,9 @@ class RiskAssessmentTool:
                                    font=('Segoe UI', 10),
                                    state='readonly')
         mission_combo.pack(fill='x', pady=(5, 0))
+        
+        # Disable mouse wheel on mission combobox
+        self.disable_mousewheel_on_combobox(mission_combo)
 
         # Threat table (separate from the mission selector)
         table_frame = tk.LabelFrame(main_container, text="Threat Risk Levels",
@@ -385,8 +479,14 @@ class RiskAssessmentTool:
         threat_combo.pack(fill='x', pady=(5, 0))
         threat_combo.bind('<<ComboboxSelected>>', self.load_threat_data)
         
+        # Disable mouse wheel on threat combobox
+        self.disable_mousewheel_on_combobox(threat_combo)
+        
         # Asset table
         self.create_asset_table(content_frame)
+
+        # Setup mouse wheel for asset table elements
+        self.setup_asset_table_mousewheel(canvas)
 
         # Buttons frame
         buttons_frame = tk.Frame(content_frame, bg=self.COLORS['white'])
@@ -408,16 +508,8 @@ class RiskAssessmentTool:
                             command=self.show_help)
         help_btn.pack(side='left')
 
-        # Scroll with mouse wheel
-        def on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        
-        # Bind mouse wheel to canvas and content frame
-        canvas.bind("<MouseWheel>", on_mousewheel)
-        content_frame.bind("<MouseWheel>", on_mousewheel)
-        
-        # Also bind to window itself to ensure it works when focused
-        window.bind("<MouseWheel>", on_mousewheel)
+        # Setup global mouse wheel scrolling for the entire content frame
+        self.setup_global_mousewheel(content_frame, canvas)
             
     def create_criteria_table(self, parent):
         """Creates the assessment criteria table"""
@@ -470,7 +562,7 @@ class RiskAssessmentTool:
 
         # Grid configuration with uniform column sizes
         for j in range(6):
-            criteria_container.grid_columnconfigure(j, weight=1, minsize=160, uniform="criteria_cols")  
+            criteria_container.grid_columnconfigure(j, weight=1, minsize=180, uniform="criteria_cols")  
         
         for i in range(6):  # 5 data rows + 1 header
             criteria_container.grid_rowconfigure(i, minsize=60, uniform="criteria_rows")  
@@ -529,6 +621,9 @@ class RiskAssessmentTool:
                                     font=('Segoe UI', 9),
                                     width=8, state='readonly')
                 combo.grid(row=i+1, column=j, padx=1, pady=1, sticky='ew')
+                
+                # Disable mouse wheel on combobox
+                self.disable_mousewheel_on_combobox(combo)
                 
                 row_entries[j-2] = combo  # 0-based index
                 self.combo_vars[asset_key][j-2] = combo_var
@@ -1797,29 +1892,8 @@ class RiskAssessmentTool:
         canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
         scrollbar.pack(side="right", fill="y")
         
-        # Mouse wheel scrolling for help window only
-        def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        
-        # Keep track of bound widgets for cleanup
-        bound_widgets = []
-        
-        # Bind mouse wheel only to the help window and its children
-        canvas.bind("<MouseWheel>", _on_mousewheel)
-        scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
-        bound_widgets.extend([canvas, scrollable_frame])
-        
-        # Ensure proper cleanup when window is closed
-        def on_help_window_close():
-            # Remove all mouse wheel bindings
-            for widget in bound_widgets:
-                try:
-                    widget.unbind("<MouseWheel>")
-                except:
-                    pass  # Widget might be already destroyed
-            help_window.destroy()
-        
-        help_window.protocol("WM_DELETE_WINDOW", on_help_window_close)
+        # Setup global mouse wheel scrolling for the help window
+        self.setup_global_mousewheel(scrollable_frame, canvas)
         
         # Focus on help window
         help_window.focus_set()

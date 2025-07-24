@@ -9,7 +9,10 @@ a = Analysis(
         ('Legacy.csv', '.'), 
         ('export_import_functions.py', '.'),
         ('logo.ico', '.'),
-        ('attack_graph_threat_relations.csv', '.')
+        ('attack_graph_threat_relations.csv', '.'),
+        ('Threat.csv', '.'),
+        ('Asset.csv', '.'),
+        ('Control.csv', '.')
     ],
     hiddenimports=[
         'tkinter',
@@ -56,7 +59,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

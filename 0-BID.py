@@ -140,6 +140,25 @@ class BIDOptimized:
         self.scaled_button_padding = max(15, int(20 * self.scale_factor))
         self.scaled_cell_height = max(20, int(25 * self.scale_factor))
 
+    def disable_mousewheel_on_combobox(self, combo):
+        """Disable mouse wheel on combobox to prevent accidental value changes while allowing page scroll"""
+        def on_mousewheel(event):
+            # Check if the combobox dropdown is open
+            try:
+                if combo.tk.call('ttk::combobox::PopdownIsVisible', combo):
+                    # If dropdown is open, allow normal combobox behavior
+                    return
+                else:
+                    # If dropdown is closed, scroll the page instead of changing value
+                    self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+                    return "break"  # Prevent combobox value change
+            except:
+                # Fallback: scroll the page
+                self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+                return "break"
+        
+        combo.bind("<MouseWheel>", on_mousewheel)
+
     def setup_ui(self):
         """Setup main UI structure"""
         # Set window size to accommodate 1700px content with padding
@@ -214,6 +233,7 @@ class BIDOptimized:
                     combo = ttk.Combobox(frame, textvariable=combo_var, values=['1', '2', '3', '4'],
                                        state='readonly', width=8, font=('Segoe UI', self.scaled_font_size - 1))
                     combo.bind('<<ComboboxSelected>>', self.update_total_score)
+                    self.disable_mousewheel_on_combobox(combo)  # Prevent accidental value changes
                     combo.grid(row=i, column=j, padx=3, pady=3, sticky='ew', ipady=7)
                     cell_row.append(combo)
                     combo_row.append(combo_var)

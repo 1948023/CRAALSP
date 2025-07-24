@@ -34,7 +34,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['tensorflow', 'tensorflow-cpu', 'tensorflow-gpu', 'tf', 'keras', 'torch', 'torchvision', 'sklearn', 'scipy', 'cv2', 'opencv-python'],
+    excludes=['tensorflow', 'tensorflow-cpu', 'tensorflow-gpu', 'tf', 'keras', 'torch', 'torchvision', 'sklearn', 'cv2', 'opencv-python'],
     noarchive=False,
     optimize=0,
 )

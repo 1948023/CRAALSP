@@ -12,7 +12,6 @@ from export_import_functions import ExportImportManager
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import csv
-import json
 import os
 import sys
 import math
@@ -73,30 +72,24 @@ class RiskAssessmentTool:
         '#d3d3d3'   # Light gray - Criterion 9
     ]
     
-    # Threat criteria (7 criteria: 5 for likelihood, 2 for impact)
+    # Threat criteria (7 criteria: 5 for likelihood, 2 for impact) - Transposed format
     CRITERIA_DATA_THREAT = [
-        ["Criteria", "Score 1 (Very Low)", "Score 2 (Low)", "Score 3 (Moderate)", "Score 4 (High)", "Score 5 (Very High)"],
-        ["Vulnerability effectiveness", "No known or already resolved vulnerabilities", "Known vulnerability, mitigated through hardening and patches", "Known vulnerability, but only partially mitigated", "Known vulnerability, with no effective mitigations", "Actively exploitable vulnerability, with no defenses"],
-        ["Mitigation Presence", "Multi-level countermeasures in place and validated", "Robust countermeasures but not regularly tested", "Limited or isolated countermeasures", "Weak or outdated countermeasures", "No relevant countermeasures"],
-        ["Detection Probability", "Real-time, centralized, and automated detection", "Automated but not centralized detection", "Manual or retrospective detection only", "Occasional or incorrect detection", "No detection capability"],
-        ["Access Complexity", "Access strongly protected by physical/logical measures", "Moderately protected access (VPN, ACL, bastion host)", "Access protected with weaker controls", "Access easily accessible by remote attackers", "Completely open or physically accessible access"],
-        ["Privilege Requirement", "Requires root/admin access", "Elevated privileges but not root", "Standard user privileges", "Minimal privileges or no authentication", "No privileges required"],
-        ["Response Delay", "Predefined automated response", "Quick response thanks to well-defined procedures", "Manual but formalized response", "Slow or poorly coordinated response", "No response capability"],
-        ["Resilience Impact", "No disruption: Full operability with local redundancies, automatic failover, and tested continuity plans", "Temporary impact: Quick restoration via documented, semi-automated procedures. No lasting degradation", "Partial degradation: Minimum operational capacity maintained. Manual intervention and noticeable recovery time required", "Severe impact: Critical unavailability. Recoverable only with urgent external intervention", "Irreversible loss: Asset permanently disabled or destroyed. No recovery possible"]
+        ["Score", "Vulnerability effectiveness", "Mitigation Presence", "Detection Probability", "Access Complexity", "Privilege Requirement", "Response Delay", "Resilience Impact"],
+        ["Score 1 (Very Low)", "No known or already resolved vulnerabilities", "Multi-level countermeasures in place and validated", "Real-time, centralized, and automated detection", "Access strongly protected by physical/logical measures", "Requires root/admin access", "Predefined automated response", "No disruption: Full operability with local redundancies, automatic failover, and tested continuity plans"],
+        ["Score 2 (Low)", "Known vulnerability, mitigated through hardening and patches", "Robust countermeasures but not regularly tested", "Automated but not centralized detection", "Moderately protected access (VPN, ACL, bastion host)", "Elevated privileges but not root", "Quick response thanks to well-defined procedures", "Temporary impact: Quick restoration via documented, semi-automated procedures. No lasting degradation"],
+        ["Score 3 (Moderate)", "Known vulnerability, but only partially mitigated", "Limited or isolated countermeasures", "Manual or retrospective detection only", "Access protected with weaker controls", "Standard user privileges", "Manual but formalized response", "Partial degradation: Minimum operational capacity maintained. Manual intervention and noticeable recovery time required"],
+        ["Score 4 (High)", "Known vulnerability, with no effective mitigations", "Weak or outdated countermeasures", "Occasional or incorrect detection", "Access easily accessible by remote attackers", "Minimal privileges or no authentication", "Slow or poorly coordinated response", "Severe impact: Critical unavailability. Recoverable only with urgent external intervention"],
+        ["Score 5 (Very High)", "Actively exploitable vulnerability, with no defenses", "No relevant countermeasures", "No detection capability", "Completely open or physically accessible access", "No privileges required", "No response capability", "Irreversible loss: Asset permanently disabled or destroyed. No recovery possible"]
     ]
     
-    # Asset criteria (9 criteria: 4 for likelihood, 5 for impact)
+    # Asset criteria (9 criteria: 4 for likelihood, 5 for impact) - Transposed format
     CRITERIA_DATA_ASSET = [
-        ["Criteria", "Score 1 (Very Low)", "Score 2 (Low)", "Score 3 (Moderate)", "Score 4 (High)", "Score 5 (Very High)"],
-        ["Dependency", "Asset not involved in mission-critical functions", "Useful support asset ", "Relationship important for multiple business processes", "Asset supporting several mission services", "Essential asset"],
-        ["Penetration", "No access or isolated user-level access", "User-level access to general ground segment components", "Admin-level access to mission services", "Admin access to mission-critical components", "Full privileged access to core mission infrastructure"],
-        ["Cyber Maturity", "Mature, audited, and mission-integrated cyber governance system with real-time threat management", "Integrated and proactive cybersecurity program; includes vulnerability management and incident drills", "Organization enforces a cybersecurity policy with partially proactive security practices", "Security rules exist but are scattered. Limited integration with mission security architecture", "Minimal cybersecurity procedures. No defined response to cyber incidents"],
-        ["Trust", "Strategic partner under strict control, with shared security responsibility and continuous assurance", "Stakeholder trusted, with contractual obligations and validated controls", "Stakeholder known and generally aligned. Moderate assurance level", "Stakeholder considered low-risk but no formal guarantees", "No trust relationship; stakeholder identity or intent unknown"],
-        ["Performance", "Minimal or no impact", "Moderate reduction, Some approach retained", "Moderate reduction, but workarounds available", "Major reduction, but workarounds available", "Unacceptable, no alternatives exist"],
-        ["Schedule", "Minimal or no impact", "Additional activities required, able to meet need dates", "Project team milestone slip <= 1 month", "Project milestone slip >= 1 month or project critical path impacted", "Can't achieve major project milestone"],
-        ["Costs", "Minimal or no impact", "Cost increase < 5%", "Cost increase > 5%", "Cost increase > 10%", "Cost increase > 15%"],
-        ["Reputation", "Issue contained internally with no external reputational impact", "Slight reputational damage; disclosure required to customers and reassurance efforts toward external stakeholders", "Noticeable reputational harm; loss of customer trust, media coverage, and regulatory disclosure required", "Serious reputational damage; loss of investor confidence, negative media exposure, and client disengagement", "Irreparable reputational harm; international fallout, industry-wide loss of credibility, potential business closure"],
-        ["Recovery", "Limited damage to the mission. Up to 1 month to resumption of normal commercial operations", "Minor damage to the mission  resulting in up to 3 months to resumption of normal commercial operations", "Moderate damage to the mission  resulting in up to 6 months to resumption of normal commercial operations", "Significant damage to the mission  resulting in up to 1 year to resumption of normal commercial operations", "Catastrophic damage long term (more than  1 year) or complete loss of mission  indefinitely"]
+        ["Score", "Dependency", "Penetration", "Cyber Maturity", "Trust", "Performance", "Schedule", "Costs", "Reputation", "Recovery"],
+        ["Score 1 (Very Low)", "Asset not involved in mission-critical functions", "No access or isolated user-level access", "Mature, audited, and mission-integrated cyber governance system with real-time threat management", "Strategic partner under strict control, with shared security responsibility and continuous assurance", "Minimal or no impact", "Minimal or no impact", "Minimal or no impact", "Issue contained internally with no external reputational impact", "Limited damage to the mission. Up to 1 month to resumption of normal commercial operations"],
+        ["Score 2 (Low)", "Useful support asset ", "User-level access to general ground segment components", "Integrated and proactive cybersecurity program; includes vulnerability management and incident drills", "Stakeholder trusted, with contractual obligations and validated controls", "Moderate reduction, Some approach retained", "Additional activities required, able to meet need dates", "Cost increase < 5%", "Slight reputational damage; disclosure required to customers and reassurance efforts toward external stakeholders", "Minor damage to the mission  resulting in up to 3 months to resumption of normal commercial operations"],
+        ["Score 3 (Moderate)", "Relationship important for multiple business processes", "Admin-level access to mission services", "Organization enforces a cybersecurity policy with partially proactive security practices", "Stakeholder known and generally aligned. Moderate assurance level", "Moderate reduction, but workarounds available", "Project team milestone slip <= 1 month", "Cost increase > 5%", "Noticeable reputational harm; loss of customer trust, media coverage, and regulatory disclosure required", "Moderate damage to the mission  resulting in up to 6 months to resumption of normal commercial operations"],
+        ["Score 4 (High)", "Asset supporting several mission services", "Admin access to mission-critical components", "Security rules exist but are scattered. Limited integration with mission security architecture", "Stakeholder considered low-risk but no formal guarantees", "Major reduction, but workarounds available", "Project milestone slip >= 1 month or project critical path impacted", "Cost increase > 10%", "Serious reputational damage; loss of investor confidence, negative media exposure, and client disengagement", "Significant damage to the mission  resulting in up to 1 year to resumption of normal commercial operations"],
+        ["Score 5 (Very High)", "Essential asset", "Full privileged access to core mission infrastructure", "Minimal cybersecurity procedures. No defined response to cyber incidents", "No trust relationship; stakeholder identity or intent unknown", "Unacceptable, no alternatives exist", "Can't achieve major project milestone", "Cost increase > 15%", "Irreparable reputational harm; international fallout, industry-wide loss of credibility, potential business closure", "Catastrophic damage long term (more than  1 year) or complete loss of mission  indefinitely"]
     ]
     
     # Risk matrix (ISO 27005)
@@ -156,6 +149,76 @@ class RiskAssessmentTool:
         
         # Create interface
         self.create_interface()
+
+    def disable_mousewheel_on_combobox(self, combo):
+        """Intelligently handle mouse wheel on combobox to prevent accidental value changes while allowing scroll"""
+        def on_mousewheel(event):
+            # Check if the combobox dropdown is open
+            try:
+                if combo.tk.call('ttk::combobox::PopdownIsVisible', combo):
+                    # If dropdown is open, allow normal combobox behavior
+                    return
+                else:
+                    # If dropdown is closed, prevent value changes but allow window scrolling
+                    # Find the parent canvas to continue scrolling
+                    widget = event.widget
+                    # Walk up the widget hierarchy to find a canvas
+                    while widget:
+                        if isinstance(widget, tk.Canvas):
+                            widget.yview_scroll(int(-1*(event.delta/120)), "units")
+                            break
+                        widget = widget.master
+                    return "break"  # Prevent combobox value change
+            except:
+                # Fallback: prevent value changes but allow window scrolling
+                widget = event.widget
+                while widget:
+                    if isinstance(widget, tk.Canvas):
+                        widget.yview_scroll(int(-1*(event.delta/120)), "units")
+                        break
+                    widget = widget.master
+                return "break"  # Prevent combobox value change
+        
+        combo.bind("<MouseWheel>", on_mousewheel)
+
+    def setup_global_mousewheel(self, widget, canvas):
+        """Setup global mouse wheel scrolling for any widget relative to a canvas"""
+        def on_global_mousewheel(event):
+            # Scroll the canvas when mouse wheel is used anywhere in the widget
+            try:
+                canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            except:
+                pass  # Ignore errors if canvas is not scrollable
+        
+        # Bind to the widget and all its children recursively
+        def bind_mousewheel_recursive(w):
+            # Always bind to non-combobox widgets
+            if not isinstance(w, ttk.Combobox):
+                w.bind("<MouseWheel>", on_global_mousewheel)
+            
+            # Recursively bind to all children
+            for child in w.winfo_children():
+                bind_mousewheel_recursive(child)
+        
+        # Start recursive binding
+        bind_mousewheel_recursive(widget)
+        
+        # Also bind directly to the main widget and canvas for safety
+        widget.bind("<MouseWheel>", on_global_mousewheel)
+        canvas.bind("<MouseWheel>", on_global_mousewheel)
+
+    def ensure_mousewheel_on_table_cells(self, canvas):
+        """Ensure all threat table cells have mouse wheel scrolling"""
+        def on_cell_mousewheel(event):
+            try:
+                canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            except:
+                pass
+        
+        # Apply to all threat cells
+        for threat, cells in self.threat_cells.items():
+            for cell_type, cell in cells.items():
+                cell.bind("<MouseWheel>", on_cell_mousewheel)
 
     def load_threats_from_csv(self):
         """Load threats from Threat.csv"""
@@ -265,11 +328,8 @@ class RiskAssessmentTool:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        # Mouse wheel scroll
-        def on_mousewheel_main(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        canvas.bind("<MouseWheel>", on_mousewheel_main)
-        scrollable_frame.bind("<MouseWheel>", on_mousewheel_main)
+        # Setup global mouse wheel scrolling for the main table
+        self.setup_global_mousewheel(scrollable_frame, canvas)
 
         # Threat table
         table_frame = tk.LabelFrame(scrollable_frame, text="Threat Risk Assessment",
@@ -277,7 +337,6 @@ class RiskAssessmentTool:
                                    bg=self.COLORS['white'], fg=self.COLORS['primary'],
                                    padx=5, pady=5)
         table_frame.pack(fill='both', expand=True)
-        table_frame.configure(width=1080)
 
         # Headers
         headers = ["Threat", "Likelihood", "Impact", "Risk"]
@@ -316,6 +375,12 @@ class RiskAssessmentTool:
         table_frame.grid_columnconfigure(1, weight=1, minsize=220)  # Likelihood column
         table_frame.grid_columnconfigure(2, weight=1, minsize=220)  # Impact column
         table_frame.grid_columnconfigure(3, weight=1, minsize=220)  # Risk column
+        
+        # Ensure the table frame and all its cells also have mouse wheel scrolling
+        self.setup_global_mousewheel(table_frame, canvas)
+        
+        # Specifically ensure all table cells have mouse wheel scrolling
+        self.ensure_mousewheel_on_table_cells(canvas)
 
     def create_buttons(self, parent):
         """Creates the buttons"""
@@ -378,7 +443,7 @@ class RiskAssessmentTool:
         """Open Threat Analysis window"""
         window = tk.Toplevel(self.root)
         window.title("Threat Analysis")
-        window.geometry("1500x800")
+        window.geometry("1650x800")
         window.configure(bg=self.COLORS['white'])
         window.transient(self.root)
         window.grab_set()
@@ -397,7 +462,7 @@ class RiskAssessmentTool:
         """Open Asset Analysis window"""
         window = tk.Toplevel(self.root)
         window.title("Asset Analysis")
-        window.geometry("1500x800")
+        window.geometry("1650x800")
         window.configure(bg=self.COLORS['white'])
         window.transient(self.root)
         window.grab_set()
@@ -453,6 +518,9 @@ class RiskAssessmentTool:
         threat_combo.pack(fill='x', pady=(5, 0))
         threat_combo.bind('<<ComboboxSelected>>', self.load_threat_data)
         
+        # Disable mouse wheel on threat combobox
+        self.disable_mousewheel_on_combobox(threat_combo)
+        
         # Asset table for threat assessment
         self.create_assessment_table(content_frame, "threat")
 
@@ -476,11 +544,8 @@ class RiskAssessmentTool:
                             command=self.show_help_threat)
         help_btn.pack(side='left')
               
-        # Mouse wheel scroll
-        def on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")        
-            canvas.bind("<MouseWheel>", on_mousewheel)
-        content_frame.bind("<MouseWheel>", on_mousewheel)
+        # Setup global mouse wheel scrolling for the entire content frame
+        self.setup_global_mousewheel(content_frame, canvas)
 
     def show_help_threat(self):
         """Show help window with criteria descriptions"""
@@ -646,12 +711,8 @@ class RiskAssessmentTool:
         canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
         scrollbar.pack(side="right", fill="y")
         
-        # Mouse wheel scrolling
-        def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        
-        canvas.bind("<MouseWheel>", _on_mousewheel)
-        scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
+        # Setup global mouse wheel scrolling for the help window
+        self.setup_global_mousewheel(scrollable_frame, canvas)
         
         # Focus on help window
         help_window.focus_set()
@@ -659,51 +720,46 @@ class RiskAssessmentTool:
 
     def create_asset_content(self, window):
         """Creates the asset content window (without threat selection)"""
-        # Scrollable canvas
-        canvas = tk.Canvas(window, bg=self.COLORS['white'])
-        scrollbar = tk.Scrollbar(window, orient="vertical", command=canvas.yview)
+        # Scrollable canvas with horizontal and vertical scrollbars
+        outer_frame = tk.Frame(window, bg=self.COLORS['white'])
+        outer_frame.pack(fill='both', expand=True, padx=5, pady=5)
+
+        canvas = tk.Canvas(outer_frame, bg=self.COLORS['white'], highlightthickness=0)
+        v_scrollbar = tk.Scrollbar(outer_frame, orient="vertical", command=canvas.yview)
+        h_scrollbar = tk.Scrollbar(outer_frame, orient="horizontal", command=canvas.xview)
+        canvas.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
+        v_scrollbar.pack(side="right", fill="y")
+        h_scrollbar.pack(side="bottom", fill="x")
+        canvas.pack(side="left", fill="both", expand=True)
+
         content_frame = tk.Frame(canvas, bg=self.COLORS['white'])
-        
-        content_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.create_window((0, 0), window=content_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True, padx=20, pady=20)
-        scrollbar.pack(side="right", fill="y")
+        content_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
         # Criteria table for ASSETS
         self.create_asset_criteria_table(content_frame)
-        
         # Asset table for asset assessment
         self.create_asset_assessment_table(content_frame)
-
         # Load latest asset data automatically
         self.load_latest_asset_data()
 
         # Buttons frame
         buttons_frame = tk.Frame(content_frame, bg=self.COLORS['white'])
-        buttons_frame.pack(pady=20)
-        
-        # Save button
+        buttons_frame.pack(pady=10)
         save_btn = tk.Button(buttons_frame, text="SAVE ASSET ASSESSMENT",
                             font=('Segoe UI', 11, 'bold'),
                             bg=self.COLORS['success'], fg=self.COLORS['white'],
-                            relief='flat', padx=25, pady=10,
+                            relief='flat', padx=15, pady=6,
                             command=lambda: self.save_asset_assessment(window))
-        save_btn.pack(side='left', padx=(0, 10))
-        
-        # Help button
+        save_btn.pack(side='left', padx=(0, 8))
         help_btn = tk.Button(buttons_frame, text="❓ Help",
                             font=('Segoe UI', 11, 'bold'),
                             bg=self.COLORS['gray'], fg=self.COLORS['white'],
-                            relief='flat', padx=20, pady=10,
+                            relief='flat', padx=12, pady=6,
                             command=self.show_help_asset)
         help_btn.pack(side='left')
-
-        # Mouse wheel scroll
-        def on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        canvas.bind("<MouseWheel>", on_mousewheel)
-        content_frame.bind("<MouseWheel>", on_mousewheel)
+        # Setup global mouse wheel scrolling for the entire content frame
+        self.setup_global_mousewheel(content_frame, canvas)
 
     def show_help_asset(self):
         """Show help window with criteria descriptions"""
@@ -800,18 +856,6 @@ class RiskAssessmentTool:
         canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
         scrollbar.pack(side="right", fill="y")
         
-        # Mouse wheel scrolling for help window only
-        def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        
-        # Keep track of bound widgets for cleanup
-        bound_widgets = []
-        
-        # Bind mouse wheel only to the help window and its children
-        canvas.bind("<MouseWheel>", _on_mousewheel)
-        scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
-        bound_widgets.extend([canvas, scrollable_frame])
-        
         # Add separator and tool explanation section
         separator_frame = tk.Frame(scrollable_frame, bg=self.COLORS['gray'], height=2)
         separator_frame.pack(fill='x', pady=(20, 15), padx=15)
@@ -887,8 +931,8 @@ class RiskAssessmentTool:
         canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
         scrollbar.pack(side="right", fill="y")
         
-        canvas.bind("<MouseWheel>", _on_mousewheel)
-        scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
+        # Setup global mouse wheel scrolling for the help window
+        self.setup_global_mousewheel(scrollable_frame, canvas)
         
         # Focus on help window
         help_window.focus_set()
@@ -910,44 +954,56 @@ class RiskAssessmentTool:
                                          bd=2)
         criteria_container.pack(fill='x', pady=(0, 20))
 
-        # Create criteria table cells
+        # Celle della tabella criteri threat: prima colonna primary, header nero grassetto, colori trasposti
         for i, row in enumerate(criteria_data):
             for j, cell_text in enumerate(row):
-                if i == 0:  # Header row
-                    cell = tk.Label(criteria_container, text=cell_text,
-                                   font=('Segoe UI', 10, 'bold'),
-                                   bg=self.COLORS['criteria_header'], 
-                                   fg=self.COLORS['white'],
-                                   relief='ridge', 
-                                   bd=1,
-                                   anchor='center',
-                                   justify='center',
-                                   wraplength=180,
-                                   width=22,
-                                   height=3,
-                                   padx=3,
-                                   pady=2)
-                else:  # Data rows
-                    font_weight = 'bold' if j == 0 else 'normal'
-                    # Use specific color for each criterion (row)
-                    bg_color = self.CRITERIA_COLORS[(i-1) % len(self.CRITERIA_COLORS)]
-                    cell = tk.Label(criteria_container, text=cell_text,
-                                   font=('Segoe UI', 9, font_weight),
-                                   bg=bg_color,
-                                   fg=self.COLORS['dark'],
-                                   relief='ridge',
-                                   bd=1,
-                                   anchor='nw',
-                                   justify='left',
-                                   wraplength=180,
-                                   width=22,
-                                   height=4,
-                                   padx=6,
-                                   pady=3)
-                
-                cell.grid(row=i, column=j, padx=2, pady=2, sticky='ew', ipady=5)        # Grid configuration with uniform column sizes
-        for j in range(6):
-            criteria_container.grid_columnconfigure(j, weight=1, minsize=120, uniform="criteria_cols")
+                # Prima colonna: tutta primary, centrata, font size 10, grassetto
+                if j == 0:
+                    bg_color = self.COLORS['criteria_header']
+                    fg_color = self.COLORS['white']
+                    font_weight = 'bold'
+                    font_size = 10
+                    anchor = 'center'
+                    justify = 'center'
+                # Header: ogni cella colorata come la colonna, testo nero grassetto
+                elif i == 0:
+                    bg_color = self.CRITERIA_COLORS[(j-1) % len(self.CRITERIA_COLORS)]
+                    fg_color = self.COLORS['dark']
+                    font_weight = 'bold'
+                    font_size = 10
+                    anchor = 'center'
+                    justify = 'center'
+                # Celle dati: ogni colonna ha il suo colore
+                else:
+                    bg_color = self.CRITERIA_COLORS[(j-1) % len(self.CRITERIA_COLORS)]
+                    fg_color = self.COLORS['dark']
+                    font_weight = 'normal'
+                    font_size = 8
+                    anchor = 'nw'
+                    justify = 'left'
+
+                cell = tk.Label(
+                    criteria_container, text=cell_text,
+                    font=('Segoe UI', font_size, font_weight),
+                    bg=bg_color,
+                    fg=fg_color,
+                    relief='ridge',
+                    bd=1,
+                    anchor=anchor,
+                    justify=justify,
+                    wraplength=180,
+                    width=22,
+                    height=3 if i == 0 else 4,
+                    padx=3 if i == 0 else 6,
+                    pady=2 if i == 0 else 3
+                )
+                cell.grid(row=i, column=j, padx=2, pady=2, sticky='ew', ipady=5)
+        # Grid configuration with adjusted column sizes for transposed layout (Threat criteria)
+        for j in range(8):  # Now we have 8 columns (Score + 7 criteria for threats)
+            if j == 0:
+                criteria_container.grid_columnconfigure(j, weight=1, minsize=40, uniform="criteria_cols")
+            else:
+                criteria_container.grid_columnconfigure(j, weight=1, minsize=80, uniform="criteria_cols")
         
         num_rows = len(criteria_data)
         for i in range(num_rows):
@@ -960,52 +1016,60 @@ class RiskAssessmentTool:
                                          font=('Segoe UI', 12, 'bold'),
                                          bg=self.COLORS['white'], 
                                          fg=self.COLORS['primary'], 
-                                         padx=20, 
-                                         pady=15,
+                                         padx=12, 
+                                         pady=10,
                                          relief='ridge', 
                                          bd=2)
-        criteria_container.pack(fill='x', pady=(0, 20))
+        criteria_container.pack(fill='x', pady=(0, 12))
 
-        # Create criteria table cells using ASSET criteria
+        # Celle della tabella criteri asset: prima colonna primary, header nero grassetto, colori trasposti
         for i, row in enumerate(self.CRITERIA_DATA_ASSET):
             for j, cell_text in enumerate(row):
-                if i == 0:  # Header row
-                    cell = tk.Label(criteria_container, text=cell_text,
-                                   font=('Segoe UI', 10, 'bold'),
-                                   bg=self.COLORS['criteria_header'], 
-                                   fg=self.COLORS['white'],
-                                   relief='ridge', 
-                                   bd=1,
-                                   anchor='center',
-                                   justify='center',
-                                   wraplength=180,  
-                                   width=22,        
-                                   height=3,
-                                   padx=3,         
-                                   pady=2)
-                else:  # Data rows
-                    font_weight = 'bold' if j == 0 else 'normal'
-                    # Use specific color for each criterion (row)
-                    bg_color = self.CRITERIA_COLORS[(i-1) % len(self.CRITERIA_COLORS)]
-                    cell = tk.Label(criteria_container, text=cell_text,
-                                   font=('Segoe UI', 9, font_weight),
-                                   bg=bg_color,
-                                   fg=self.COLORS['dark'],
-                                   relief='ridge',
-                                   bd=1,
-                                   anchor='nw',
-                                   justify='left',
-                                   wraplength=180,  
-                                   width=22,        
-                                   height=4,        
-                                   padx=6,          
-                                   pady=3)
-                
-                cell.grid(row=i, column=j, padx=2, pady=2, sticky='ew', ipady=5)        # Grid configuration with uniform column sizes
-        for j in range(6):
-            criteria_container.grid_columnconfigure(j, weight=1, minsize=120, uniform="criteria_cols")
-        for i in range(11):  # 10 data rows + 1 header
-            criteria_container.grid_rowconfigure(i, minsize=70, uniform="criteria_rows")
+                # Prima colonna: tutta primary, centrata, font size 10, grassetto
+                if j == 0:
+                    bg_color = self.COLORS['criteria_header']
+                    fg_color = self.COLORS['white']
+                    font_weight = 'bold'
+                    font_size = 10
+                    anchor = 'center'
+                    justify = 'center'
+                # Header: ogni cella colorata come la colonna, testo nero grassetto
+                elif i == 0:
+                    bg_color = self.CRITERIA_COLORS[(j-1) % len(self.CRITERIA_COLORS)]
+                    fg_color = self.COLORS['dark']
+                    font_weight = 'bold'
+                    font_size = 10
+                    anchor = 'center'
+                    justify = 'center'
+                # Celle dati: ogni colonna ha il suo colore
+                else:
+                    bg_color = self.CRITERIA_COLORS[(j-1) % len(self.CRITERIA_COLORS)]
+                    fg_color = self.COLORS['dark']
+                    font_weight = 'normal'
+                    font_size = 9
+                    anchor = 'nw'
+                    justify = 'left'
+
+                cell = tk.Label(
+                    criteria_container, text=cell_text,
+                    font=('Segoe UI', font_size, font_weight),
+                    bg=bg_color,
+                    fg=fg_color,
+                    relief='ridge',
+                    bd=1,
+                    anchor=anchor,
+                    justify=justify,
+                    wraplength=120,
+                    width=16,
+                    height=3 if i == 0 else 5,
+                    padx=6,
+                    pady=4
+                )
+                cell.grid(row=i, column=j, padx=2, pady=2, sticky='ew', ipady=6)
+        for j in range(10):
+            criteria_container.grid_columnconfigure(j, weight=1, minsize=60, uniform="criteria_cols")
+        for i in range(6):
+            criteria_container.grid_rowconfigure(i, minsize=48, uniform="criteria_rows")
 
     def create_assessment_table(self, parent, assessment_type):
         """Creates the assessment table for threat window only"""
@@ -1093,6 +1157,9 @@ class RiskAssessmentTool:
                                     width=5, state='readonly',
                                     style=style_name)
                 combo.grid(row=i+1, column=j, padx=1, pady=1, sticky='ew')
+                
+                # Disable mouse wheel on combobox
+                self.disable_mousewheel_on_combobox(combo)
                 
                 row_entries[j-3] = combo
                 self.combo_vars[asset_key][j-3] = combo_var
@@ -1214,6 +1281,9 @@ class RiskAssessmentTool:
                                     width=4, state='readonly',
                                     style=style_name)
                 combo.grid(row=i+1, column=j, padx=1, pady=1, sticky='ew')
+                
+                # Disable mouse wheel on combobox
+                self.disable_mousewheel_on_combobox(combo)
                 
                 row_entries[j-3] = combo
                 self.combo_vars[asset_key][j-3] = combo_var

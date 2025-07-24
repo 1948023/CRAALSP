@@ -251,7 +251,73 @@ The European Union Agency for Cybersecurity (ENISA) Space Threat Landscape provi
     \item \textbf{Legal (LEG)}: Legal actions of third parties (contracting or otherwise) in order to prohibit actions or compensate for loss based on applicable law
 \end{itemize}
 
-The evolving threat landscape necessitates continuous adaptation of security measures and risk assessment methodologies to address both current and emerging risks. This dynamic environment reinforces the importance of standardized, comprehensive risk assessment frameworks that can accommodate the unique challenges facing space systems across all mission phases.
+
+\subsection{Asset Landscape}
+
+Understanding the comprehensive asset landscape is crucial for effective threat assessment in space systems. The Risk Assessment Tool Suite incorporates a detailed asset taxonomy derived from extensive analysis of space mission architectures, providing a foundation for systematic vulnerability identification and risk evaluation.
+
+\paragraph{Ground Segment Assets}
+
+The ground segment represents the terrestrial foundation of space operations, encompassing critical infrastructure that enables mission control, data processing, and user interface capabilities:
+
+\begin{itemize}
+    \item \textbf{Ground Stations}: Essential components for space-ground communications including tracking systems for spacecraft position monitoring, ranging equipment for distance measurement and orbital determination, transmission systems for uplink command delivery, and reception systems for downlink data acquisition
+    \item \textbf{Mission Control Centers}: Centralized facilities managing telemetry processing for real-time spacecraft health monitoring, commanding systems for operational control, and analysis and support infrastructure for mission decision-making
+    \item \textbf{Data Processing Centers}: Specialized facilities handling mission analysis for scientific and operational data interpretation, and payload processing systems for instrument data calibration and distribution
+    \item \textbf{Remote Terminals}: Distributed access points providing network access for remote operations and software access for distributed mission management
+    \item \textbf{User Ground Segment}: Supporting infrastructure including development systems for mission software and procedures, supportive infrastructure for mission planning and analysis, and operational systems for routine mission execution
+\end{itemize}
+
+\paragraph{Space Segment Assets}
+
+The space segment comprises the orbital components that execute mission objectives in the harsh environment of space:
+
+\begin{itemize}
+    \item \textbf{Platform Subsystems}: Core spacecraft infrastructure including electrical power systems for energy generation and distribution, attitude control systems for spacecraft orientation and stability, communication systems for space-ground data links, command and data handling systems for onboard processing, telemetry systems for spacecraft health monitoring, and tracking systems for navigation and positioning
+    \item \textbf{Payload Systems}: Mission-specific components including payload data handling systems for scientific or commercial data processing, payload communication modules for specialized data transmission, and untrusted data handling systems for processing external or unverified data sources
+\end{itemize}
+
+\paragraph{Link Segment Assets}
+
+The link segment provides the critical communication pathways that enable coordination and data exchange across the entire space system:
+
+\begin{itemize}
+    \item \textbf{Inter-System Links}: Communication channels between platform and payload subsystems, enabling coordinated spacecraft operations
+    \item \textbf{Intra-Segment Links}: Connections within ground segment components, between multiple space systems for constellation operations, and between ground wide area networks for distributed operations
+    \item \textbf{Cross-Segment Links}: Critical pathways connecting space segment to ground segment for mission control, space segment to user segment for service delivery, and ground segment to user segment for data distribution
+    \item \textbf{User-to-User Links}: Communication channels enabling inter-user connectivity and collaborative operations
+\end{itemize}
+
+\paragraph{User Segment Assets}
+
+The user segment encompasses the end-user infrastructure that consumes and processes space-based services:
+
+\begin{itemize}
+    \item \textbf{User Communications}: Transmission systems for uplink communications to space systems and reception systems for downlink data acquisition
+    \item \textbf{Processing Infrastructure}: Local processing capabilities for user-specific data analysis and application execution
+\end{itemize}
+
+\paragraph{Asset Interdependencies and Vulnerabilities}
+
+The comprehensive asset landscape reveals critical interdependencies that create potential vulnerability cascades:
+
+\begin{table}[H]
+\centering
+\caption{Asset Categories and Associated Vulnerability Patterns}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Asset Category} & \textbf{Critical Components} & \textbf{Primary Vulnerability Areas} \\ \hline
+Ground Segment & Ground stations, mission control & Physical security, network access, software integrity \\ \hline
+Space Segment & Platform, payload systems & Environmental resilience, communication security, autonomous operation \\ \hline
+Link Segment & Inter/intra/cross-segment links & Encryption, authentication, jamming resistance, protocol security \\ \hline
+User Segment & User terminals, processing & Interface security, data handling, access control \\ \hline
+\end{tabular}
+\end{table}
+
+This comprehensive asset landscape provides the foundation for systematic threat modeling and risk assessment across all phases of space mission lifecycles. By understanding the complete inventory of critical assets and their interdependencies, security professionals can develop more effective threat scenarios and implement appropriate protective measures tailored to the specific characteristics of each asset category.
+
+\vspace{13pt}
+The evolving landscape requires continuous adaptation of security measures and risk assessment methodologies to address both current and emerging risks. This dynamic environment reinforces the importance of standardized, comprehensive risk assessment frameworks that can accommodate the unique challenges facing space systems across all mission phases.
 
 \section{Existing Risk Assessment Frameworks}
 
@@ -418,7 +484,7 @@ The framework identifies four distinct phases requiring specialized risk assessm
 The BID Phase Assessment represents the earliest opportunity to integrate cybersecurity considerations into a space project. Conducted during the proposal or pre-feasibility stage, this initial evaluation aims to align the project’s scope, budget, and planning assumptions with a realistic understanding of risk exposure. The assessment is based primarily on the project category (e.g., scientific mission, commercial payload, defense satellite) and its high-level functional and operational requirements. Although limited in technical detail at this stage, the process focuses on identifying fundamental cybersecurity constraints and potential mission-critical vulnerabilities that could affect project viability. This includes considerations such as mission criticality, reliance on third-party infrastructure (e.g., commercial ground stations), initial compliance with applicable standards (e.g., ECSS or ISO/IEC), and the presence of potential regulatory or geopolitical risks. The output of this phase informs the allocation of security resources, the initial definition of risk tolerance, and the inclusion of security planning in project proposals and contractual frameworks.
 
 \subsection{Preliminary Risk Assessment}
-The Preliminary Risk Assessment is conducted in the early stages of system design and requirement definition, typically during Phase 0/A of the mission lifecycle. Its objective is to create a structured foundation for subsequent security engineering and risk management activities. This phase involves the identification and categorization of key mission assets—such as onboard subsystems, data links, ground segment interfaces, and mission-critical software components. Concurrently, potential threats are mapped using both historical data and scenario-based analysis, including consideration of emerging risks such as space-based jamming or AI-driven cyberattacks. This phase promotes early visibility into systemic vulnerabilities, allowing for the definition of security requirements that can be integrated into system architecture, redundancy strategies, and operational planning. The outputs include a threat-asset matrix, initial risk register, and a prioritized list of areas requiring further analysis or mitigation in the next phase.
+The Preliminary Risk Assessment is conducted in the early stages of system design and requirement definition, typically during Phase 0/A of the mission lifecycle. Its objective is to create a structured foundation for subsequent security engineering and risk management activities. This phase involves the identification and categorization of key mission assets—such as onboard subsystems, data links, ground segment interfaces, and mission-critical software components. This phase promotes early visibility into systemic vulnerabilities, allowing for the definition of security requirements that can be integrated into system architecture, redundancy strategies, and operational planning. The outputs include a threat-asset matrix, initial risk register, and a prioritized list of areas requiring further analysis or mitigation in the next phase.
 
 \subsection{Comprehensive Risk Assessment}
 The Comprehensive Risk Assessment represents the most detailed and analytically intensive phase of the framework. Typically carried out during system development, integration, and testing phases (Phase B/C/D), it leverages a standardized taxonomy of threat types (e.g., nefarious activity, eavesdropping, physical sabotage), asset categories (e.g., space, ground, link, user), and lifecycle phases. The analysis employs both qualitative and quantitative methods, including risk scoring based on likelihood-impact matrices and attack path modeling. This phase also evaluates control effectiveness, environmental constraints, access complexity, and response capabilities. Special attention is paid to interdependencies among system components and cascading failure scenarios. The result is a comprehensive risk profile that supports informed decisions on design trade-offs, security control implementation, and mission assurance planning. Additionally, the assessment facilitates cross-domain alignment, particularly when projects involve international partners or dual-use technologies.
@@ -432,189 +498,223 @@ Each phase of the proposed risk assessment framework adopts tailored methodologi
 
 At the core of this approach lies a standardized risk data model, which includes a common taxonomy of threats, asset classifications, evaluation criteria, and scoring metrics. This shared data structure facilitates the smooth transition of risk-related knowledge across lifecycle phases, reducing information loss and improving traceability. For example, threats identified during the Preliminary Risk Assessment are refined and expanded upon in the Comprehensive Risk Assessment using the same underlying classification system, enabling seamless aggregation, comparison, and revision of risk data over time.
 
-Moreover, the framework supports both top-down and bottom-up assessment techniques, including scenario-based analysis, threat modeling (e.g., STRIDE or attack graphs), and probabilistic risk estimation where applicable. The methodology also incorporates stakeholder input, domain-specific intelligence (e.g., satellite telemetry or ground station logs), and feedback loops, allowing for continuous improvement and responsiveness to newly emerging risks.
-
 Crucially, the framework is designed to be compatible with tool-supported implementation, facilitating partial automation of processes such as asset mapping, vulnerability identification, risk scoring, and documentation generation. This modular and data-centric approach ensures that each methodological component contributes coherently to an integrated and evolving risk profile throughout the entire mission lifecycle.
 
 \section{Space Systems Risk Taxonomy}
+The framework implements a dual-phase risk assessment methodology specifically designed for space systems cybersecurity. This approach combines preliminary rapid assessment capabilities with comprehensive detailed analysis, utilizing criteria-based evaluation and quadratic mean computation for robust risk quantification.
 
-The framework employs a comprehensive risk taxonomy specifically developed for space systems, addressing the unique characteristics and operational environments of space missions.
+\subsection{Preliminary Risk Assessment}
 
-\subsection{Threat Actor Classification}
+The preliminary risk assessment provides rapid risk evaluation capabilities for initial threat identification and priority setting during early mission phases. This methodology focuses on threat-centric analysis with streamlined assessment criteria.
 
-Space systems face threats from various categories of actors, each with distinct capabilities, motivations, and access patterns:
+\subsubsection{Threat-Centric Assessment Approach}
+
+The preliminary assessment employs a threat-centric methodology where each identified threat is evaluated against all relevant assets using seven specialized criteria. This approach ensures comprehensive coverage while maintaining assessment efficiency:
 
 \begin{itemize}
-    \item \textbf{Nation-State Actors}: Advanced persistent threats with sophisticated capabilities and strategic objectives
-    \item \textbf{Criminal Organizations}: Profit-motivated groups targeting valuable data or disrupting operations for financial gain
-    \item \textbf{Terrorist Groups}: Ideologically motivated actors seeking to cause widespread disruption or damage
-    \item \textbf{Insider Threats}: Malicious or negligent individuals with legitimate system access
-    \item \textbf{Hacktivist Groups}: Politically motivated collectives targeting systems for symbolic or disruptive purposes
-    \item \textbf{Opportunistic Attackers}: Individuals exploiting discovered vulnerabilities without specific targeting
+    \item \textbf{Vulnerability Effectiveness}: Evaluates how effectively known vulnerabilities can be exploited in the current system state, ranging from resolved vulnerabilities to actively exploitable weaknesses
+    \item \textbf{Mitigation Presence}: Assesses the presence and effectiveness of security countermeasures, from multi-level validated defenses to complete absence of relevant protections
+    \item \textbf{Detection Probability}: Measures the likelihood that malicious activities will be detected, spanning real-time automated detection to complete absence of detection capabilities
+    \item \textbf{Access Complexity}: Evaluates the difficulty for attackers to gain system access, from strongly protected environments to completely open access points
+    \item \textbf{Privilege Requirement}: Assesses the level of system privileges needed for successful exploitation, from root access requirements to no authentication needs
+    \item \textbf{Response Delay}: Measures organizational response capabilities, from predefined automated responses to complete absence of response procedures
+    \item \textbf{Resilience Impact}: Evaluates operational impact on system resilience, from no disruption with automatic failover to irreversible asset loss
 \end{itemize}
 
-\subsection{Asset Classification Framework}
+\subsubsection{Likelihood and Impact Computation}
 
-The framework categorizes space system assets across multiple dimensions to enable comprehensive risk assessment:
+The preliminary methodology employs a structured approach to derive likelihood and impact values from the seven assessment criteria:
 
-\begin{table}[H]
-\centering
-\caption{Space System Asset Classification}
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Asset Category} & \textbf{Sub-Categories} & \textbf{Risk Considerations} \\ \hline
-\multirow{3}{*}{Space Segment} & Spacecraft Bus & Physical protection, redundancy \\ \cline{2-3}
-& Payload Systems & Mission-critical functionality \\ \cline{2-3}
-& Communication Systems & Link security, encryption \\ \hline
-\multirow{3}{*}{Ground Segment} & Mission Control Centers & Physical and logical access control \\ \cline{2-3}
-& Data Processing Centers & Information security, backup systems \\ \cline{2-3}
-& Ground Stations & RF security, signal integrity \\ \hline
-\multirow{2}{*}{Link Segment} & Uplink Communications & Command authentication, jamming resistance \\ \cline{2-3}
-& Downlink Communications & Data integrity, eavesdropping protection \\ \hline
-\multirow{2}{*}{User Segment} & End-User Systems & Interface security, data handling \\ \cline{2-3}
-& Support Infrastructure & Service availability, access management \\ \hline
-\end{tabular}
-\end{table}
+\textbf{Likelihood Calculation}: The first five criteria (Vulnerability Effectiveness through Privilege Requirement) contribute to likelihood assessment. Each criterion is scored on a 1-5 scale, and the overall likelihood is computed using quadratic mean to emphasize higher risk factors
+\textbf{Impact Assessment}: The last two criteria (Response Delay and Resilience impact) contribute to the impact score, offering focused evaluation of operational consequences and business continuity implications
 
-\subsection{Vulnerability Categories}
+$$L = \sqrt{\frac{1}{n}\sum_{i=1}^{n} C_i^2}$$
 
-Space systems exhibit unique vulnerability patterns that require specialized assessment approaches:
+where $C_i$ represents the score for criterion $i$.
 
+
+\textbf{Risk Level Determination}: Final risk levels are determined using the ISO 27005 risk matrix, combining computed likelihood and impact values to produce standardized risk classifications (Very Low, Low, Medium, High, Very High).
+
+\subsection{Comprehensive Risk Assessment}
+
+The comprehensive risk assessment provides detailed asset-focused analysis for thorough risk evaluation during detailed design and implementation phases. This methodology emphasizes asset vulnerabilities and multi-dimensional impact analysis.
+
+\subsubsection{Asset-Centric Assessment Framework}
+
+The comprehensive assessment employs an asset-centric approach where each asset is evaluated using nine specialized criteria covering both likelihood and impact dimensions. This methodology provides holistic risk understanding across technical and business domains:
+
+\textbf{Likelihood Factors}:
 \begin{itemize}
-    \item \textbf{Design Vulnerabilities}: Inherent weaknesses in system architecture or component design
-    \item \textbf{Implementation Vulnerabilities}: Security flaws introduced during development or manufacturing
-    \item \textbf{Configuration Vulnerabilities}: Misconfigurations in system setup or operational parameters
-    \item \textbf{Operational Vulnerabilities}: Weaknesses in procedures, training, or operational practices
-    \item \textbf{Environmental Vulnerabilities}: Susceptibilities arising from the space environment or operational context
-    \item \textbf{Supply Chain Vulnerabilities}: Risks introduced through third-party components or services
+    \item \textbf{Dependency}: Evaluates asset criticality to mission operations, from non-critical support functions to essential mission-critical components
+    \item \textbf{Penetration}: Assesses potential system access levels, from isolated user access to full privileged control of core infrastructure
+    \item \textbf{Cyber Maturity}: Evaluates organizational cybersecurity governance, from mature audited systems to minimal cybersecurity procedures
+    \item \textbf{Trust}: Assesses stakeholder trustworthiness, from strategic partners under strict control to unknown entities with unclear intent
 \end{itemize}
 
-\section{Risk Assessment Methodologies}
+\textbf{Impact Factors}:
+\begin{itemize}
+    \item \textbf{Performance}: Measures operational performance impact, from minimal effects to unacceptable degradation with no alternatives
+    \item \textbf{Schedule}: Evaluates project timeline impact, from minimal delays to inability to achieve major milestones
+    \item \textbf{Costs}: Assesses financial implications, from minimal cost increases to substantial budgetary impacts exceeding 15\%
+    \item \textbf{Reputation}: Evaluates reputational consequences, from contained internal issues to irreparable international damage
+    \item \textbf{Recovery}: Measures recovery time requirements, from limited damage with quick restoration to catastrophic long-term mission loss
+\end{itemize}
 
-\subsection{Quantitative Risk Analysis Techniques}
+\subsubsection{Multi-Dimensional Risk Calculation}
 
-The framework incorporates several quantitative methodologies for precise risk measurement:
+The comprehensive methodology employs sophisticated risk computation that integrates multiple assessment dimensions:
 
-\begin{lstlisting}[language=Python, caption=Quantitative Risk Calculation Framework]
-class QuantitativeRiskAnalysis:
-    """Advanced quantitative risk analysis for space systems"""
-    
-    def __init__(self):
-        self.risk_factors = {
-            'likelihood_modifiers': {
-                'environmental': 0.1,
-                'technical_complexity': 0.2,
-                'threat_sophistication': 0.3,
-                'access_difficulty': 0.4
-            },
-            'impact_multipliers': {
-                'mission_criticality': 2.0,
-                'recovery_time': 1.5,
-                'cascading_effects': 1.8,
-                'regulatory_impact': 1.3
-            }
-        }
-    
-    def calculate_risk_score(self, base_likelihood, base_impact, 
-                           modifiers=None, multipliers=None):
-        """Calculate composite risk score using advanced weighting"""
-        adjusted_likelihood = self.apply_likelihood_modifiers(
-            base_likelihood, modifiers or {})
-        adjusted_impact = self.apply_impact_multipliers(
-            base_impact, multipliers or {})
-        
-        # Monte Carlo simulation for uncertainty analysis
-        risk_distribution = self.monte_carlo_simulation(
-            adjusted_likelihood, adjusted_impact, iterations=10000)
-        
-        return {
-            'expected_risk': np.mean(risk_distribution),
-            'confidence_interval': np.percentile(risk_distribution, [5, 95]),
-            'risk_variance': np.var(risk_distribution)
-        }
-    
-    def temporal_risk_modeling(self, initial_risk, time_horizon, 
-                              threat_evolution_rate):
-        """Model risk evolution over mission timeline"""
-        time_points = np.linspace(0, time_horizon, 100)
-        risk_trajectory = initial_risk * np.exp(
-            threat_evolution_rate * time_points)
-        
-        return time_points, risk_trajectory
-\end{lstlisting}
+\textbf{Likelihood Computation}: The four likelihood criteria are combined using quadratic mean calculation to emphasize critical vulnerabilities:
 
-\subsection{Qualitative Assessment Frameworks}
+\textbf{Impact Computation}: The five impact criteria are similarly combined using quadratic mean to capture the most severe potential consequences:
 
-For scenarios where quantitative data is limited, the framework provides structured qualitative assessment methodologies:
+$$I_{comp} = \sqrt{\frac{1}{n}\sum_{k=1}^{n} I_k^2}$$
+
+where $I_k$ represents the criterion scores.
+
+\textbf{Integrated Risk Assessment}: The final risk level combines computed likelihood and impact using the same ISO 27005 risk matrix, ensuring consistency across assessment methodologies while providing enhanced granularity through multi-factor analysis.
+
+\subsubsection{Quadratic Mean Rationale}
+
+The framework employs quadratic mean (root mean square) rather than arithmetic mean for criterion aggregation based on risk assessment best practices:
 
 \begin{itemize}
-    \item \textbf{Expert Elicitation Techniques}: Structured methods for capturing domain expertise
-    \item \textbf{Scenario-Based Analysis}: Systematic evaluation of threat scenarios and their implications
-    \item \textbf{Comparative Assessment}: Benchmarking against similar systems or historical precedents
-    \item \textbf{Delphi Method}: Consensus building among multiple experts for complex risk assessments
+    \item \textbf{Emphasis on High-Risk Factors}: Quadratic mean assigns greater weight to higher individual scores, ensuring that critical vulnerabilities or severe impacts are not diluted by lower-scoring criteria
+    \item \textbf{Mathematical Robustness}: The quadratic approach provides more stable and discriminating results compared to simple averaging, particularly important for security assessments where extreme values indicate critical risks
+    \item \textbf{Conservative Risk Posture}: This approach supports conservative risk management by ensuring that high-severity individual factors drive overall risk assessments
+    \item \textbf{Industry Alignment}: Quadratic mean aligns with established practices in safety-critical industries where maximum credible consequences drive risk evaluation
+\end{itemize}
+
+\subsubsection{Assessment Integration and Validation}
+
+Both preliminary and comprehensive methodologies support assessment integration and validation through:
+
+\begin{itemize}
+    \item \textbf{Cross-Methodology Validation}: Results from preliminary threat-centric and comprehensive asset-centric assessments can be compared to identify discrepancies and ensure assessment consistency
+    \item \textbf{Iterative Refinement}: Assessment results can be refined through multiple evaluation cycles as mission details and threat intelligence evolve
+    \item \textbf{Expert Review Integration}: Structured mechanisms for incorporating expert judgment and domain knowledge into quantitative assessments
+    \item \textbf{Uncertainty Management}: Recognition and documentation of assessment uncertainties and confidence levels to support informed decision-making
+
 \end{itemize}
 
 \section{Risk Treatment Strategies}
 
-\subsection{Space-Specific Mitigation Approaches}
+The framework incorporates a comprehensive catalog of cybersecurity controls derived from leading international standards and space-specific guidance documents. This multi-framework approach ensures coverage of diverse risk scenarios while maintaining alignment with established industry practices and regulatory requirements.
 
-The framework defines mitigation strategies tailored to the unique constraints of space systems:
+\subsection{Multi-Framework Control Integration}
 
-\begin{table}[H]
-\centering
-\caption{Space System Risk Mitigation Strategies}
-\begin{tabular}{|l|l|l|l|}
-\hline
-\textbf{Strategy Type} & \textbf{Implementation} & \textbf{Effectiveness} & \textbf{Constraints} \\ \hline
-Redundancy & Multiple backup systems & High & Mass/power limitations \\ \hline
-Encryption & Advanced cryptographic protocols & Very High & Processing overhead \\ \hline
-Access Control & Multi-factor authentication & High & Operational complexity \\ \hline
-Monitoring & Continuous telemetry analysis & Medium & Bandwidth limitations \\ \hline
-Isolation & System segmentation & High & Integration challenges \\ \hline
-Response Planning & Automated contingency protocols & Medium & Scenario coverage \\ \hline
-\end{tabular}
-\end{table}
+The risk treatment strategy employs controls systematically extracted and harmonized from thirteen major cybersecurity frameworks and standards specifically relevant to space systems:
 
-\subsection{Cost-Benefit Analysis Framework}
+\begin{itemize}
+    \item \textbf{ISO 27001}: International standard for information security management systems, providing baseline organizational security controls
+    \item \textbf{NIST Cybersecurity Framework 2.0}: Comprehensive framework for managing cybersecurity risks across critical infrastructure
+    \item \textbf{NIST IR 8270}: Space Systems Cybersecurity Guidelines providing space-specific security recommendations
+    \item \textbf{NIST IR 8323 r1}: Foundational Cybersecurity Activities for IoT Device Manufacturers adapted for space systems
+    \item \textbf{NIST IR 8401}: Cybersecurity Framework Profile for Hybrid Satellite Networks addressing space-terrestrial integration
+    \item \textbf{NIST IR 8411}: Security Guidance for First Responder Mobile and Wearable Devices applicable to space operations
+    \item \textbf{NIS2 Directive}: European cybersecurity requirements for critical infrastructure including space systems
+    \item \textbf{NASA Best Practices Guide (BPG)}: NASA-specific cybersecurity practices for space missions
+    \item \textbf{SPARTA}: Space cybersecurity framework addressing comprehensive space system security
+    \item \textbf{BSI Profile for Space}: German Federal Office for Information Security space-specific guidance
+    \item \textbf{BSI TR-03184}: Technical Guideline for secure satellite communication systems
+    \item \textbf{METI Guidelines}: Japanese Ministry guidelines for space systems cybersecurity
+    \item \textbf{UK Space Agency NCSC}: National Cyber Security Centre guidelines for space sector cybersecurity
+\end{itemize}
 
-Risk treatment decisions require careful consideration of costs versus benefits in the resource-constrained space environment:
+\subsection{Control Categorization and Implementation}
 
-\begin{lstlisting}[language=Python, caption=Cost-Benefit Analysis for Risk Mitigation]
-def cost_benefit_analysis(mitigation_options, risk_reduction, 
-                         implementation_costs, mission_parameters):
-    """Comprehensive cost-benefit analysis for mitigation selection"""
-    
-    results = {}
-    for option in mitigation_options:
-        # Calculate risk reduction value
-        risk_value_reduction = (
-            risk_reduction[option] * 
-            mission_parameters['mission_value'] *
-            mission_parameters['risk_tolerance_factor']
-        )
-        
-        # Include lifecycle costs
-        total_cost = (
-            implementation_costs[option]['development'] +
-            implementation_costs[option]['integration'] +
-            implementation_costs[option]['operations'] *
-            mission_parameters['mission_duration']
-        )
-        
-        # Calculate net benefit and ROI
-        net_benefit = risk_value_reduction - total_cost
-        roi = (risk_value_reduction / total_cost) if total_cost > 0 else float('inf')
-        
-        results[option] = {
-            'net_benefit': net_benefit,
-            'roi': roi,
-            'payback_period': total_cost / risk_value_reduction 
-                if risk_value_reduction > 0 else float('inf'),
-            'risk_reduction_percentage': risk_reduction[option] * 100
-        }
-    
-    return results
-\end{lstlisting}
+The integrated control framework organizes 125 distinct cybersecurity controls into twelve strategic categories, each addressing specific aspects of space system security throughout the mission lifecycle:
+
+\subsubsection{Policies \& Procedures}
+Foundational governance controls establishing cybersecurity management frameworks, including information security policies, role definitions, resource allocation, and secure authentication procedures. These controls provide the organizational foundation for all subsequent security measures.
+
+\subsubsection{Compliance}
+Regulatory and legal compliance controls ensuring adherence to relevant cybersecurity requirements, intellectual property protection, independent security reviews, and assessment \& authorization procedures. These controls bridge organizational security practices with regulatory obligations.
+
+\subsubsection{Risk Management}
+Comprehensive risk assessment and management controls including threat modeling, criticality analysis, adaptive risk response mechanisms, third-party risk management, structured risk management processes, and business impact analysis. These controls provide systematic approaches to identifying, evaluating, and responding to cybersecurity risks.
+
+\subsubsection{Security by Design}
+Proactive security controls integrated into system design and development, including configuration management, secure coding standards, secure development lifecycle practices, cybersecurity-safe mode implementations, secure command modes, power system security, environment separation, and change management. These controls ensure security considerations are embedded throughout the system development process.
+
+\subsubsection{Environmental \& Physical Security}
+Physical protection controls addressing transport security, tamper protection, facility security, and environmental threat mitigation. These controls protect against physical attacks and environmental hazards that could compromise space system security.
+
+\subsubsection{Network Security}
+Communication and network protection controls including secure communication protocols, anti-counterfeit hardware measures, transmission security, physical port management, backdoor command elimination, resilient positioning and timing, smart contracts, alternative communication media, traffic flow security, network segmentation, cryptographic key management, message encryption, power masking, and RF encryption. These controls protect data in transit and secure communication pathways.
+
+\subsubsection{Data Security}
+Information protection controls covering data classification and labeling, comprehensive data management across all states, data loss prevention, backup procedures, information lifecycle management, data masking, real-time verification systems, process ID whitelisting, and tamper-resistant hardware. These controls ensure data confidentiality, integrity, and availability.
+
+\subsubsection{Vulnerability Management}
+Proactive security maintenance controls including malware protection, vulnerability management processes, software installation procedures, vulnerability scanning, security testing, software updates, protocol updates, software source control, trusted hardware development, and integrity checking mechanisms. These controls maintain system security posture against evolving threats.
+
+\subsubsection{Access Management}
+Identity and access control mechanisms including device authentication, access control policies, identity management, authentication information management, access rights management, authentication procedures, remote access management, multi-factor authentication, relay protection, session termination, insider threat protection, restricted zone access controls, and password security. These controls ensure only authorized entities can access system resources.
+
+\subsubsection{Asset Management}
+Comprehensive asset lifecycle controls including asset inventory maintenance, asset return procedures, equipment maintenance protocols, secure disposal processes, asset prioritization guidelines, and asset lifecycle management. These controls provide visibility and control over all system assets throughout their operational lifetime.
+
+\subsubsection{Supply Chain Management}
+Third-party risk controls addressing supplier security management, software version protection, software bill of materials generation, supply chain integrity assurance, cloud cybersecurity measures, and outsourced development oversight. These controls mitigate risks introduced through external dependencies and partnerships.
+
+\subsubsection{Monitoring \& Alerting}
+Continuous security monitoring controls including network and communications monitoring, intrusion detection and prevention systems, event detection communication, anomaly detection, cyber actor detection, telemetry monitoring, reinforcement learning systems, RF mapping, personnel monitoring, dependency confusion protection, and Security Information and Event Management (SIEM) integration. These controls provide real-time threat detection and response capabilities.
+
+\subsubsection{Incident Response}
+Security incident management controls including public relations management, incident response planning, incident threshold definition, emergency power systems, incident recovery procedures, secure cabling protocols, critical service delivery requirements, capacity management, and system redundancy. These controls ensure effective response to and recovery from security incidents.
+
+\subsubsection{Capacity Building}
+Organizational capability enhancement controls including information sharing mechanisms, cybersecurity awareness and training programs, and cyber threat intelligence collection and analysis. These controls strengthen overall organizational cybersecurity posture and situational awareness.
+
+\subsubsection{Testing}
+Security validation controls including software mission assurance, comprehensive software and hardware testing, dynamic code analysis, static code analysis, long duration testing, machine learning data integrity verification, dual authorization for on-orbit servicing, simulation testing, and detection process testing. These controls validate security measures and identify potential vulnerabilities.
+
+\subsubsection{Continuous Improvement}
+Ongoing enhancement controls including detection process improvement and oversight and governance mechanisms. These controls ensure the cybersecurity program evolves and improves based on operational experience and changing threat landscapes.
+
+\subsubsection{Defense Capabilities}
+Active protection controls including satellite maneuverability, defensive jamming and spoofing, deception and decoys, antenna nulling and adaptive filtering, physical seizure capabilities, sensor filtering and shuttering, defensive dazzling and blinding systems, and protective technology mechanisms. These controls provide active defense capabilities against sophisticated threats.
+
+\subsection{Lifecycle-Aware Control Application}
+
+The control framework recognizes that different cybersecurity measures are appropriate at different phases of the space mission lifecycle. Controls are mapped to specific lifecycle phases:
+
+\begin{itemize}
+    \item \textbf{All Phases}: Foundational controls applicable throughout the entire mission lifecycle
+    \item \textbf{Phase B/C}: Design and development phase controls focusing on secure system architecture
+    \item \textbf{Phase D}: Integration and testing phase controls ensuring secure implementation
+    \item \textbf{Phase E}: Operations phase controls providing ongoing security during mission execution
+    \item \textbf{Phase F}: End-of-life phase controls managing secure system decommissioning
+\end{itemize}
+
+\subsection{Segment-Specific Control Targeting}
+
+Controls are strategically applied across different space system segments based on threat applicability and operational requirements:
+
+\begin{itemize}
+    \item \textbf{Ground Segment}: Controls protecting terrestrial infrastructure including ground stations, mission control centers, and data processing facilities
+    \item \textbf{Space Segment}: Controls securing space-based assets including satellites, spacecraft, and orbital platforms
+    \item \textbf{Link Segment}: Controls protecting communication pathways between space and ground segments
+    \item \textbf{User Segment}: Controls securing end-user interfaces and data consumption points
+    \item \textbf{Human Resources}: Controls addressing personnel security, training, and insider threat mitigation
+\end{itemize}
+
+\subsection{Risk-Based Control Prioritization}
+
+The framework employs risk-based prioritization to guide control implementation decisions. Controls are evaluated based on their effectiveness in addressing specific risk criteria:
+
+\begin{itemize}
+    \item \textbf{Vulnerability Effectiveness}: Controls that reduce system vulnerability to exploitation
+    \item \textbf{Mitigation Presence}: Controls that provide active threat mitigation capabilities
+    \item \textbf{Detection Probability}: Controls that enhance threat detection and monitoring capabilities
+    \item \textbf{Access Complexity}: Controls that increase the difficulty of unauthorized system access
+    \item \textbf{Privilege Requirement}: Controls that enforce appropriate privilege levels for system operations
+    \item \textbf{Response Delay}: Controls that improve incident response timing and effectiveness
+    \item \textbf{Resilience Impact}: Controls that enhance system resilience and recovery capabilities
+\end{itemize}
+
+This comprehensive, multi-framework approach ensures that space system cybersecurity addresses the full spectrum of relevant threats while leveraging established best practices from both general cybersecurity and space-specific domains. The systematic categorization and lifecycle mapping of controls provides practical guidance for implementing appropriate security measures throughout the space mission lifecycle.
 
 \section{Framework Validation Methodology}
 
@@ -2659,22 +2759,22 @@ In conclusion, this thesis demonstrates that systematic approaches to cybersecur
 % ============================================================================
 \backmatter
 
-\begin{thebibliography}{9}
-\bibitem{NIST800-30}
-National Institute of Standards and Technology (NIST) (2012) \emph{Guide
-\bibitem{ISO27005}
-ISO27005 \emph{Risk Management - Guidelines for Information Security Risk Management}
-\bibitem{ENISA Space Threat Landscape}
-European Union Agency for Cybersecurity (ENISA) (2020) \emph{ENISA Threat Landscape for Space Systems}
-\bibitem{Communication Security}
-Pavur et al. (2020) \emph{A Tale of Sea and Sky On the Security of Maritime VSAT Communications}
-\bibitem{Ground Segment Security}
-Santamarta (2014) \emph{SATCOM Terminals: Hacking by Air, Sea, and Land}
-\bibitem{Supply Chain Risks}
-Peterson et al. (2019) \emph{Introduction to U-Net and Res-Net for Image Segmentation}
-\bibitem{Topic}
-Autore \emph{Titolo}
-\end{thebibliography}
+%\begin{thebibliography}{9}
+%\bibitem{NIST800-30}
+%National Institute of Standards and Technology (NIST) (2012) \emph{Guide
+%\bibitem{ISO27005}
+%ISO27005 \emph{Risk Management - Guidelines for Information Security Risk Management}
+%\bibitem{ENISA Space Threat Landscape}
+%European Union Agency for Cybersecurity (ENISA) (2020) \emph{ENISA Threat Landscape for Space Systems}
+%\bibitem{Communication Security}
+%Pavur et al. (2020) \emph{A Tale of Sea and Sky On the Security of Maritime VSAT Communications}
+%\bibitem{Ground Segment Security}
+%Santamarta (2014) \emph{SATCOM Terminals: Hacking by Air, Sea, and Land}
+%\bibitem{Supply Chain Risks}
+%Peterson et al. (2019) \emph{Introduction to U-Net and Res-Net for Image Segmentation}
+%\bibitem{Topic}
+%Autore \emph{Titolo}
+%\end{thebibliography}
 
 \printbibliography
 

@@ -7,6 +7,9 @@ a = Analysis(
     binaries=[],
     datas=[
         ('Legacy.csv', '.'), 
+        ('Threat.csv', '.'),
+        ('Asset.csv', '.'),
+        ('Control.csv', '.'),
         ('export_import_functions.py', '.'),
         ('logo.ico', '.'),
         ('attack_graph_threat_relations.csv', '.')
