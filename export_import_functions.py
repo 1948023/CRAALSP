@@ -18,7 +18,7 @@ def get_base_path():
     if getattr(sys, 'frozen', False):
         # Running as compiled executable
         # PyInstaller stores data files in sys._MEIPASS
-        return getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+        return os.path.dirname(sys.executable)
     else:
         # Running as script
         return os.path.dirname(os.path.abspath(__file__))
@@ -702,7 +702,7 @@ class ExportImportManager:
         """Get list of threats that have been analyzed"""
         analyzed_threats = []
         
-        for threat_name in self.app.threat_data.keys():
+        for threat_name in sorted(self.app.threat_data.keys()):
             threat_data = self.app.threat_data[threat_name]
             has_valid_risk = False
             
@@ -1000,7 +1000,7 @@ class ExportImportManager:
         
         # Data
         assets_added = 0
-        if threat_name in self.app.threat_data:
+        if threat_name in sorted(self.app.threat_data):
             threat_data = self.app.threat_data[threat_name]
             
             for asset_key, threat_asset_data in threat_data.items():

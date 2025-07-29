@@ -49,8 +49,7 @@ def get_base_path():
     """Get the base path for the application (works with both .py and .exe)"""
     if getattr(sys, 'frozen', False):
         # Running as compiled executable
-        # PyInstaller stores data files in sys._MEIPASS
-        return getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+        return os.path.dirname(sys.executable)
     else:
         # Running as script
         return os.path.dirname(os.path.abspath(__file__))
@@ -1736,7 +1735,7 @@ class AttackGraphAnalyzer:
                     self.choice = None
                     self.root = tk.Toplevel()
                     self.root.title("🎯 Interactive Analysis Options")
-                    self.root.geometry("650x450")
+                    self.root.geometry("650x550")
                     self.root.resizable(False, False)
                     self.root.configure(bg='#f8fafc')
                     
@@ -1761,7 +1760,7 @@ class AttackGraphAnalyzer:
                     header_frame.pack_propagate(False)
                     
                     title_label = tk.Label(header_frame, text="🎯 Interactive Analysis Options",
-                                          font=('Arial', 18, 'bold'),
+                                          font=('Segoe UI', 18, 'bold'),
                                           fg='white', bg='#1e40af')
                     title_label.pack(expand=True)
                     
@@ -1772,7 +1771,7 @@ class AttackGraphAnalyzer:
                     # Info
                     info_label = tk.Label(content_frame, 
                                          text="Choose the type of analysis you want to perform:",
-                                         font=('Arial', 12), bg='#f8fafc', fg='#374151')
+                                         font=('Segoe UI', 12), bg='#f8fafc', fg='#374151')
                     info_label.pack(pady=(0, 25))
                     
                     # Enhanced buttons with icons and descriptions
@@ -1815,7 +1814,7 @@ class AttackGraphAnalyzer:
                         
                         btn = tk.Button(btn_container,
                                        text=config['text'],
-                                       font=('Arial', 13, 'bold'),
+                                       font=('Segoe UI', 13, 'bold'),
                                        bg=config['color'], fg='white',
                                        relief='raised', bd=3,
                                        cursor='hand2',
@@ -1826,7 +1825,7 @@ class AttackGraphAnalyzer:
                         # Description label
                         desc_label = tk.Label(btn_container,
                                              text=config['desc'],
-                                             font=('Arial', 9),
+                                             font=('Segoe UI', 9),
                                              bg='#f8fafc', fg='#6b7280',
                                              justify=tk.LEFT)
                         desc_label.pack(side=tk.LEFT, expand=True, anchor='w')
@@ -2622,7 +2621,7 @@ def main():
                 self.choice = None
                 self.root = tk.Toplevel()
                 self.root.title("🚀 CRAAL Space Threat Analyzer")
-                self.root.geometry("600x400")
+                self.root.geometry("600x500")
                 self.root.resizable(False, False)
                 
                 # Center the window
@@ -2657,13 +2656,13 @@ def main():
                 
                 title_label = tk.Label(header_frame, 
                                       text="🛰️ CRAAL Space Threat Analyzer", 
-                                      font=('Arial', 18, 'bold'),
+                                      font=('Segoe UI', 18, 'bold'),
                                       fg='white', bg='#1e3a8a')
                 title_label.pack(expand=True)
                 
                 subtitle_label = tk.Label(header_frame, 
                                          text="Cybersecurity Risk Assessment & Attack Learning", 
-                                         font=('Arial', 10, 'italic'),
+                                         font=('Segoe UI', 10, 'italic'),
                                          fg='#bfdbfe', bg='#1e3a8a')
                 subtitle_label.pack()
                 
@@ -2673,8 +2672,8 @@ def main():
                 
                 # Instructions
                 instruction_label = tk.Label(content_frame, 
-                                            text="Choose your analysis mode:",
-                                            font=('Arial', 14, 'bold'),
+                                            text="Choose the analysis mode:",
+                                            font=('Segoe UI', 14, 'bold'),
                                             bg='#f0f8ff', fg='#1e3a8a')
                 instruction_label.pack(pady=(0, 20))
                 
@@ -2684,22 +2683,22 @@ def main():
                 
                 # Interactive mode button
                 interactive_btn = tk.Button(buttons_frame, 
-                                           text="🎮 Interactive Analysis\n(Choose threats manually with GUI)",
-                                           font=('Arial', 12, 'bold'),
+                                           text="🎮 Specific connection and path analysis\nChoose threat manually with GUI",
+                                           font=('Segoe UI', 11, 'bold'),
                                            bg='#10b981', fg='white',
                                            relief='raised', bd=3,
-                                           width=25, height=3,
+                                           width=33, height=3,
                                            cursor='hand2',
                                            command=lambda: self.set_choice(True))
                 interactive_btn.pack(pady=10)
                 
                 # Auto mode button  
                 auto_btn = tk.Button(buttons_frame, 
-                                    text="🤖 Automatic Analysis\n(Uses pre-configured settings)",
-                                    font=('Arial', 12, 'bold'),
+                                    text="🤖 Automatic Analysis\nComplete analysis",
+                                    font=('Segoe UI', 11, 'bold'),
                                     bg='#3b82f6', fg='white',
                                     relief='raised', bd=3,
-                                    width=25, height=3,
+                                    width=33, height=3,
                                     cursor='hand2',
                                     command=lambda: self.set_choice(False))
                 auto_btn.pack(pady=10)
@@ -2707,7 +2706,7 @@ def main():
                 # Cancel button
                 cancel_btn = tk.Button(buttons_frame, 
                                       text="❌ Cancel",
-                                      font=('Arial', 11),
+                                      font=('Segoe UI', 11),
                                       bg='#ef4444', fg='white',
                                       relief='raised', bd=2,
                                       width=15, height=1,
@@ -2716,15 +2715,15 @@ def main():
                 cancel_btn.pack(pady=10)
                 
                 # Footer
-                footer_frame = tk.Frame(main_frame, bg='#e5e7eb', height=40)
-                footer_frame.pack(fill=tk.X, side=tk.BOTTOM, padx=5, pady=5)
-                footer_frame.pack_propagate(False)
+                #footer_frame = tk.Frame(main_frame, bg='#e5e7eb', height=40)
+                #footer_frame.pack(fill=tk.X, side=tk.BOTTOM, padx=5, pady=5)
+                #footer_frame.pack_propagate(False)
                 
-                footer_label = tk.Label(footer_frame, 
-                                       text="💡 Interactive mode allows you to manually select specific threats for detailed analysis",
-                                       font=('Arial', 9),
-                                       bg='#e5e7eb', fg='#6b7280')
-                footer_label.pack(expand=True)
+                #footer_label = tk.Label(footer_frame, 
+                #                       text="💡 Interactive mode allows you to manually select specific threats for detailed analysis",
+                #                       font=('Segoe UI', 9),
+                #                       bg='#e5e7eb', fg='#6b7280')
+                #footer_label.pack(expand=True)
                 
                 # Bind hover effects
                 self.add_hover_effects(interactive_btn, '#059669', '#10b981')
@@ -2845,7 +2844,7 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
             
             title_label = tk.Label(header_frame, 
                                   text=f"{icon} Select {self.selection_type.capitalize()} Threat",
-                                  font=('Arial', 18, 'bold'),
+                                  font=('Segoe UI', 18, 'bold'),
                                   fg='white', bg='#1e40af')
             title_label.pack(expand=True)
             
@@ -2859,13 +2858,13 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
             
             info_text = f"📊 Available threats: {len(self.threats)}   |   💡 Use search to filter   |   🎲 Random selection available"
             info_label = tk.Label(info_frame, text=info_text,
-                                 font=('Arial', 10), bg='#e0f2fe', fg='#0c4a6e',
+                                 font=('Segoe UI', 10), bg='#e0f2fe', fg='#0c4a6e',
                                  pady=8)
             info_label.pack()
             
             # Search frame with enhanced styling
             search_frame = tk.LabelFrame(content_frame, text="🔍 Search & Filter", 
-                                        font=('Arial', 11, 'bold'),
+                                        font=('Segoe UI', 11, 'bold'),
                                         bg='#f8fafc', fg='#1e40af',
                                         relief='groove', bd=2)
             search_frame.pack(fill=tk.X, pady=(0, 15))
@@ -2873,25 +2872,25 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
             search_inner = tk.Frame(search_frame, bg='#f8fafc')
             search_inner.pack(fill=tk.X, padx=10, pady=10)
             
-            tk.Label(search_inner, text="Search:", font=('Arial', 10, 'bold'),
+            tk.Label(search_inner, text="Search:", font=('Segoe UI', 10, 'bold'),
                     bg='#f8fafc', fg='#374151').pack(side=tk.LEFT, padx=(0, 8))
             
             self.search_var = tk.StringVar()
             search_entry = tk.Entry(search_inner, textvariable=self.search_var,
-                                   font=('Arial', 11), relief='solid', bd=1,
+                                   font=('Segoe UI', 11), relief='solid', bd=1,
                                    highlightthickness=2, highlightcolor='#3b82f6')
             search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
             search_entry.bind('<KeyRelease>', self.filter_threats)
             
             clear_btn = tk.Button(search_inner, text="Clear", 
-                                 font=('Arial', 9), bg='#6b7280', fg='white',
+                                 font=('Segoe UI', 9), bg='#6b7280', fg='white',
                                  relief='raised', bd=2, cursor='hand2',
                                  command=self.clear_search)
             clear_btn.pack(side=tk.RIGHT)
             
             # Main selection frame
             selection_frame = tk.LabelFrame(content_frame, text="🎯 Threat Selection",
-                                           font=('Arial', 11, 'bold'),
+                                           font=('Segoe UI', 11, 'bold'),
                                            bg='#f8fafc', fg='#1e40af',
                                            relief='groove', bd=2)
             selection_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
@@ -2935,7 +2934,7 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
             
             # Button styling
             button_style = {
-                'font': ('Arial', 11, 'bold'),
+                'font': ('Segoe UI', 11, 'bold'),
                 'relief': 'raised',
                 'bd': 3,
                 'cursor': 'hand2',
@@ -2953,7 +2952,7 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
                                   command=self.select_current, **button_style)
             select_btn.pack(side=tk.LEFT, padx=(0, 8))
             
-            skip_btn = tk.Button(button_frame, text="⏭️ Skip (Auto)", 
+            skip_btn = tk.Button(button_frame, text="⏭️ Skip", 
                                 bg='#f59e0b', fg='white',
                                 command=self.skip_selection, **button_style)
             skip_btn.pack(side=tk.LEFT, padx=(0, 8))

@@ -443,7 +443,7 @@ class RiskAssessmentTool:
         """Open Threat Analysis window"""
         window = tk.Toplevel(self.root)
         window.title("Threat Analysis")
-        window.geometry("1650x800")
+        window.geometry("1670x800")
         window.configure(bg=self.COLORS['white'])
         window.transient(self.root)
         window.grab_set()
@@ -462,7 +462,7 @@ class RiskAssessmentTool:
         """Open Asset Analysis window"""
         window = tk.Toplevel(self.root)
         window.title("Asset Analysis")
-        window.geometry("1650x800")
+        window.geometry("1600x800")
         window.configure(bg=self.COLORS['white'])
         window.transient(self.root)
         window.grab_set()
@@ -1059,7 +1059,7 @@ class RiskAssessmentTool:
                     bd=1,
                     anchor=anchor,
                     justify=justify,
-                    wraplength=120,
+                    wraplength=135,
                     width=16,
                     height=3 if i == 0 else 5,
                     padx=6,
@@ -1411,10 +1411,12 @@ class RiskAssessmentTool:
         threat_values = []
         for col_idx in [0, 1, 2, 3, 4]:
             if col_idx not in self.combo_vars[key]:
+                continue
                 self.update_display(key, 7, "")
                 return
             value_str = self.combo_vars[key][col_idx].get().strip()
             if not value_str or value_str == "0":
+                continue
                 self.update_display(key, 7, "")
                 return
             try:
@@ -1423,9 +1425,9 @@ class RiskAssessmentTool:
                 self.update_display(key, 7, "")
                 return
         
-        if len(threat_values) == 5:
+        if len(threat_values) > 0:
             # Calculate threat-specific likelihood using quadratic mean
-            threat_quadratic_mean = math.sqrt(sum(x**2 for x in threat_values) / 5)
+            threat_quadratic_mean = math.sqrt(sum(x**2 for x in threat_values) / len(threat_values))
             threat_likelihood = (threat_quadratic_mean - 1) / 4  # Normalize [1,5] -> [0,1]
             threat_likelihood = max(0.0, min(1.0, threat_likelihood))
             
@@ -1436,7 +1438,7 @@ class RiskAssessmentTool:
                 # Convert both likelihoods to categories
                 threat_likelihood_cat = self.value_to_category(threat_likelihood)
                 asset_likelihood_cat = self.value_to_category(asset_likelihood)
-                
+                #print (key)
                 # Combine using ISO 27005 risk matrix (treat as likelihood x likelihood)
                 combined_likelihood_cat = self.RISK_MATRIX.get((threat_likelihood_cat, asset_likelihood_cat), threat_likelihood_cat)
                 
@@ -1458,11 +1460,13 @@ class RiskAssessmentTool:
         values = []
         for col_idx in [5, 6]:
             if col_idx not in self.combo_vars[key]:
+                continue
                 self.update_display(key, 8, "")
                 return
             
             value_str = self.combo_vars[key][col_idx].get().strip()
             if not value_str or value_str == "0":
+                continue
                 self.update_display(key, 8, "")
                 return
             
@@ -1472,9 +1476,9 @@ class RiskAssessmentTool:
                 self.update_display(key, 8, "")
                 return
         
-        if len(values) == 2:
+        if len(values) >0 :
             # Calculate threat-specific impact using quadratic mean
-            threat_quadratic_mean = math.sqrt(sum(x**2 for x in values) / 2)
+            threat_quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
             threat_impact = (threat_quadratic_mean - 1) / 4  # Normalize [1,5] -> [0,1]
             threat_impact = max(0.0, min(1.0, threat_impact))
             
@@ -1507,11 +1511,13 @@ class RiskAssessmentTool:
         values = []
         for col_idx in [0, 1, 2, 3]:
             if col_idx not in self.combo_vars[key]:
+                continue
                 self.update_display(key, 9, "")  # Likelihood is at column 9
                 return
             
             value_str = self.combo_vars[key][col_idx].get().strip()
             if not value_str or value_str == "0":
+                continue
                 self.update_display(key, 9, "")
                 return
             
@@ -1521,9 +1527,9 @@ class RiskAssessmentTool:
                 self.update_display(key, 9, "")
                 return
         
-        if len(values) == 4:
+        if len(values) >0:
             # Use quadratic mean for likelihood calculation
-            quadratic_mean = math.sqrt(sum(x**2 for x in values) / 4)
+            quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
             likelihood = (quadratic_mean - 1) / 4  # [1,5] -> [0,1]
             likelihood = max(0.0, min(1.0, likelihood))            # Convert to category
             likelihood_category = self.value_to_category(likelihood)
@@ -1539,11 +1545,13 @@ class RiskAssessmentTool:
         values = []
         for col_idx in [4, 5, 6, 7, 8]:
             if col_idx not in self.combo_vars[key]:
+                continue
                 self.update_display(key, 10, "")  # Impact is at column 13
                 return
             
             value_str = self.combo_vars[key][col_idx].get().strip()
             if not value_str or value_str == "0":
+                continue
                 self.update_display(key, 10, "")
                 return
             try:
@@ -1552,9 +1560,9 @@ class RiskAssessmentTool:
                 self.update_display(key, 10, "")
                 return
         
-        if len(values) == 5:
+        if len(values) > 0:
             # For assets, use quadratic mean for more conservative approach
-            quadratic_mean = math.sqrt(sum(x**2 for x in values) / 5)
+            quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
             impact = (quadratic_mean - 1) / 4  # [1,5] -> [0,1]
             impact = max(0.0, min(1.0, impact))            # Convert to category
             impact_category = self.value_to_category(impact)
@@ -1748,61 +1756,37 @@ class RiskAssessmentTool:
         window.destroy()
 
     def update_all_threats_in_main_table(self):
-        """Update main table with calculated values for all saved threats"""
+        """Update main table with the likelihood, impact and risk that produce the maximum risk for each threat"""
         risk_priorities = {"Very High": 5, "High": 4, "Medium": 3, "Low": 2, "Very Low": 1, "": 0}
-        
-        # For each threat that has saved data
+
         for threat_name in self.threat_data.keys():
             if threat_name not in self.threat_cells:
                 continue
-            
-            max_likelihood = ""
-            max_impact = ""
-            max_impact = ""
-            max_risk = ""
-            max_priority = 0
-            
-            # Calculate maximum risk for this threat
-            threat_data = self.threat_data[threat_name]
-            
-            for asset_key, asset_data in threat_data.items():
-                # Calculate likelihood from saved data
-                likelihood = self.calculate_likelihood_from_saved_data(asset_data)
-                
-                # Calculate impact from saved data
-                impact = self.calculate_impact_from_saved_data(asset_data)
-                
-                # Calculate risk if both are available
-                if likelihood >= 0 and impact >= 0:
-                    likelihood_cat = self.value_to_category(likelihood)
-                    impact_cat = self.value_to_category(impact)
-                    risk_level = self.RISK_MATRIX.get((likelihood_cat, impact_cat), "")
-                    
-                    priority = risk_priorities.get(risk_level, 0)
-                    if priority > max_priority:
-                        max_priority = priority
-                        max_likelihood = likelihood_cat
-                        max_impact = impact_cat
-                        max_risk = risk_level
-            
-            # Update main table for this threat
-            self.threat_cells[threat_name]['likelihood'].config(text=max_likelihood)
-            self.threat_cells[threat_name]['impact'].config(text=max_impact)
-            self.threat_cells[threat_name]['risk'].config(text=max_risk)
+
+            # Updata main table
+            likelihood, impact, risk = self.get_max_risk_combination(self.threat_data[threat_name])
+            self.threat_cells[threat_name]['likelihood'].config(text=likelihood)
+            self.threat_cells[threat_name]['impact'].config(text=impact)
+            self.threat_cells[threat_name]['risk'].config(text=risk)
 
     def calculate_likelihood_from_saved_data(self, asset_data):
         """Calculate likelihood from saved data for threats combining threat and asset likelihood"""
         try:
             # Calculate threat-specific likelihood from first 5 criteria
-            if not all(str(i) in asset_data for i in [0, 1, 2, 3, 4]):
-                return -1.0
-            
             threat_values = []
             for i in [0, 1, 2, 3, 4]:
-                val = asset_data[str(i)]
-                if not val or val == "0":
-                    return -1.0
-                threat_values.append(float(val))
+                # Use get() with default to safely access the value
+                val = asset_data.get(str(i), "")
+                # Skip empty or zero values but continue with remaining criteria
+                if val and str(val).strip() and str(val) != "0":
+                    try:
+                        threat_values.append(float(val))
+                    except (ValueError, TypeError):
+                        continue  # Skip invalid values but continue processing
+            
+            # Require at least one valid value to calculate threat likelihood
+            if not threat_values:
+                return -1.0
             
             # Calculate threat-specific likelihood using quadratic mean
             threat_quadratic_mean = math.sqrt(sum(x**2 for x in threat_values) / len(threat_values))
@@ -1810,7 +1794,6 @@ class RiskAssessmentTool:
             threat_likelihood = max(0.0, min(1.0, threat_likelihood))
             
             # Get asset likelihood from asset assessment
-            # Extract asset key from current context (assuming similar key structure)
             asset_likelihood = -1.0
             if hasattr(self, 'asset_data') and self.asset_data:
                 # Find the most recent assessment - prioritize assessment_ keys over imported_ keys
@@ -1829,18 +1812,20 @@ class RiskAssessmentTool:
                     # Try to find matching asset data
                     for asset_key, asset_assessment_data in self.asset_data[latest_key].items():
                         # Calculate asset likelihood for comparison
-                        if all(str(i) in asset_assessment_data for i in [0, 1, 2, 3]):
-                            asset_values = []
-                            for i in [0, 1, 2, 3]:
-                                val = asset_assessment_data[str(i)]
-                                if val and val != "0":
+                        asset_values = []
+                        for i in [0, 1, 2, 3]:
+                            val = asset_assessment_data.get(str(i), "")
+                            if val and str(val).strip() and str(val) != "0":
+                                try:
                                     asset_values.append(float(val))
-                            
-                            if len(asset_values) == 4:
-                                asset_quadratic_mean = math.sqrt(sum(x**2 for x in asset_values) / 4)
-                                asset_likelihood = (asset_quadratic_mean - 1) / 4
-                                asset_likelihood = max(0.0, min(1.0, asset_likelihood))
-                                break  # Use first valid asset likelihood found
+                                except (ValueError, TypeError):
+                                    continue
+                        
+                        if asset_values:  # If we have at least one valid value
+                            asset_quadratic_mean = math.sqrt(sum(x**2 for x in asset_values) / len(asset_values))
+                            asset_likelihood = (asset_quadratic_mean - 1) / 4
+                            asset_likelihood = max(0.0, min(1.0, asset_likelihood))
+                            break  # Use first valid asset likelihood found
             
             # Combine threat and asset likelihood if asset data is available
             if asset_likelihood >= 0:
@@ -1861,25 +1846,30 @@ class RiskAssessmentTool:
                 }
                 return category_to_value.get(combined_likelihood_cat, threat_likelihood)
             else:
-                # If no asset data, return -1.0 to indicate empty result
-                return -1.0
-            
-        except (ValueError, KeyError):
+                # If no asset data, return threat likelihood alone
+                return threat_likelihood
+                
+        except Exception as e:
             return -1.0
 
     def calculate_impact_from_saved_data(self, asset_data):
         """Calculate impact from saved data for threats combining threat and asset impact"""
         try:
             # Calculate threat-specific impact from last 2 criteria
-            if not all(str(i) in asset_data for i in [5, 6]):
-                return -1.0
-            
             threat_values = []
             for i in [5, 6]:
-                val = asset_data[str(i)]
-                if not val or val == "0":
-                    return -1.0
-                threat_values.append(float(val))
+                # Use get() with default to safely access the value
+                val = asset_data.get(str(i), "")
+                # Skip empty or zero values but continue with remaining criteria
+                if val and str(val).strip() and str(val) != "0":
+                    try:
+                        threat_values.append(float(val))
+                    except (ValueError, TypeError):
+                        continue  # Skip invalid values but continue processing
+            
+            # Require at least one valid value to calculate threat impact
+            if not threat_values:
+                return -1.0
             
             # Calculate threat-specific impact using quadratic mean
             threat_quadratic_mean = math.sqrt(sum(x**2 for x in threat_values) / len(threat_values))
@@ -1905,18 +1895,20 @@ class RiskAssessmentTool:
                     # Try to find matching asset data
                     for asset_key, asset_assessment_data in self.asset_data[latest_key].items():
                         # Calculate asset impact for comparison
-                        if all(str(i) in asset_assessment_data for i in [4, 5, 6, 7, 8]):
-                            asset_values = []
-                            for i in [4, 5, 6, 7, 8]:
-                                val = asset_assessment_data[str(i)]
-                                if val and val != "0":
+                        asset_values = []
+                        for i in [4, 5, 6, 7, 8]:
+                            val = asset_assessment_data.get(str(i), "")
+                            if val and str(val).strip() and str(val) != "0":
+                                try:
                                     asset_values.append(float(val))
-                            
-                            if len(asset_values) == 5:
-                                asset_quadratic_mean = math.sqrt(sum(x**2 for x in asset_values) / 5)
-                                asset_impact = (asset_quadratic_mean - 1) / 4
-                                asset_impact = max(0.0, min(1.0, asset_impact))
-                                break  # Use first valid asset impact found
+                                except (ValueError, TypeError):
+                                    continue
+                        
+                        if asset_values:  # If we have at least one valid value
+                            asset_quadratic_mean = math.sqrt(sum(x**2 for x in asset_values) / len(asset_values))
+                            asset_impact = (asset_quadratic_mean - 1) / 4
+                            asset_impact = max(0.0, min(1.0, asset_impact))
+                            break  # Use first valid asset impact found
             
             # Combine threat and asset impact if asset data is available
             if asset_impact >= 0:
@@ -1937,11 +1929,135 @@ class RiskAssessmentTool:
                 }
                 return category_to_value.get(combined_impact_cat, threat_impact)
             else:
-                # If no asset data, return -1.0 to indicate empty result
-                return -1.0
-            
-        except (ValueError, KeyError):
+                # If no asset data, return threat impact alone
+                return threat_impact
+                
+        except Exception as e:
             return -1.0
+
+    def get_max_risk_combination(self, threat_data):
+        """
+        Restituisce (likelihood_cat, impact_cat, risk_cat) dell'asset che ha il rischio massimo per un threat.
+        threat_data: dict delle righe asset per uno specifico threat (es: self.threat_data[threat_name])
+        """
+        risk_priorities = {"Very High": 5, "High": 4, "Medium": 3, "Low": 2, "Very Low": 1, "": 0}
+        best_likelihood = ""
+        best_impact = ""
+        best_risk = ""
+        max_priority = 0
+
+        # Trova la chiave dell'ultimo asset assessment
+        latest_key = None
+        if hasattr(self, 'asset_data') and self.asset_data:
+            assessment_keys = [k for k in self.asset_data.keys() if k.startswith('assessment_')]
+            imported_keys = [k for k in self.asset_data.keys() if k.startswith('imported_')]
+            if assessment_keys:
+                latest_key = max(assessment_keys)
+            elif imported_keys:
+                latest_key = max(imported_keys)
+            elif self.asset_data:
+                latest_key = max(self.asset_data.keys())
+
+        asset_assessment = self.asset_data[latest_key] if latest_key and latest_key in self.asset_data else {}
+
+        for asset_key, asset_data in threat_data.items():
+            # --- Likelihood ---
+            # Threat-specific likelihood (primi 5 criteri)
+            threat_values = []
+            for i in [0, 1, 2, 3, 4]:
+                val = asset_data.get(str(i), "")
+                if val and str(val) != "0":
+                    try:
+                        threat_values.append(float(val))
+                    except (ValueError, TypeError):
+                        pass
+            
+            if not threat_values:  # Se non ci sono valori validi, skip
+                continue
+                
+            threat_quadratic_mean = math.sqrt(sum(x**2 for x in threat_values) / len(threat_values))
+            threat_likelihood = (threat_quadratic_mean - 1) / 4
+            threat_likelihood = max(0.0, min(1.0, threat_likelihood))
+
+            # Asset likelihood (primi 4 criteri)
+            asset_likelihood = -1.0
+            if asset_key in asset_assessment:
+                asset_row = asset_assessment[asset_key]
+                asset_values = []
+                for i in [0, 1, 2, 3]:
+                    val = asset_row.get(str(i), "")
+                    if val and str(val) != "0":
+                        try:
+                            asset_values.append(float(val))
+                        except (ValueError, TypeError):
+                            pass
+                
+                if asset_values:  # Calcola solo se ci sono valori validi
+                    asset_quadratic_mean = math.sqrt(sum(x**2 for x in asset_values) / len(asset_values))
+                    asset_likelihood = (asset_quadratic_mean - 1) / 4
+                    asset_likelihood = max(0.0, min(1.0, asset_likelihood))
+
+            if asset_likelihood < 0:
+                continue
+
+            threat_likelihood_cat = self.value_to_category(threat_likelihood)
+            asset_likelihood_cat = self.value_to_category(asset_likelihood)
+            combined_likelihood_cat = self.RISK_MATRIX.get((threat_likelihood_cat, asset_likelihood_cat), threat_likelihood_cat)
+
+            # --- Impact ---
+            # Threat-specific impact (ultimi 2 criteri)
+            threat_impact_values = []
+            for i in [5, 6]:
+                val = asset_data.get(str(i), "")
+                if val and str(val) != "0":
+                    try:
+                        threat_impact_values.append(float(val))
+                    except (ValueError, TypeError):
+                        pass
+            
+            if not threat_impact_values:  # Se non ci sono valori validi, skip
+                continue
+                
+            threat_impact_mean = math.sqrt(sum(x**2 for x in threat_impact_values) / len(threat_impact_values))
+            threat_impact = (threat_impact_mean - 1) / 4
+            threat_impact = max(0.0, min(1.0, threat_impact))
+
+            # Asset impact (ultimi 5 criteri)
+            asset_impact = -1.0
+            if asset_key in asset_assessment:
+                asset_row = asset_assessment[asset_key]
+                asset_impact_values = []
+                for i in [4, 5, 6, 7, 8]:
+                    val = asset_row.get(str(i), "")
+                    if val and str(val) != "0":
+                        try:
+                            asset_impact_values.append(float(val))
+                        except (ValueError, TypeError):
+                            pass
+                
+                if asset_impact_values:  # Calcola solo se ci sono valori validi
+                    asset_impact_mean = math.sqrt(sum(x**2 for x in asset_impact_values) / len(asset_impact_values))
+                    asset_impact = (asset_impact_mean - 1) / 4
+                    asset_impact = max(0.0, min(1.0, asset_impact))
+
+            if asset_impact < 0:
+                continue
+
+            threat_impact_cat = self.value_to_category(threat_impact)
+            asset_impact_cat = self.value_to_category(asset_impact)
+            combined_impact_cat = self.RISK_MATRIX.get((threat_impact_cat, asset_impact_cat), threat_impact_cat)
+
+            # --- Risk ---
+            risk_cat = self.RISK_MATRIX.get((combined_likelihood_cat, combined_impact_cat), "")
+
+            priority = risk_priorities.get(risk_cat, 0)
+            if priority > max_priority:
+                max_priority = priority
+                best_likelihood = combined_likelihood_cat
+                best_impact = combined_impact_cat
+                best_risk = risk_cat
+
+        return best_likelihood, best_impact, best_risk
 
     def get_asset_likelihood_for_key(self, key):
         """Get asset likelihood for a specific asset key from the latest asset assessment"""
@@ -1949,8 +2065,8 @@ class RiskAssessmentTool:
             return -1.0
         
         # Find the most recent assessment - prioritize assessment_ keys over imported_ keys
-        assessment_keys = [key for key in self.asset_data.keys() if key.startswith('assessment_')]
-        imported_keys = [key for key in self.asset_data.keys() if key.startswith('imported_')]
+        assessment_keys = [k for k in self.asset_data.keys() if k.startswith('assessment_')]
+        imported_keys = [k for k in self.asset_data.keys() if k.startswith('imported_')]
         
         # Use the latest assessment key if available, otherwise use latest imported key
         if assessment_keys:
@@ -1972,24 +2088,29 @@ class RiskAssessmentTool:
         
         # Calculate asset likelihood from first 4 criteria (Dependency, Penetration, Cyber Maturity, Trust)
         try:
-            # Check if necessary values are present (first 4 criteria)
-            if not all(str(i) in asset_data for i in [0, 1, 2, 3]):
-                return -1.0
-            
             values = []
             for i in [0, 1, 2, 3]:
-                val = asset_data[str(i)]
-                if not val or val == "0":
-                    return -1.0
-                values.append(float(val))
+                # Use get() with default to safely access the value
+                val = asset_data.get(str(i), "")
+                # Skip empty or zero values but continue with remaining criteria
+                if val and str(val).strip() and str(val) != "0":
+                    try:
+                        values.append(float(val))
+                    except (ValueError, TypeError):
+                        continue  # Skip invalid values but continue processing
+            
+            # Require at least one valid value to calculate likelihood
+            if not values:
+                return -1.0
             
             # Use quadratic mean for asset likelihood
-            quadratic_mean = math.sqrt(sum(x**2 for x in values) / 4)
+            quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
             likelihood = (quadratic_mean - 1) / 4  # Normalize [1,5] -> [0,1]
             
             return max(0.0, min(1.0, likelihood))
             
-        except (ValueError, KeyError):
+        except Exception as e:
+            # Catch any unexpected errors and return -1.0
             return -1.0
 
     def get_asset_impact_for_key(self, key):
@@ -1998,8 +2119,8 @@ class RiskAssessmentTool:
             return -1.0
         
         # Find the most recent assessment - prioritize assessment_ keys over imported_ keys
-        assessment_keys = [key for key in self.asset_data.keys() if key.startswith('assessment_')]
-        imported_keys = [key for key in self.asset_data.keys() if key.startswith('imported_')]
+        assessment_keys = [k for k in self.asset_data.keys() if k.startswith('assessment_')]
+        imported_keys = [k for k in self.asset_data.keys() if k.startswith('imported_')]
         
         # Use the latest assessment key if available, otherwise use latest imported key
         if assessment_keys:
@@ -2021,24 +2142,29 @@ class RiskAssessmentTool:
         
         # Calculate asset impact from last 5 criteria (Performance, Schedule, Costs, Reputation, Recovery)
         try:
-            # Check if necessary values are present (last 5 criteria)
-            if not all(str(i) in asset_data for i in [4, 5, 6, 7, 8]):
-                return -1.0
-            
             values = []
             for i in [4, 5, 6, 7, 8]:
-                val = asset_data[str(i)]
-                if not val or val == "0":
-                    return -1.0
-                values.append(float(val))
+                # Use get() with default to safely access the value
+                val = asset_data.get(str(i), "")
+                # Skip empty or zero values but continue with remaining criteria
+                if val and str(val).strip() and str(val) != "0":
+                    try:
+                        values.append(float(val))
+                    except (ValueError, TypeError):
+                        continue  # Skip invalid values but continue processing
+            
+            # Require at least one valid value to calculate impact
+            if not values:
+                return -1.0
             
             # Use quadratic mean for asset impact
-            quadratic_mean = math.sqrt(sum(x**2 for x in values) / 5)
+            quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
             impact = (quadratic_mean - 1) / 4  # Normalize [1,5] -> [0,1]
             
             return max(0.0, min(1.0, impact))
             
-        except (ValueError, KeyError):
+        except Exception as e:
+            # Catch any unexpected errors and return -1.0
             return -1.0
 
     def setup_combobox_styles(self):
@@ -2325,16 +2451,16 @@ class RiskAssessmentTool:
             
             # Calculate likelihood if we have all 4 values
             likelihood_cat = ""
-            if len(likelihood_values) == 4:
-                quadratic_mean = math.sqrt(sum(x**2 for x in likelihood_values) / 4)
+            if len(likelihood_values) > 0:
+                quadratic_mean = math.sqrt(sum(x**2 for x in likelihood_values) / len(likelihood_values))
                 likelihood = (quadratic_mean - 1) / 4  # Normalize [1,5] -> [0,1]
                 likelihood = max(0.0, min(1.0, likelihood))
                 likelihood_cat = self.value_to_category(likelihood)
             
             # Calculate impact if we have all 5 values
             impact_cat = ""
-            if len(impact_values) == 5:
-                quadratic_mean = math.sqrt(sum(x**2 for x in impact_values) / 5)
+            if len(impact_values) > 0:
+                quadratic_mean = math.sqrt(sum(x**2 for x in impact_values) / len(impact_values))
                 impact = (quadratic_mean - 1) / 4  # Normalize [1,5] -> [0,1]
                 impact = max(0.0, min(1.0, impact))
                 impact_cat = self.value_to_category(impact)

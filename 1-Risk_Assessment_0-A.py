@@ -663,11 +663,13 @@ class RiskAssessmentTool:
         values = []
         for col_idx in [0, 1, 2]:
             if col_idx not in self.combo_vars[key]:
+                continue
                 self.update_display(key, 5, "")  # Likelihood column
                 return
             
             value_str = self.combo_vars[key][col_idx].get().strip()
             if not value_str or value_str == "0":
+                continue
                 self.update_display(key, 5, "")
                 return
             
@@ -677,12 +679,12 @@ class RiskAssessmentTool:
                 self.update_display(key, 5, "")
                 return
         
-        if len(values) != 3:
-            self.update_display(key, 5, "")
-            return
+        #if len(values) != 3:
+        #    self.update_display(key, 5, "")
+        #    return
 
         # Calculate Likelihood using quadratic mean
-        quadratic_mean = math.sqrt(sum(x**2 for x in values) / 3)
+        quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
         likelihood = (quadratic_mean - 1) / 4  # Normalize [1,5] -> [0,1]
         likelihood = max(0.0, min(1.0, likelihood))
 
@@ -695,6 +697,7 @@ class RiskAssessmentTool:
 
         # Update main table in real-time also for likelihood
         self.update_main_table_risk_realtime()
+
     def get_saved_likelihood(self, threat_name, asset_num):
         """Get saved likelihood for specific threat/asset using only base calculation"""
         if threat_name not in self.threat_data:
@@ -730,6 +733,7 @@ class RiskAssessmentTool:
             pass
         
         return 0.0
+    
     def calculate_impact(self, key):
         """Calculates Impact as the quadratic mean of Operational Impact and Recovery Time"""
         if key not in self.combo_vars:
@@ -739,11 +743,13 @@ class RiskAssessmentTool:
         values = []
         for col_idx in [3, 4]:
             if col_idx not in self.combo_vars[key]:
+                continue
                 self.update_display(key, 6, "")  # Impact column
                 return
             
             value_str = self.combo_vars[key][col_idx].get().strip()
             if not value_str or value_str == "0":
+                continue
                 self.update_display(key, 6, "")
                 return
             
@@ -752,20 +758,19 @@ class RiskAssessmentTool:
             except ValueError:
                 self.update_display(key, 6, "")
                 return
-        if len(values) == 2:
-            # Quadratic mean normalized
-            quadratic_mean = math.sqrt(sum(x**2 for x in values) / 2)
-            impact = (quadratic_mean - 1) / 4  # [1,5] -> [0,1]
-            impact = max(0.0, min(1.0, impact))
+        
+        # Quadratic mean normalized
+        quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
+        impact = (quadratic_mean - 1) / 4  # [1,5] -> [0,1]
+        impact = max(0.0, min(1.0, impact))
 
-            # Update display with category instead of numeric value
-            impact_category = self.value_to_category(impact)
-            self.update_display(key, 6, impact_category)  # Impact column
+        # Update display with category instead of numeric value
+        impact_category = self.value_to_category(impact)
+        self.update_display(key, 6, impact_category)  # Impact column
 
-            # Recalculate risk
-            self.calculate_risk(key)
-        else:
-            self.update_display(key, 6, "")
+        # Recalculate risk
+        self.calculate_risk(key)
+
     def calculate_risk(self, key):
         """Calculates Risk using the Likelihood x Impact matrix"""
         if key not in self.impact_entries:
@@ -1159,14 +1164,22 @@ class RiskAssessmentTool:
                                 
                                 # Use base_val - 1 for better calibration
                                 adjusted_val = max(1, base_val)
-                                
-                                threat_data[asset_key] = {
-                                    '0': str(adjusted_val),  # Vulnerability
-                                    '1': str(adjusted_val),  # Access Control
-                                    '2': str(adjusted_val),  # Defense Capability
-                                    '3': '3',  # Operational Impact (medium)
-                                    '4': '3'   # Recovery Time (medium)
+                                if threat_name == "Jamming":
+                                    threat_data[asset_key] = {
+                                        '0': str(adjusted_val),  # Vulnerability
+                                        '1': '',  # Access Control
+                                        '2': str(adjusted_val),  # Defense Capability
+                                        '3': '3',  # Operational Impact (medium)
+                                        '4': '3'   # Recovery Time (medium)
                                 }
+                                else:
+                                    threat_data[asset_key] = {
+                                        '0': str(adjusted_val),  # Vulnerability
+                                        '1': str(adjusted_val),  # Access Control
+                                        '2': str(adjusted_val),  # Defense Capability
+                                        '3': '3',  # Operational Impact (medium)
+                                        '4': '3'   # Recovery Time (medium)
+                                    }
                     
                     if threat_data:
                         self.threat_data[threat_name] = threat_data

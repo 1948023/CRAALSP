@@ -14,10 +14,12 @@
 \usepackage{amsmath}
 \usetikzlibrary{positioning, arrows.meta}
 
+
 % Mathematical packages
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+
 
 % Graphics and figures
 \usepackage{graphicx}
@@ -528,7 +530,7 @@ The preliminary methodology employs a structured approach to derive likelihood a
 \textbf{Likelihood Calculation}: The first five criteria (Vulnerability Effectiveness through Privilege Requirement) contribute to likelihood assessment. Each criterion is scored on a 1-5 scale, and the overall likelihood is computed using quadratic mean to emphasize higher risk factors
 \textbf{Impact Assessment}: The last two criteria (Response Delay and Resilience impact) contribute to the impact score, offering focused evaluation of operational consequences and business continuity implications
 
-$$L = \sqrt{\frac{1}{n}\sum_{i=1}^{n} C_i^2}$$
+$$V = \sqrt{\frac{1}{n}\sum_{i=1}^{n} C_i^2}$$
 
 where $C_i$ represents the score for criterion $i$.
 
@@ -568,7 +570,7 @@ The comprehensive methodology employs sophisticated risk computation that integr
 
 \textbf{Impact Computation}: The five impact criteria are similarly combined using quadratic mean to capture the most severe potential consequences:
 
-$$I_{comp} = \sqrt{\frac{1}{n}\sum_{k=1}^{n} I_k^2}$$
+$$V_{comp} = \sqrt{\frac{1}{n}\sum_{k=1}^{n} I_k^2}$$
 
 where $I_k$ represents the criterion scores.
 
@@ -598,7 +600,6 @@ Both preliminary and comprehensive methodologies support assessment integration 
 \end{itemize}
 
 \section{Risk Treatment Strategies}
-
 The framework incorporates a comprehensive catalog of cybersecurity controls derived from leading international standards and space-specific guidance documents. This multi-framework approach ensures coverage of diverse risk scenarios while maintaining alignment with established industry practices and regulatory requirements.
 
 \subsection{Multi-Framework Control Integration}
@@ -715,6 +716,7 @@ The framework employs risk-based prioritization to guide control implementation 
 \end{itemize}
 
 This comprehensive, multi-framework approach ensures that space system cybersecurity addresses the full spectrum of relevant threats while leveraging established best practices from both general cybersecurity and space-specific domains. The systematic categorization and lifecycle mapping of controls provides practical guidance for implementing appropriate security measures throughout the space mission lifecycle.
+
 
 \section{Framework Validation Methodology}
 

@@ -9,10 +9,7 @@ a = Analysis(
         ('Legacy.csv', '.'), 
         ('export_import_functions.py', '.'),
         ('logo.ico', '.'),
-        ('attack_graph_threat_relations.csv', '.'),
-        ('Threat.csv', '.'),
-        ('Asset.csv', '.'),
-        ('Control.csv', '.')
+        ('attack_graph_threat_relations.csv', '.')
     ],
     hiddenimports=[
         'tkinter',
