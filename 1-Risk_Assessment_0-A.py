@@ -679,9 +679,10 @@ class RiskAssessmentTool:
                 self.update_display(key, 5, "")
                 return
         
-        #if len(values) != 3:
-        #    self.update_display(key, 5, "")
-        #    return
+        if len(values) == 0:
+            self.update_display(key, 5, "")
+            self.update_display(key, 7, "")
+            return
 
         # Calculate Likelihood using quadratic mean
         quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
@@ -758,7 +759,11 @@ class RiskAssessmentTool:
             except ValueError:
                 self.update_display(key, 6, "")
                 return
-        
+            
+        if len(values) == 0:
+            self.update_display(key, 6, "")
+            self.update_display(key, 7, "")
+            return
         # Quadratic mean normalized
         quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
         impact = (quadratic_mean - 1) / 4  # [1,5] -> [0,1]
@@ -1164,7 +1169,7 @@ class RiskAssessmentTool:
                                 
                                 # Use base_val - 1 for better calibration
                                 adjusted_val = max(1, base_val)
-                                if threat_name == "Jamming":
+                                if threat_name == "Jamming" or threat_name == "Tainted hardware components":
                                     threat_data[asset_key] = {
                                         '0': str(adjusted_val),  # Vulnerability
                                         '1': '',  # Access Control

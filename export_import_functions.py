@@ -1314,20 +1314,20 @@ class ExportImportManager:
                 continue
                 
             # Method 3: Check for partial matches (case-insensitive) with known threats
-            if text and len(text) > 3:  # Skip very short texts
-                for known_threat in known_threats:
-                    # Exact match (case-insensitive)
-                    if text.lower() == known_threat.lower() and text not in threat_names:
-                        threat_names.append(known_threat)  # Use the canonical form from CSV
-                        logging.info(f"Extracted threat name via case-insensitive match: {known_threat}")
-                        break
-                    # Check if paragraph contains the threat name
-                    elif known_threat.lower() in text.lower() and known_threat not in threat_names:
-                        # Additional check: make sure it's not part of a larger sentence
-                        if len(text.split()) <= 10:  # Likely a heading, not a sentence
-                            threat_names.append(known_threat)
-                            logging.info(f"Extracted threat name via partial match: {known_threat}")
-                            break
+            #if text and len(text) > 3:  # Skip very short texts
+            #    for known_threat in known_threats:
+            #        # Exact match (case-insensitive)
+            #        if text.lower() == known_threat.lower() and text not in threat_names:
+            #            threat_names.append(known_threat)  # Use the canonical form from CSV
+            #            logging.info(f"Extracted threat name via case-insensitive match: {known_threat}")
+            #            break
+            #        # Check if paragraph contains the threat name
+            #        elif known_threat.lower() in text.lower() and known_threat not in threat_names:
+            #            # Additional check: make sure it's not part of a larger sentence
+            #            if len(text.split()) <= 10:  # Likely a heading, not a sentence
+            #                threat_names.append(known_threat)
+            #                logging.info(f"Extracted threat name via partial match: {known_threat}")
+            #                break
         
         logging.info(f"Total threat names extracted: {len(threat_names)} - {threat_names}")
         return threat_names

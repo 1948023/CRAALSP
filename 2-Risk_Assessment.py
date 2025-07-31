@@ -1424,6 +1424,10 @@ class RiskAssessmentTool:
             except ValueError:
                 self.update_display(key, 7, "")
                 return
+        if len(threat_values) == 0:
+            self.update_display(key, 7, "")
+            self.update_display(key, 9, "")
+            return
         
         if len(threat_values) > 0:
             # Calculate threat-specific likelihood using quadratic mean
@@ -1476,6 +1480,11 @@ class RiskAssessmentTool:
                 self.update_display(key, 8, "")
                 return
         
+        if len(values) == 0:
+            self.update_display(key, 8, "")
+            self.update_display(key, 9, "")
+            return
+
         if len(values) >0 :
             # Calculate threat-specific impact using quadratic mean
             threat_quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
@@ -1526,6 +1535,9 @@ class RiskAssessmentTool:
             except ValueError:
                 self.update_display(key, 9, "")
                 return
+        if len(values) == 0:
+            self.update_display(key, 9, "")
+            return
         
         if len(values) >0:
             # Use quadratic mean for likelihood calculation
@@ -1559,6 +1571,9 @@ class RiskAssessmentTool:
             except ValueError:
                 self.update_display(key, 10, "")
                 return
+        if len(values) == 0:
+            self.update_display(key, 10, "")
+            return
         
         if len(values) > 0:
             # For assets, use quadratic mean for more conservative approach
