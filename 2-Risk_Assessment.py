@@ -149,6 +149,19 @@ class RiskAssessmentTool:
         
         # Create interface
         self.create_interface()
+        
+        # Set up close confirmation
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        """Handle window closing with confirmation dialog"""
+        result = messagebox.askyesno(
+            "Confirm Exit",
+            "Are you sure you want to exit?\nNot exported values will be lost.",
+            icon='warning'
+        )
+        if result:
+            self.root.destroy()
 
     def disable_mousewheel_on_combobox(self, combo):
         """Intelligently handle mouse wheel on combobox to prevent accidental value changes while allowing scroll"""
@@ -560,7 +573,7 @@ class RiskAssessmentTool:
         help_window.grab_set()
         
         # Title
-        title_label = tk.Label(help_window, text="Risk Assessment Criteria Descriptions", 
+        title_label = tk.Label(help_window, text="Risk Assessment Criteria Descriptions - Threat Mode", 
                               font=('Segoe UI', 16, 'bold'),
                               bg=self.COLORS['white'], fg=self.COLORS['dark'])
         title_label.pack(pady=(20, 15))
@@ -677,8 +690,10 @@ class RiskAssessmentTool:
    • Risk aggregation across asset categories and threat domains
    • Confidence intervals and uncertainty analysis for risk estimates
 
-5. DATA MANAGEMENT AND INTEGRATION:
-   • Export detailed risk reports and assessment matrices using "EXPORT REPORT"
+5. DATA MANAGEMENT AND INTEGRATION (THREAT ANALYSIS MODE):
+   • Use "Save Assessment" to temporarily store your current work in progress  
+   • Use "Export Report" to generate final documentation and permanently save your analysis
+   • IMPORTANT: "Save Assessment" stores data temporarily. For permanent documentation and final reports, always use "Export Report" to create Word/CSV documents
    • Import reports from Phase 0/A or external risk assessments using "IMPORT REPORT"
    • Import legacy data from previous 0-A reports using "IMPORT REPORT 0-A" (available in Output folder)
    • Maintain audit trails and version control for assessment iterations
@@ -765,7 +780,7 @@ class RiskAssessmentTool:
         """Show help window with criteria descriptions"""
         help_window = tk.Toplevel(self.root)
         help_window.title("Assessment Criteria - Help")
-        help_window.geometry("1200x700")  # Increased height to accommodate tool explanation
+        help_window.geometry("1200x700")  # Asset analysis help window
         help_window.configure(bg=self.COLORS['white'])
         help_window.resizable(True, True)
         
@@ -774,7 +789,7 @@ class RiskAssessmentTool:
         help_window.grab_set()
         
         # Title
-        title_label = tk.Label(help_window, text="Risk Assessment Criteria Descriptions", 
+        title_label = tk.Label(help_window, text="Risk Assessment Criteria Descriptions - Asset Mode", 
                               font=('Segoe UI',  16, 'bold'),
                               bg=self.COLORS['white'], fg=self.COLORS['dark'])
         title_label.pack(pady=(20, 15))
@@ -897,8 +912,10 @@ class RiskAssessmentTool:
    • Risk aggregation across asset categories and threat domains
    • Confidence intervals and uncertainty analysis for risk estimates
 
-5. DATA MANAGEMENT AND INTEGRATION:
-   • Export detailed risk reports and assessment matrices using "EXPORT REPORT"
+5. DATA MANAGEMENT AND INTEGRATION (ASSET ANALYSIS MODE):
+   • Use "Save Assessment" to temporarily store your current work in progress  
+   • Use "Export Report" to generate final documentation and permanently save your analysis
+   • IMPORTANT: "Save Assessment" stores data temporarily. For permanent documentation and final reports, always use "Export Report" to create Word/CSV documents
    • Import reports from Phase 0/A or external risk assessments using "IMPORT REPORT"
    • Import legacy data from previous 0-A reports using "IMPORT REPORT 0-A" (available in Output folder)
    • Maintain audit trails and version control for assessment iterations

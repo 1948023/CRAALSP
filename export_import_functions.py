@@ -1175,8 +1175,9 @@ class ExportImportManager:
             all_threat_names = self._extract_threat_names_from_document(doc)
             logging.info(f"Found threat names in document: {all_threat_names}")
             
+            # Only create threat data entries for valid threats found in the document
             for threat_name in all_threat_names:
-                if threat_name not in self.app.threat_data:
+                if threat_name and threat_name not in self.app.threat_data:
                     self.app.threat_data[threat_name] = {}
             
             # Track parsing statistics
@@ -1240,7 +1241,7 @@ class ExportImportManager:
                         self._parse_threat_table_simple(threat_name, table)
                         threat_tables_found += 1
                     else:
-                        logging.warning(f"Threat table found but no threat name identified (table {i})")
+                        logging.warning(f"Threat table found but no valid threat name identified (table {i}) - skipping table")
                         logging.warning(f"Headers were: {header_texts}")
                         logging.warning(f"Current threat context was: {current_threat_name}")
                     continue
@@ -1303,7 +1304,29 @@ class ExportImportManager:
                         threat_names.append(threat_name)
                         logging.info(f"Extracted threat name via 'Risk Assessment for': {threat_name}")
                     else:
-                        logging.warning(f"Unknown threat name found: {threat_name}")
+                        # Try to find best match
+                        best_match = None
+                        threat_name_lower = threat_name.lower()
+                        
+                        # First try exact case-insensitive match
+                        for known_threat in known_threats:
+                            if threat_name_lower == known_threat.lower():
+                                best_match = known_threat
+                                break
+                        
+                        # If no exact match, try substring matching with longer threats first
+                        if not best_match:
+                            sorted_threats = sorted(known_threats, key=len, reverse=True)
+                            for known_threat in sorted_threats:
+                                if known_threat.lower() in threat_name_lower or threat_name_lower in known_threat.lower():
+                                    best_match = known_threat
+                                    break
+                        
+                        if best_match and best_match not in threat_names:
+                            threat_names.append(best_match)
+                            logging.info(f"Extracted threat name via 'Risk Assessment for' with matching: {threat_name} -> {best_match}")
+                        else:
+                            logging.warning(f"Unknown threat name found and no match: {threat_name} - will be ignored")
                 continue
             
             # Method 2: Look for exact matches with known threats FIRST
@@ -1447,21 +1470,30 @@ class ExportImportManager:
                 if not found_text or not known_threat_names_list:
                     return found_text
                 
-                found_text_lower = found_text.lower()
+                found_text_lower = found_text.lower().strip()
                 
-                # Method 1: Check if any known threat is a substring of what we found
+                # Method 1: Exact match (case-insensitive) - highest priority
                 for known_threat in known_threat_names_list:
-                    if known_threat.lower() in found_text_lower:
-                        logging.info(f"Found substring match: '{found_text}' contains '{known_threat}'")
+                    if found_text_lower == known_threat.lower():
+                        logging.info(f"Found exact match: '{found_text}' == '{known_threat}'")
                         return known_threat
                 
                 # Method 2: Check if what we found is a substring of any known threat
-                for known_threat in known_threat_names_list:
+                # Sort by length (longer threats first) to prioritize more specific matches
+                sorted_threats = sorted(known_threat_names_list, key=len, reverse=True)
+                for known_threat in sorted_threats:
                     if found_text_lower in known_threat.lower():
                         logging.info(f"Found reverse substring match: '{known_threat}' contains '{found_text}'")
                         return known_threat
                 
-                # Method 3: Fuzzy matching for similar strings
+                # Method 3: Check if any known threat is a substring of what we found
+                # Sort by length (longer threats first) to prioritize more specific matches
+                for known_threat in sorted_threats:
+                    if known_threat.lower() in found_text_lower:
+                        logging.info(f"Found substring match: '{found_text}' contains '{known_threat}'")
+                        return known_threat
+                
+                # Method 4: Fuzzy matching for similar strings
                 best_match = None
                 best_similarity = 0
                 for known_threat in known_threat_names_list:
@@ -1481,7 +1513,10 @@ class ExportImportManager:
                     logging.info(f"Found fuzzy match: '{found_text}' -> '{best_match}' (similarity: {best_similarity:.2f})")
                     return best_match
                 
-                return found_text
+                # Method 5: If no match found, check if the found text is valid in Threat.csv
+                # If not, return None to indicate this threat should be ignored
+                logging.warning(f"No match found for threat: '{found_text}' - will be ignored as it's not in Threat.csv")
+                return None
             
             # Now analyze the paragraphs to find the threat name
             # Structure should be:
@@ -1501,7 +1536,11 @@ class ExportImportManager:
                     # Try to find the best match from known threats
                     if known_threat_names:
                         matched_threat = find_best_threat_match(threat_name, known_threat_names)
-                        if matched_threat != threat_name:
+                        if matched_threat is None:
+                            # Threat not found in Threat.csv, skip it
+                            logging.warning(f"Threat '{threat_name}' not found in Threat.csv - skipping this table")
+                            return None
+                        elif matched_threat != threat_name:
                             logging.info(f"Corrected threat name from '{threat_name}' to '{matched_threat}'")
                             return matched_threat
                     
@@ -1516,9 +1555,9 @@ class ExportImportManager:
                                 logging.info(f"Found valid threat via case-insensitive 'Risk Assessment for' pattern: {known_threat}")
                                 return known_threat
                         
-                        # If not found in known threats, still return it (CSV might be incomplete)
-                        logging.info(f"Using extracted threat name (not in CSV): {threat_name}")
-                        return threat_name
+                        # If not found in known threats, skip it (don't import)
+                        logging.warning(f"Threat '{threat_name}' not found in Threat.csv - skipping this table")
+                        return None
             
             # If we have more paragraphs, check the second one (should be the direct threat name)
             if len(paragraphs_before) >= 2:
@@ -1528,7 +1567,11 @@ class ExportImportManager:
                 # Try to find the best match from known threats first
                 if known_threat_names:
                     matched_threat = find_best_threat_match(second_paragraph, known_threat_names)
-                    if matched_threat != second_paragraph:
+                    if matched_threat is None:
+                        # Threat not found in Threat.csv, skip it
+                        logging.warning(f"Threat '{second_paragraph}' not found in Threat.csv - skipping this table")
+                        return None
+                    elif matched_threat != second_paragraph:
                         logging.info(f"Corrected threat name from '{second_paragraph}' to '{matched_threat}'")
                         return matched_threat
                 
@@ -1545,17 +1588,19 @@ class ExportImportManager:
                 
                 # Method 4: Check if paragraph contains a known threat name (for short paragraphs only)
                 if len(second_paragraph.split()) <= 8:  # Only for reasonably short headings
-                    for known_threat in known_threats:
+                    # Sort by length (longer threats first) to prioritize more specific matches
+                    sorted_threats = sorted(known_threats, key=len, reverse=True)
+                    for known_threat in sorted_threats:
                         if known_threat.lower() in second_paragraph.lower():
                             logging.info(f"Found threat via substring match in 2nd paragraph: {known_threat}")
                             return known_threat
                 
                 # Method 5: If we found a heading-like text but it's not in known threats,
-                # it might still be a valid threat name (in case CSV is incomplete)
+                # skip it instead of using it (since it's not valid)
                 if (len(second_paragraph.split()) <= 6 and 
                     not any(word in second_paragraph.lower() for word in ['table', 'assessment', 'control', 'overview', 'mitigation'])):
-                    logging.info(f"Found potential threat name (not in CSV) in 2nd paragraph: {second_paragraph}")
-                    return second_paragraph
+                    logging.warning(f"Found potential threat name but not in Threat.csv: '{second_paragraph}' - skipping")
+                    return None
             
             logging.warning(f"No threat name found for table {table_index}. Found {len(paragraphs_before)} paragraphs before table.")
             if paragraphs_before:

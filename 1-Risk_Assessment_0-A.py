@@ -191,6 +191,19 @@ class RiskAssessmentTool:
         self.mission_type_var = tk.StringVar(value=self.MISSION_TYPES[0])
         
         self.create_interface()
+        
+        # Set up close confirmation
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        """Handle window closing with confirmation dialog"""
+        result = messagebox.askyesno(
+            "Confirm Exit",
+            "Are you sure you want to exit?\nNot exported values will be lost.",
+            icon='warning'
+        )
+        if result:
+            self.root.destroy()
     
     def disable_mousewheel_on_combobox(self, combo):
         """Intelligently handle mouse wheel on combobox to prevent accidental value changes while allowing scroll"""
@@ -1880,8 +1893,9 @@ class RiskAssessmentTool:
    • The main table shows the highest risk level found across all assets for each threat
 
 4. DATA MANAGEMENT:
-   • Save your assessments for each threat individually
-   • Export complete reports to Word documents for documentation and sharing
+   • Save your assessments for each threat individually using "Save Assessment" - this stores data temporarily
+   • Use "Export Assessment" to generate final reports and permanently save your work
+   • IMPORTANT: "Save Assessment" only saves data temporarily. To create final documentation and preserve your work permanently, always use "Export Assessment" to generate Word/CSV reports
    • Import previously saved assessments to continue work or review past analyses
 
 5. LEGACY DATA INTEGRATION:

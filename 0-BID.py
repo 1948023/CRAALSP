@@ -126,6 +126,19 @@ class BIDOptimized:
         self.setup_ui()
         self.create_tables()
         self.update_total_score()
+        
+        # Set up close confirmation
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        """Handle window closing with confirmation dialog"""
+        result = messagebox.askyesno(
+            "Confirm Exit",
+            "Are you sure you want to exit?\nNot exported values will be lost.",
+            icon='warning'
+        )
+        if result:
+            self.root.destroy()
 
     def setup_scaling(self):
         """Calculate scale factors based on screen resolution"""
@@ -428,7 +441,7 @@ class BIDOptimized:
         buttons_inner_frame.pack(padx=3, pady=3)
         
         # Save button
-        self.save_button = tk.Button(buttons_inner_frame, text="💾 Save Data", command=self.save_data,
+        self.save_button = tk.Button(buttons_inner_frame, text="💾 Export Data", command=self.save_data,
                                    font=('Segoe UI', self.scaled_button_font + 1, 'bold'),
                                    bg=self.COLORS['blue'], fg=self.COLORS['white'],
                                    activebackground='#0056b3', activeforeground=self.COLORS['white'],

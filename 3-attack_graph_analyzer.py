@@ -71,6 +71,17 @@ except ImportError:
     HAS_SCIPY = False
 
 # =============================================================================
+# GUI STYLING CONFIGURATION - Consistent with other components
+# =============================================================================
+
+COLORS = {
+    'primary': '#4a90c2', 'success': '#28a745', 'white': '#ffffff',
+    'light': '#f8f9fa', 'dark': '#2c3e50', 'gray': '#6c757d',
+    'criteria_header': '#5a67d8', 'criteria_bg': '#edf2f7',
+    'warning': '#ffc107', 'danger': '#dc3545', 'info': '#17a2b8'
+}
+
+# =============================================================================
 # ANALYSIS CONFIGURATION - MODIFY THESE VALUES TO CUSTOMIZE THE ANALYSIS
 # =============================================================================
 
@@ -1734,10 +1745,10 @@ class AttackGraphAnalyzer:
                 def __init__(self):
                     self.choice = None
                     self.root = tk.Toplevel()
-                    self.root.title("🎯 Interactive Analysis Options")
-                    self.root.geometry("650x550")
+                    self.root.title("🎯 Attack Graph Analysis Options")
+                    self.root.geometry("700x500")
                     self.root.resizable(False, False)
-                    self.root.configure(bg='#f8fafc')
+                    self.root.configure(bg=COLORS['white'])
                     
                     # Center the window
                     self.root.transient()
@@ -1755,23 +1766,23 @@ class AttackGraphAnalyzer:
                     
                 def setup_ui(self):
                     # Header
-                    header_frame = tk.Frame(self.root, bg='#1e40af', height=80)
+                    header_frame = tk.Frame(self.root, bg=COLORS['primary'], height=80)
                     header_frame.pack(fill=tk.X)
                     header_frame.pack_propagate(False)
                     
-                    title_label = tk.Label(header_frame, text="🎯 Interactive Analysis Options",
-                                          font=('Segoe UI', 18, 'bold'),
-                                          fg='white', bg='#1e40af')
+                    title_label = tk.Label(header_frame, text="🎯 Attack Graph Analysis Options",
+                                          font=('Segoe UI', 16, 'bold'),
+                                          fg=COLORS['white'], bg=COLORS['primary'])
                     title_label.pack(expand=True)
                     
                     # Main content
-                    content_frame = tk.Frame(self.root, bg='#f8fafc')
+                    content_frame = tk.Frame(self.root, bg=COLORS['white'])
                     content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
                     
                     # Info
                     info_label = tk.Label(content_frame, 
                                          text="Choose the type of analysis you want to perform:",
-                                         font=('Segoe UI', 12), bg='#f8fafc', fg='#374151')
+                                         font=('Segoe UI', 11), bg=COLORS['white'], fg=COLORS['dark'])
                     info_label.pack(pady=(0, 25))
                     
                     # Enhanced buttons with icons and descriptions
@@ -1779,29 +1790,29 @@ class AttackGraphAnalyzer:
                         {
                             'text': '📡 Threat Connections Analysis',
                             'desc': 'Analyze connections of a specific threat\n(predecessors and successors)',
-                            'color': '#3b82f6',
-                            'hover': '#2563eb',
+                            'color': COLORS['primary'],
+                            'hover': '#3a7ca8',
                             'choice': 1
                         },
                         {
                             'text': '🛤️ Path Analysis', 
                             'desc': 'Find attack paths between two threats\n(source → target)',
-                            'color': '#10b981',
-                            'hover': '#059669',
+                            'color': COLORS['success'],
+                            'hover': '#1e7e34',
                             'choice': 2
                         },
                         {
-                            'text': '� Combined Analysis',
+                            'text': '🔄 Combined Analysis',
                             'desc': 'Perform both threat connections and path analysis\n(comprehensive analysis)',
-                            'color': '#8b5cf6',
-                            'hover': '#7c3aed',
+                            'color': COLORS['info'],
+                            'hover': '#138496',
                             'choice': 3
                         },
                         {
                             'text': '❌ Exit Interactive Mode',
                             'desc': 'Return to main menu\n(close interactive analysis)',
-                            'color': '#ef4444',
-                            'hover': '#dc2626',
+                            'color': COLORS['danger'],
+                            'hover': '#c82333',
                             'choice': 4
                         }
                     ]
@@ -1809,24 +1820,24 @@ class AttackGraphAnalyzer:
                     self.buttons = []
                     for config in button_configs:
                         # Button container for better layout
-                        btn_container = tk.Frame(content_frame, bg='#f8fafc')
+                        btn_container = tk.Frame(content_frame, bg=COLORS['white'])
                         btn_container.pack(fill=tk.X, pady=8)
                         
                         btn = tk.Button(btn_container,
                                        text=config['text'],
-                                       font=('Segoe UI', 13, 'bold'),
-                                       bg=config['color'], fg='white',
+                                       font=('Segoe UI', 11, 'bold'),
+                                       bg=config['color'], fg=COLORS['white'],
                                        relief='raised', bd=3,
                                        cursor='hand2',
-                                       width=25, height=2,
+                                       width=25, height=1,
                                        command=lambda c=config['choice']: self.set_choice(c))
                         btn.pack(side=tk.LEFT, padx=(0, 15))
                         
                         # Description label
                         desc_label = tk.Label(btn_container,
                                              text=config['desc'],
-                                             font=('Segoe UI', 9),
-                                             bg='#f8fafc', fg='#6b7280',
+                                             font=('Segoe UI', 10),
+                                             bg=COLORS['white'], fg=COLORS['gray'],
                                              justify=tk.LEFT)
                         desc_label.pack(side=tk.LEFT, expand=True, anchor='w')
                         
@@ -1992,11 +2003,24 @@ class AttackGraphAnalyzer:
             interactive_mode (bool): If True, allows user to select specific threats interactively.
                                    If False, uses pre-configured automatic analysis.
         """
-        if interactive_mode:
-            self.run_interactive_analysis()
+        from tkinter import messagebox
+        
+        if self.graph is None:
+            messagebox.showerror("Error", "Graph not available for analysis")
+            return
+        
+        available_threats = list(self.graph.nodes())
+        
+        if not available_threats:
+            messagebox.showerror("Error", "No threats available in the graph")
             return
         
         self.output.log("🚀 STARTING COMPLETE ATTACK GRAPH ANALYSIS")
+        
+        if interactive_mode:
+            self.output.log("🎮 INTERACTIVE MODE: User will select threats for analysis")
+        else:
+            self.output.log("🤖 AUTOMATIC MODE: Threats will be automatically determined")
 
         try:
             # Basic statistics
@@ -2015,43 +2039,74 @@ class AttackGraphAnalyzer:
 
             # Specific threat connections analysis
             self.output.log("\n=== SPECIFIC THREAT NETWORK ANALYSIS ===")
-            self.analyze_threat_connections()
+            
+            if interactive_mode:
+                # User selects central threat for connections analysis
+                messagebox.showinfo("Interactive Selection", 
+                                   "Please select a central threat for connections analysis.")
+                central_threat = interactive_threat_selection(available_threats, "central threat for connections analysis")
+                if central_threat is None:
+                    self.output.log("❌ User cancelled threat selection. Terminating analysis.")
+                    return
+                    
+                # Save visualization for interactive mode
+                old_setting = THREAT_CONNECTION_ANALYSIS.get("save_visualization", False)
+                THREAT_CONNECTION_ANALYSIS["save_visualization"] = True
+                self.analyze_threat_connections(central_threat)
+                THREAT_CONNECTION_ANALYSIS["save_visualization"] = old_setting
+            else:
+                # Automatic selection using configured threat
+                self.analyze_threat_connections()
 
             # Specific configurable paths analysis
             self.output.log("\n=== SPECIFIC CONFIGURABLE PATHS ANALYSIS ===")
 
-            # Analyze the main configured path
-            source = SPECIFIC_PATH_ANALYSIS["source_threat"]
-            target = SPECIFIC_PATH_ANALYSIS["target_threat"]
-            max_len = SPECIFIC_PATH_ANALYSIS["max_path_length"]
-
-            self.output.log(f"\n🎯 MAIN PATH: {source} → {target}")
-            self.find_attack_paths(source, target, max_len)
-
-            # Analyze multiple paths if configured
-            if MULTIPLE_PATH_ANALYSIS:
-                self.output.log(f"\n🎯 MULTIPLE PATHS ANALYSIS ({len(MULTIPLE_PATH_ANALYSIS)} paths):")
-
-                for i, path_config in enumerate(MULTIPLE_PATH_ANALYSIS, 1):
-                    self.output.log(f"\n--- PATH {i}: {path_config['description']} ---")
-                    self.find_attack_paths(
-                        path_config["source"], 
-                        path_config["target"],
-                        max_len
-                    )
-            
-            # Create and save graphs for specific paths
-            self.output.log("\n=== CREATION SPECIFIC PATH GRAPH ===")
-            
-            # Generate combined graphs for the main configured path
-            source = SPECIFIC_PATH_ANALYSIS["source_threat"]
-            target = SPECIFIC_PATH_ANALYSIS["target_threat"]
-            main_paths = self.find_attack_paths(source, target, max_len)
-            
-            if main_paths:
-                self._create_combined_paths_graph(main_paths, source, target)
+            if interactive_mode:
+                # User selects source and target threats for path analysis
+                messagebox.showinfo("Interactive Selection", 
+                                   "Please select source and target threats for path analysis.")
+                source_threat, target_threat = interactive_path_selection(available_threats)
+                if source_threat is None or target_threat is None:
+                    self.output.log("❌ User cancelled path selection. Terminating analysis.")
+                    return
+                    
+                max_len = SPECIFIC_PATH_ANALYSIS["max_path_length"]
+                self.output.log(f"\n🎯 INTERACTIVE PATH: {source_threat} → {target_threat}")
+                paths = self.find_attack_paths(source_threat, target_threat, max_len)
+                
+                # Create visualization for interactive paths
+                if paths:
+                    self._create_combined_paths_graph(paths, source_threat, target_threat)
+                    
             else:
-                self.output.log("No paths found for visualization")
+                # Automatic analysis using configured paths
+                source = SPECIFIC_PATH_ANALYSIS["source_threat"]
+                target = SPECIFIC_PATH_ANALYSIS["target_threat"]
+                max_len = SPECIFIC_PATH_ANALYSIS["max_path_length"]
+
+                self.output.log(f"\n🎯 MAIN PATH: {source} → {target}")
+                paths = self.find_attack_paths(source, target, max_len)
+
+                # Analyze multiple paths if configured
+                if MULTIPLE_PATH_ANALYSIS:
+                    self.output.log(f"\n🎯 MULTIPLE PATHS ANALYSIS ({len(MULTIPLE_PATH_ANALYSIS)} paths):")
+
+                    for i, path_config in enumerate(MULTIPLE_PATH_ANALYSIS, 1):
+                        self.output.log(f"\n--- PATH {i}: {path_config['description']} ---")
+                        self.find_attack_paths(
+                            path_config["source"], 
+                            path_config["target"],
+                            max_len
+                        )
+                
+                # Create and save graphs for specific paths
+                self.output.log("\n=== CREATION SPECIFIC PATH GRAPH ===")
+                
+                # Generate combined graphs for the main configured path
+                if paths:
+                    self._create_combined_paths_graph(paths, source, target)
+                else:
+                    self.output.log("No paths found for visualization")
             
             self.output.log("\n✅ ANALYSIS COMPLETED SUCCESSFULLY")
             
@@ -2510,6 +2565,11 @@ def select_csv_file():
             initialdir="."
         )
         
+        # Check if user cancelled the dialog
+        if not file_path:  # Empty string or None
+            root.destroy()
+            return None
+        
         if file_path:
             # Verify the file exists and is readable
             if not os.path.exists(file_path):
@@ -2567,7 +2627,11 @@ def main():
     selected_file = select_csv_file()
     
     if selected_file is None:
-        #print("❌ No file selected. Exiting.")
+        # User cancelled file selection - show message and exit
+        try:
+            messagebox.showinfo("Cancelled", "File selection cancelled. Exiting application.")
+        except:
+            pass  # In case tkinter window was already destroyed
         return
     
     #print(f"✅ Selected file: {selected_file}")
@@ -2622,7 +2686,7 @@ def main():
                 self.root = tk.Toplevel()
                 self.root.title("🚀 CRAAL Space Threat Analyzer")
                 self.root.geometry("600x500")
-                self.root.resizable(False, False)
+                self.root.resizable(True, True)
                 
                 # Center the window
                 self.root.transient()
@@ -2646,59 +2710,59 @@ def main():
                 
             def setup_ui(self):
                 # Main frame with gradient-like effect
-                main_frame = tk.Frame(self.root, bg='#f0f8ff', relief='raised', bd=2)
+                main_frame = tk.Frame(self.root, bg=COLORS['light'], relief='raised', bd=2)
                 main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
                 
                 # Header with title and icon
-                header_frame = tk.Frame(main_frame, bg='#1e3a8a', height=80)
+                header_frame = tk.Frame(main_frame, bg=COLORS['primary'], height=80)
                 header_frame.pack(fill=tk.X, padx=5, pady=5)
                 header_frame.pack_propagate(False)
                 
                 title_label = tk.Label(header_frame, 
                                       text="🛰️ CRAAL Space Threat Analyzer", 
-                                      font=('Segoe UI', 18, 'bold'),
-                                      fg='white', bg='#1e3a8a')
+                                      font=('Segoe UI', 16, 'bold'),
+                                      fg=COLORS['white'], bg=COLORS['primary'])
                 title_label.pack(expand=True)
                 
                 subtitle_label = tk.Label(header_frame, 
                                          text="Cybersecurity Risk Assessment & Attack Learning", 
-                                         font=('Segoe UI', 10, 'italic'),
-                                         fg='#bfdbfe', bg='#1e3a8a')
+                                         font=('Segoe UI', 11, 'italic'),
+                                         fg=COLORS['light'], bg=COLORS['primary'])
                 subtitle_label.pack()
                 
                 # Content frame
-                content_frame = tk.Frame(main_frame, bg='#f0f8ff')
+                content_frame = tk.Frame(main_frame, bg=COLORS['light'])
                 content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
                 
                 # Instructions
                 instruction_label = tk.Label(content_frame, 
                                             text="Choose the analysis mode:",
-                                            font=('Segoe UI', 14, 'bold'),
-                                            bg='#f0f8ff', fg='#1e3a8a')
+                                            font=('Segoe UI', 11, 'bold'),
+                                            bg=COLORS['light'], fg=COLORS['dark'])
                 instruction_label.pack(pady=(0, 20))
                 
                 # Buttons frame
-                buttons_frame = tk.Frame(content_frame, bg='#f0f8ff')
+                buttons_frame = tk.Frame(content_frame, bg=COLORS['light'])
                 buttons_frame.pack(pady=20)
                 
                 # Interactive mode button
                 interactive_btn = tk.Button(buttons_frame, 
-                                           text="🎮 Specific connection and path analysis\nChoose threat manually with GUI",
+                                           text="🎮 Interactive Analysis\nSelect specific threats with GUI",
                                            font=('Segoe UI', 11, 'bold'),
-                                           bg='#10b981', fg='white',
+                                           bg=COLORS['success'], fg=COLORS['white'],
                                            relief='raised', bd=3,
-                                           width=33, height=3,
+                                           width=33, height=2,
                                            cursor='hand2',
                                            command=lambda: self.set_choice(True))
                 interactive_btn.pack(pady=10)
                 
                 # Auto mode button  
                 auto_btn = tk.Button(buttons_frame, 
-                                    text="🤖 Automatic Analysis\nComplete analysis",
+                                    text="🤖 Automatic Analysis\nComplete analysis with preset configuration",
                                     font=('Segoe UI', 11, 'bold'),
-                                    bg='#3b82f6', fg='white',
+                                    bg=COLORS['primary'], fg=COLORS['white'],
                                     relief='raised', bd=3,
-                                    width=33, height=3,
+                                    width=33, height=2,
                                     cursor='hand2',
                                     command=lambda: self.set_choice(False))
                 auto_btn.pack(pady=10)
@@ -2707,8 +2771,8 @@ def main():
                 cancel_btn = tk.Button(buttons_frame, 
                                       text="❌ Cancel",
                                       font=('Segoe UI', 11),
-                                      bg='#ef4444', fg='white',
-                                      relief='raised', bd=2,
+                                      bg=COLORS['danger'], fg=COLORS['white'],
+                                      relief='raised', bd=3,
                                       width=15, height=1,
                                       cursor='hand2',
                                       command=lambda: self.set_choice(None))
@@ -2814,9 +2878,9 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
             # Create main window with enhanced styling
             self.root = tk.Toplevel()
             self.root.title(f"🎯 Select {selection_type.capitalize()} Threat")
-            self.root.geometry("900x700")
+            self.root.geometry("700x700")
             self.root.resizable(True, True)
-            self.root.configure(bg='#f8fafc')
+            self.root.configure(bg=COLORS['white'])
             
             # Center the window
             self.root.transient()
@@ -2834,7 +2898,7 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
             
         def setup_ui(self):
             # Header frame with gradient-like effect
-            header_frame = tk.Frame(self.root, bg='#1e40af', height=70)
+            header_frame = tk.Frame(self.root, bg=COLORS['primary'], height=80)
             header_frame.pack(fill=tk.X, padx=0, pady=0)
             header_frame.pack_propagate(False)
             
@@ -2844,46 +2908,46 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
             
             title_label = tk.Label(header_frame, 
                                   text=f"{icon} Select {self.selection_type.capitalize()} Threat",
-                                  font=('Segoe UI', 18, 'bold'),
-                                  fg='white', bg='#1e40af')
+                                  font=('Segoe UI', 16, 'bold'),
+                                  fg=COLORS['white'], bg=COLORS['primary'])
             title_label.pack(expand=True)
             
             # Main content frame
-            content_frame = tk.Frame(self.root, bg='#f8fafc')
-            content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            content_frame = tk.Frame(self.root, bg=COLORS['white'])
+            content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=20)
             
             # Info panel
-            info_frame = tk.Frame(content_frame, bg='#e0f2fe', relief='ridge', bd=2)
+            info_frame = tk.Frame(content_frame, bg=COLORS['light'], relief='ridge', bd=2)
             info_frame.pack(fill=tk.X, pady=(0, 15))
             
             info_text = f"📊 Available threats: {len(self.threats)}   |   💡 Use search to filter   |   🎲 Random selection available"
             info_label = tk.Label(info_frame, text=info_text,
-                                 font=('Segoe UI', 10), bg='#e0f2fe', fg='#0c4a6e',
+                                 font=('Segoe UI', 11), bg=COLORS['light'], fg=COLORS['dark'],
                                  pady=8)
             info_label.pack()
             
             # Search frame with enhanced styling
             search_frame = tk.LabelFrame(content_frame, text="🔍 Search & Filter", 
                                         font=('Segoe UI', 11, 'bold'),
-                                        bg='#f8fafc', fg='#1e40af',
+                                        bg=COLORS['white'], fg=COLORS['primary'],
                                         relief='groove', bd=2)
             search_frame.pack(fill=tk.X, pady=(0, 15))
             
-            search_inner = tk.Frame(search_frame, bg='#f8fafc')
+            search_inner = tk.Frame(search_frame, bg=COLORS['white'])
             search_inner.pack(fill=tk.X, padx=10, pady=10)
             
-            tk.Label(search_inner, text="Search:", font=('Segoe UI', 10, 'bold'),
-                    bg='#f8fafc', fg='#374151').pack(side=tk.LEFT, padx=(0, 8))
+            tk.Label(search_inner, text="Search:", font=('Segoe UI', 11, 'bold'),
+                    bg=COLORS['white'], fg=COLORS['dark']).pack(side=tk.LEFT, padx=(0, 8))
             
             self.search_var = tk.StringVar()
             search_entry = tk.Entry(search_inner, textvariable=self.search_var,
                                    font=('Segoe UI', 11), relief='solid', bd=1,
-                                   highlightthickness=2, highlightcolor='#3b82f6')
+                                   highlightthickness=2, highlightcolor=COLORS['primary'])
             search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
             search_entry.bind('<KeyRelease>', self.filter_threats)
             
             clear_btn = tk.Button(search_inner, text="Clear", 
-                                 font=('Segoe UI', 9), bg='#6b7280', fg='white',
+                                 font=('Segoe UI', 11), bg=COLORS['gray'], fg=COLORS['white'],
                                  relief='raised', bd=2, cursor='hand2',
                                  command=self.clear_search)
             clear_btn.pack(side=tk.RIGHT)
@@ -2891,7 +2955,7 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
             # Main selection frame
             selection_frame = tk.LabelFrame(content_frame, text="🎯 Threat Selection",
                                            font=('Segoe UI', 11, 'bold'),
-                                           bg='#f8fafc', fg='#1e40af',
+                                           bg=COLORS['white'], fg=COLORS['primary'],
                                            relief='groove', bd=2)
             selection_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
             
@@ -2938,8 +3002,8 @@ def interactive_threat_selection(graph_nodes, selection_type="threat"):
                 'relief': 'raised',
                 'bd': 3,
                 'cursor': 'hand2',
-                'width': 12,
-                'height': 2
+                'width': 15,
+                'height': 1
             }
             
             random_btn = tk.Button(button_frame, text="🎲 Random", 
@@ -3047,7 +3111,7 @@ def interactive_path_selection(graph_nodes):
     """
     # First, select source threat
     source_threat = interactive_threat_selection(graph_nodes, "source")
-    
+
     if source_threat is None:
         return None, None
     
