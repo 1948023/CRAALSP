@@ -88,12 +88,12 @@ class RiskAssessmentTool:
     
     # Criteria table data (5x6 + header) - Transposed format
     CRITERIA_DATA = [
-        ["Score", "Vulnerability Level", "Access Control", "Defense Capability", "Operational Impact", "Recovery Time"],
-        ["Score 1 (Very Low)", "No know or already resolved vulnerabilities", "Access strongly protected by physical/logical measures and isolated environment", "Multi-level validated countermeasures with real-time automated detection", "No impact thanks to redundancy with predefined automated response", "Immediate restoration with automated procedures"],
-        ["Score 2 (Low)", "Know vulnerability, mitigate throught hardening and patches", "Moderately protected access with some isolation controls", "Robust countermeasures with automated but decentralized detection", "Negligible impact, quick response and system easily restored", "Quick recovery within hours to days using standard procedures"],
-        ["Score 3 (Moderate)", "Know vulnerability, but only partially mitigated", "Standard access protection with basic controls", "Limited countermeasures with manual detection only", "Medium impact with manual response, but mission continues", "Manual recovery requiring weeks of coordinated effort"],
-        ["Score 4 (High)", "Known vulnerability, with no effective mitigation", "Access easily accessible by remote attackers", "Weak countermeasure with occasional detection", "Serious impact with slow response, mission temporarily interrupted", "Complex recovery requiring months of specialized intervention"],
-        ["Score 5 (Very High)", "Actively exploitable vulnerability, with no defense", "Completely open or physically accessible access", "No countermeasures or detection capabilities", "Permanent loss of assets or mission with no response capability", "Impossible recovery or permanent system loss"]    ]
+        ["Score", "Vulnerability Level", "Detection Probability", "Defense Capability", "Operational Impact", "Recovery Time"],
+        ["Score 1 (Very Low)", "No know or already resolved vulnerabilities", "Continuous real-time monitoring with automated threat detection and immediate alerts", "Comprehensive defense: effective mitigations, restricted access controls, and administrative privilege requirements", "No impact thanks to redundancy with predefined automated response", "Immediate restoration with automated procedures"],
+        ["Score 2 (Low)", "Know vulnerability, mitigate throught hardening and patches", "Robust monitoring systems with automated detection and rapid response capabilities", "Strong defense: robust mitigations, controlled access pathways, and elevated privilege requirements", "Negligible impact, quick response and system easily restored", "Quick recovery within hours to days using standard procedures"],
+        ["Score 3 (Moderate)", "Know vulnerability, but only partially mitigated", "Standard monitoring with periodic scans and manual analysis required", "Moderate defense: limited mitigations, accessible entry points, and standard privilege requirements", "Medium impact with manual response, but mission continues", "Manual recovery requiring weeks of coordinated effort"],
+        ["Score 4 (High)", "Known vulnerability, with no effective mitigation", "Limited monitoring capabilities with infrequent checks and slow detection", "Weak defense: insufficient mitigations, easily accessible systems, and moderate privilege requirements", "Serious impact with slow response, mission temporarily interrupted", "Complex recovery requiring months of specialized intervention"],
+        ["Score 5 (Very High)", "Actively exploitable vulnerability, with no defense", "No monitoring systems or detection capabilities in place", "No defense: absent mitigations, unrestricted access, and no privilege requirements", "Permanent loss of assets or mission with no response capability", "Impossible recovery or permanent system loss"]    ]
     
     # Risk matrix
     RISK_MATRIX = {
@@ -393,21 +393,37 @@ class RiskAssessmentTool:
         # Left section - Export/Import 0-A buttons
         left_frame = tk.Frame(main_container, bg=self.COLORS['white'])
         left_frame.pack(side='left', padx=(0, 30))
+
+        # Center section - THREAT ANALYSIS button
+        center_frame = tk.Frame(main_container, bg=self.COLORS['white'])
+        center_frame.pack(side='left', padx=30)
+
+        # Right section - Import Legacy Report button
+        right_frame = tk.Frame(main_container, bg=self.COLORS['white'])
+        right_frame.pack(side='left', padx=(30, 0))
         
+        import_legacy_btn = tk.Button(left_frame, text="IMPORT MISSION ANALYSIS REPORT",
+                                     font=('Segoe UI', 10, 'bold'),
+                                     bg='#e74c3c', fg=self.COLORS['white'],
+                                     relief='flat', padx=19, pady=0.5,
+                                     command=self.import_legacy_report)
+        import_legacy_btn.pack()
+
         if DOCX_AVAILABLE:
-            export_word_btn = tk.Button(left_frame, text="EXPORT 0-A REPORT",
-                                       font=('Segoe UI', 10, 'bold'),
-                                       bg="#0E831E", fg=self.COLORS['white'],
-                                       relief='flat', padx=20, pady=2,
-                                       command=self.export_to_word)
+            export_word_btn = tk.Button(right_frame, text="EXPORT 0-A REPORT",
+                                       font=('Segoe UI', 11, 'bold'),
+                                       bg="#27ae60", fg=self.COLORS['white'],
+                                       relief='flat', padx=20, pady=12,
+                                       command=self.export_to_word,
+                                       justify='center')
             export_word_btn.pack(pady=(0, 2))
             
             import_word_btn = tk.Button(left_frame, text="IMPORT 0-A REPORT",
                                        font=('Segoe UI', 10, 'bold'),
-                                       bg='#8e44ad', fg=self.COLORS['white'],
-                                       relief='flat', padx=19.5, pady=2,
+                                       bg='#9b59b6', fg=self.COLORS['white'],
+                                       relief='flat', padx=67.5, pady=0.5,
                                        command=self.import_from_word)
-            import_word_btn.pack(pady=(2, 0))
+            import_word_btn.pack(pady=(2, 5))
         else:
             no_docx_label = tk.Label(left_frame, text="Word export/import unavailable\ninstall python-docx",
                                    font=('Segoe UI', 9),
@@ -415,9 +431,7 @@ class RiskAssessmentTool:
                                    justify='center')
             no_docx_label.pack()
 
-        # Center section - THREAT ANALYSIS button
-        center_frame = tk.Frame(main_container, bg=self.COLORS['white'])
-        center_frame.pack(side='left', padx=30)
+        
         
         threat_btn = tk.Button(center_frame, text="THREAT ANALYSIS",
                               font=('Segoe UI', 14, 'bold'),
@@ -425,18 +439,6 @@ class RiskAssessmentTool:
                               relief='flat', padx=40, pady=15,
                               command=self.open_threat_window)
         threat_btn.pack()
-
-        # Right section - Import Legacy Report button
-        right_frame = tk.Frame(main_container, bg=self.COLORS['white'])
-        right_frame.pack(side='left', padx=(30, 0))
-        
-        import_legacy_btn = tk.Button(right_frame, text="IMPORT MISSION\nANALYSIS REPORT",
-                                     font=('Segoe UI', 11, 'bold'),
-                                     bg='#e67e22', fg=self.COLORS['white'],
-                                     relief='flat', padx=20, pady=12,
-                                     command=self.import_legacy_report,
-                                     justify='center')
-        import_legacy_btn.pack()
     
     def open_threat_window(self):
         """Open Threat Analysis window"""
@@ -589,7 +591,7 @@ class RiskAssessmentTool:
         table_frame.pack(fill='both', expand=True)
         
         # Headers
-        headers = ["Category", "Sub-Category", "Vulnerability", "Access", "Defense", 
+        headers = ["Category", "Sub-Category", "Vulnerability", "Detection", "Defense", 
                   "Operational Impact", "Recovery", "Likelihood", "Impact", "Risk"]
         
         for j, header in enumerate(headers):
@@ -625,7 +627,7 @@ class RiskAssessmentTool:
             row_entries = {}
             self.combo_vars[asset_key] = {}
             
-            # Writable columns (2-6: Vulnerability, Access, Defense, Operational Impact, Recovery)
+            # Writable columns (2-6: Vulnerability, Detection Probability, Defense Capability, Operational Impact, Recovery)
             for j in range(2, 7):
                 combo_var = tk.StringVar(value="")                
                 combo = ttk.Combobox(table_frame,
@@ -642,7 +644,7 @@ class RiskAssessmentTool:
                 self.combo_vars[asset_key][j-2] = combo_var
 
                 # Bind calculations
-                if j <= 4:  # Vulnerability, Access, Defense -> Likelihood
+                if j <= 4:  # Vulnerability, Detection Probability, Defense Capability -> Likelihood
                     combo_var.trace_add('write', lambda *args, key=asset_key: self.calculate_likelihood(key))
                 elif j <= 6:  # Operational Impact, Recovery -> Impact
                     combo_var.trace_add('write', lambda *args, key=asset_key: self.calculate_impact(key))
@@ -672,7 +674,7 @@ class RiskAssessmentTool:
         if key not in self.combo_vars:
             return
 
-        # Get values Vulnerability, Access, Defense (columns 0,1,2)
+        # Get values Vulnerability, Detection Probability, Defense Capability (columns 0,1,2)
         values = []
         for col_idx in [0, 1, 2]:
             if col_idx not in self.combo_vars[key]:
@@ -724,12 +726,12 @@ class RiskAssessmentTool:
         row_data = self.threat_data[threat_name][asset_key]
         
         try:
-            # Check values for Vulnerability, Access, Defense
+            # Check values for Vulnerability, Detection Probability, Defense Capability
             if not isinstance(row_data, dict):
                 return 0.0
             
             values = []
-            for i in [0, 1, 2]:  # Vulnerability, Access, Defense
+            for i in [0, 1, 2]:  # Vulnerability, Detection Probability, Defense Capability
                 if str(i) not in row_data:
                     return 0.0
                 val = row_data[str(i)]
@@ -958,7 +960,7 @@ class RiskAssessmentTool:
     def calculate_likelihood_from_saved_data(self, threat_name, asset_key, asset_data):
         """Calculates likelihood from saved data using quadratic mean"""
         try:
-            # Check if necessary values are present (Vulnerability, Access, Defense)
+            # Check if necessary values are present (Vulnerability, Detection Probability, Defense Capability)
             if not all(str(i) in asset_data for i in [0, 1, 2]):
                 return 0.0
             
@@ -1361,7 +1363,7 @@ class RiskAssessmentTool:
 
         # Exact header for import
         header_cells = table.rows[0].cells
-        headers = ['Asset', 'Vulnerability', 'Access Control', 'Defense Capability', 
+        headers = ['Asset', 'Vulnerability', 'Detection Probability', 'Defense Capability', 
                   'Operational Impact', 'Recovery Time', 'Likelihood', 'Impact', 'Risk Level']
         
         for i, header in enumerate(headers):
@@ -1391,7 +1393,7 @@ class RiskAssessmentTool:
                             # Asset name (important: must exactly match ASSET_CATEGORIES)
                             row_cells[0].text = asset_name
 
-                            # Criteria (columns 0-4 correspond to Vulnerability, Access, Defense, Operational Impact, Recovery)
+                            # Criteria (columns 0-4 correspond to Vulnerability, Detection Probability, Defense Capability, Operational Impact, Recovery)
                             criteria_keys = ['0', '1', '2', '3', '4']
                             for j, key in enumerate(criteria_keys):
                                 if key in asset_data:
@@ -1564,7 +1566,7 @@ class RiskAssessmentTool:
 
             # Check header to confirm it's the right table
             header_row = table.rows[0]
-            expected_headers = ['Asset', 'Vulnerability', 'Access Control', 'Defense Capability', 
+            expected_headers = ['Asset', 'Vulnerability', 'Detection Probability', 'Defense Capability', 
                               'Operational Impact', 'Recovery Time', 'Likelihood', 'Impact', 'Risk Level']
             
             header_match = True
@@ -1824,8 +1826,8 @@ class RiskAssessmentTool:
         # Criteria descriptions
         criteria_help = {
             "Vulnerability Level": "Measures the presence and severity of known security vulnerabilities in the system. Lower scores indicate well-patched systems with no known vulnerabilities, while higher scores indicate systems with actively exploitable vulnerabilities.",
-            "Access Control": "Evaluates the strength of physical and logical access controls protecting the system. This includes authentication mechanisms, authorization policies, and physical security measures.",
-            "Defense Capability": "Assesses the effectiveness of security countermeasures and detection systems. This includes firewalls, intrusion detection, monitoring systems, and incident response capabilities.",
+            "Detection Probability": "Evaluates the likelihood that malicious activities will be detected by monitoring and security systems. Higher scores indicate comprehensive real-time monitoring with automated threat detection, while lower scores indicate limited or no detection capabilities.",
+            "Defense Capability": "Assesses comprehensive defense including effective mitigations, restricted access controls, and administrative privilege requirements. This encompasses countermeasures, access protection measures, and privilege management systems working together as a unified defense strategy.",
             "Operational Impact": "Measures the potential impact on mission operations if the threat materializes. This considers service disruption, data loss, and effects on critical mission functions.",
             "Recovery Time": "Evaluates the time and resources required to restore normal operations after a security incident. This includes backup systems, recovery procedures, and business continuity planning."
         }
@@ -1880,15 +1882,15 @@ class RiskAssessmentTool:
    • For each threat, evaluate all 9 asset categories (Ground Stations, Mission Control, Space Platform, etc.)
    • Rate each asset using the 5 assessment criteria on a scale of 1-5:
      - Vulnerability Level: How exposed is the asset to known vulnerabilities?
-     - Access Control: How well protected is access to the asset?
-     - Defense Capability: What countermeasures and detection systems are in place?
+     - Detection Probability: How likely are malicious activities to be detected?
+     - Defense Capability: What comprehensive defense measures (mitigations, access controls, privileges) are in place?
      - Operational Impact: How would a successful attack affect mission operations?
      - Recovery Time: How long would it take to restore normal operations?
 
 3. AUTOMATIC RISK CALCULATION:
-   • The tool automatically calculates Likelihood using the quadratic mean of Vulnerability, Access, and Defense scores
+   • The tool automatically calculates Likelihood using the quadratic mean of Vulnerability, Detection, and Defense scores
    • Impact is calculated using the quadratic mean of Operational Impact and Recovery Time scores
-   • Likelihood is calculated using the quadratic mean of Vulnerability Level, Access Control and Defense Capability
+   • Likelihood is calculated using the quadratic mean of Vulnerability Level, Detection Probability and Defense Capability
    • Final Risk Level is determined using a standard risk matrix (Likelihood x Impact)
    • The main table shows the highest risk level found across all assets for each threat
 

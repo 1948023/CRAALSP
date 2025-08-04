@@ -404,7 +404,23 @@ class RiskAssessmentTool:
         buttons_container = tk.Frame(button_frame, bg=self.COLORS['white'])
         buttons_container.pack(pady=10)
 
-        # THREAT button
+        # IMPORT REPORT 0-A button (first)
+        legacy_import_btn = tk.Button(buttons_container, text="IMPORT REPORT 0-A",
+                                     font=('Segoe UI', 12, 'bold'),
+                                     bg="#7e2929", fg=self.COLORS['white'],
+                                     relief='flat', padx=30, pady=10,
+                                     command=self.export_import_manager.legacy_import)
+        legacy_import_btn.pack(side='left', padx=(0, 10))
+
+        # IMPORT REPORT button (second)
+        import_report_btn = tk.Button(buttons_container, text="IMPORT REPORT",
+                                    font=('Segoe UI', 12, 'bold'),
+                                    bg='#2c3e50', fg=self.COLORS['white'],
+                                    relief='flat', padx=30, pady=10,
+                                    command=self.export_import_manager.import_word_report)
+        import_report_btn.pack(side='left', padx=(0, 10))
+
+        # THREAT ANALYSIS button (third)
         add_threat_btn = tk.Button(buttons_container, text="THREAT ANALYSIS",
                                   font=('Segoe UI', 12, 'bold'),
                                   bg=self.COLORS['primary'], fg=self.COLORS['white'],
@@ -412,45 +428,29 @@ class RiskAssessmentTool:
                                   command=self.open_threat_window)
         add_threat_btn.pack(side='left', padx=(0, 10))
 
-        # ASSET button
+        # ASSET ANALYSIS button (fourth)
         add_asset_btn = tk.Button(buttons_container, text="ASSET ANALYSIS",
                                  font=('Segoe UI', 12, 'bold'),
                                  bg=self.COLORS['success'], fg=self.COLORS['white'],
                                  relief='flat', padx=30, pady=10,
                                  command=self.open_asset_window)
-        add_asset_btn.pack(side='left', padx=(10, 10))
+        add_asset_btn.pack(side='left', padx=(0, 10))
 
-        # EXPORT button
+        # EXPORT CSV button (fifth)
         export_btn = tk.Button(buttons_container, text="EXPORT CSV",
                               font=('Segoe UI', 12, 'bold'),
                               bg='#e67e22', fg=self.COLORS['white'],
                               relief='flat', padx=30, pady=10,
                               command=self.export_import_manager.export_csv)
-        export_btn.pack(side='left', padx=(10, 10))
+        export_btn.pack(side='left', padx=(0, 10))
 
-        # EXPORT REPORT button
+        # EXPORT REPORT button (sixth and last)
         export_report_btn = tk.Button(buttons_container, text="EXPORT REPORT",
                                      font=('Segoe UI', 12, 'bold'),
                                      bg='#8e44ad', fg=self.COLORS['white'],
                                      relief='flat', padx=30, pady=10,
                                      command=self.export_import_manager.export_word_report)
-        export_report_btn.pack(side='left', padx=(10, 0))
-
-        # IMPORT REPORT button
-        import_report_btn = tk.Button(buttons_container, text="IMPORT REPORT",
-                                    font=('Segoe UI', 12, 'bold'),
-                                    bg='#2c3e50', fg=self.COLORS['white'],
-                                    relief='flat', padx=30, pady=10,
-                                    command=self.export_import_manager.import_word_report)
-        import_report_btn.pack(side='left', padx=(10, 0))
-
-        # LEGACY IMPORT button
-        legacy_import_btn = tk.Button(buttons_container, text="IMPORT REPORT 0-A",
-                                     font=('Segoe UI', 12, 'bold'),
-                                     bg="#7e2929", fg=self.COLORS['white'],
-                                     relief='flat', padx=30, pady=10,
-                                     command=self.export_import_manager.legacy_import)
-        legacy_import_btn.pack(side='left', padx=(10, 0))
+        export_report_btn.pack(side='left', padx=(0, 0))
 
     def open_threat_window(self):
         """Open Threat Analysis window"""
@@ -2537,6 +2537,7 @@ class RiskAssessmentTool:
                                 'reference': row.get('Reference frameworks', '').strip(),
                                 'lifecycle': row.get('Lifecycle phase', '').strip(),
                                 'segment': row.get('Segment', '').strip(),
+                                'criterio': row.get('Criterio', '').strip(),
                             })
                             
         except FileNotFoundError:

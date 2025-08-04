@@ -441,9 +441,9 @@ class ExportImportManager:
                 self.logger.warning(f"Table too short for threat {threat_name}")
                 return asset_data
                 
-            # Expected headers: Asset, Vulnerability, Access Control, Defense Capability, 
+            # Expected headers: Asset, Vulnerability, Detection Probability, Defense Capability, 
             #                  Operational Impact, Recovery Time, Likelihood, Impact, Risk Level
-            expected_headers = ['asset', 'vulnerability', 'access', 'defense', 'operational', 'recovery']
+            expected_headers = ['asset', 'vulnerability', 'detection', 'defense', 'operational', 'recovery']
             
             # Get actual headers
             header_row = table.rows[0]
@@ -479,8 +479,8 @@ class ExportImportManager:
                 # Mapping personalizzato
                 mapping = {
                     0: ["0"],        # Vulnerability → Vulnerability (criterio 0)
-                    1: ["3", "4"],   # Access → Access (criterio 3) + Privilege (criterio 4)  
-                    2: ["1", "2"],   # Defense → Mitigation (criterio 1) + Detection (criterio 2)
+                    1: ["2"],        # Detection Probability → Detection (criterio 2)
+                    2: ["1", "3", "4"],        # Defense → Mitigation (criterio 1) + Access (criterio 3) + Privilege
                     3: ["5"],        # Operational → Response (criterio 5)
                     4: ["6"]         # Recovery → Resilience (criterio 6)
                 }
@@ -1082,13 +1082,13 @@ class ExportImportManager:
         doc.add_heading(f'Mitigation Controls for {threat_name}', level=3)
         
         # Create controls table
-        table = doc.add_table(rows=1, cols=6)
+        table = doc.add_table(rows=1, cols=7)
         table.style = 'Table Grid'
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
         
         # Header
         header_cells = table.rows[0].cells
-        headers = ['Control Title', 'Control ID', 'Description', 'Reference Frameworks', 'Lifecycle Phase', 'Segment']
+        headers = ['Control Title', 'Control ID', 'Description', 'Reference Frameworks', 'Lifecycle Phase', 'Segment', 'Criteria']
         for i, header in enumerate(headers):
             header_cells[i].text = header
             header_cells[i].paragraphs[0].runs[0].bold = True
@@ -1102,6 +1102,7 @@ class ExportImportManager:
             row_cells[3].text = control.get('reference', '')
             row_cells[4].text = control.get('lifecycle', '')
             row_cells[5].text = control.get('segment', '')
+            row_cells[6].text = control.get('criterio', '')
         
         doc.add_paragraph()
 
