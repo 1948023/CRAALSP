@@ -793,12 +793,42 @@ class ExportImportManager:
     
     def _get_all_assets_with_likelihood_impact(self):
         """Get all assets that have both likelihood and impact values defined"""
-        assets_with_assessment = set()  # Use set to avoid duplicates
-        for i, (category, sub_category, asset_name) in enumerate(self.app.ASSET_CATEGORIES):
-            asset_likelihood, asset_impact = self._get_asset_likelihood_impact(asset_name)
-            if asset_likelihood and asset_impact:
-                assets_with_assessment.add(asset_name)
-        return sorted(list(assets_with_assessment))
+        assets_with_assessment = []  # Use list instead of set
+        try:
+            # Check if ASSET_CATEGORIES exists and is not None
+            if not hasattr(self.app, 'ASSET_CATEGORIES') or self.app.ASSET_CATEGORIES is None:
+                logging.error("ASSET_CATEGORIES not found or is None")
+                return []
+            
+            # Ensure ASSET_CATEGORIES is iterable
+            if not hasattr(self.app.ASSET_CATEGORIES, '__iter__'):
+                logging.error("ASSET_CATEGORIES is not iterable")
+                return []
+            
+            for i, asset_tuple in enumerate(self.app.ASSET_CATEGORIES):
+                try:
+                    # Safely unpack the tuple
+                    if not isinstance(asset_tuple, (tuple, list)) or len(asset_tuple) < 3:
+                        logging.warning(f"Invalid asset tuple at index {i}: {asset_tuple}")
+                        continue
+                    
+                    category, sub_category, asset_name = asset_tuple[:3]  # Take first 3 elements
+                    
+                    if not asset_name:  # Skip empty asset names
+                        continue
+                        
+                    asset_likelihood, asset_impact = self._get_asset_likelihood_impact(asset_name)
+                    if asset_likelihood and asset_impact:
+                        if asset_name not in assets_with_assessment:  # Avoid duplicates manually
+                            assets_with_assessment.append(asset_name)
+                except Exception as inner_e:
+                    logging.error(f"Error processing asset at index {i}: {inner_e}")
+                    continue
+                    
+        except Exception as e:
+            logging.error(f"Error getting assets with likelihood/impact: {e}")
+            return []
+        return sorted(assets_with_assessment)
 
     def _get_asset_detailed_criteria(self, asset_name):
         """Get detailed criteria scores for an asset from latest assessment"""
@@ -822,10 +852,20 @@ class ExportImportManager:
         
         # Find asset index by name
         asset_index = -1
-        for i, (category, sub_category, component) in enumerate(self.app.ASSET_CATEGORIES):
-            if component == asset_name:
-                asset_index = i
-                break
+        
+        # Safely access ASSET_CATEGORIES
+        if not hasattr(self.app, 'ASSET_CATEGORIES') or self.app.ASSET_CATEGORIES is None:
+            print(f"Warning: ASSET_CATEGORIES not found or None")
+            return {}
+        
+        try:
+            for i, (category, sub_category, component) in enumerate(self.app.ASSET_CATEGORIES):
+                if component == asset_name:
+                    asset_index = i
+                    break
+        except (TypeError, ValueError) as e:
+            print(f"Warning: Error iterating ASSET_CATEGORIES: {e}")
+            return {}
         
         if asset_index == -1:
             return {}
@@ -840,15 +880,24 @@ class ExportImportManager:
 
     def _get_threat_detailed_criteria(self, threat_name, asset_name):
         """Get detailed criteria scores for a threat-asset combination"""
+        
         if threat_name not in self.app.threat_data:
             return {}
         
         # Find asset index by name
         asset_index = -1
-        for i, (category, sub_category, component) in enumerate(self.app.ASSET_CATEGORIES):
-            if component == asset_name:
-                asset_index = i
-                break
+        
+        # Safely access ASSET_CATEGORIES
+        if not hasattr(self.app, 'ASSET_CATEGORIES') or self.app.ASSET_CATEGORIES is None:
+            return {}
+        
+        try:
+            for i, (category, sub_category, component) in enumerate(self.app.ASSET_CATEGORIES):
+                if component == asset_name:
+                    asset_index = i
+                    break
+        except (TypeError, ValueError) as e:
+            return {}
         
         if asset_index == -1:
             return {}
@@ -859,7 +908,8 @@ class ExportImportManager:
         if asset_key not in threat_data:
             return {}
         
-        return threat_data[asset_key]
+        result = threat_data[asset_key]
+        return result
 
     def _add_word_title_and_info(self, doc):
         """Add title and info to Word document"""
@@ -906,7 +956,11 @@ class ExportImportManager:
         doc.add_heading('Asset Assessment Overview', level=1)
         
         # Get ALL assets with valid likelihood and impact (not just those in threat assessment)
-        assets_with_assessment = self._get_all_assets_with_likelihood_impact()
+        try:
+            assets_with_assessment = self._get_all_assets_with_likelihood_impact()
+        except Exception as e:
+            logging.error(f"Error getting assets with assessment: {e}")
+            assets_with_assessment = []
         
         if not assets_with_assessment:
             doc.add_paragraph("No asset assessment data available.")
@@ -925,39 +979,55 @@ class ExportImportManager:
         header_cells = table.rows[0].cells
         headers = ['Category', 'Sub-category', 'Asset'] + asset_criteria + ['Likelihood', 'Impact', 'Risk']
         for i, header in enumerate(headers):
-            header_cells[i].text = header
-            header_cells[i].paragraphs[0].runs[0].bold = True
+            if i < len(header_cells):  # Safety check
+                header_cells[i].text = header
+                header_cells[i].paragraphs[0].runs[0].bold = True
         
         # Data
         for asset_name in assets_with_assessment:
-            asset_category, asset_sub_category = "", ""
-            for category, sub_category, component in self.app.ASSET_CATEGORIES:
-                if component == asset_name:
-                    asset_category = category
-                    asset_sub_category = sub_category
-                    break
-            
-            # Get asset criteria details
-            asset_criteria_data = self._get_asset_detailed_criteria(asset_name)
-            asset_likelihood, asset_impact = self._get_asset_likelihood_impact(asset_name)
-            asset_risk = ""
-            if asset_likelihood and asset_impact:
-                asset_risk = self.app.RISK_MATRIX.get((asset_likelihood, asset_impact), "")
+            try:
+                asset_category, asset_sub_category = "", ""
+                
+                # Safely access ASSET_CATEGORIES
+                if not hasattr(self.app, 'ASSET_CATEGORIES') or self.app.ASSET_CATEGORIES is None:
+                    print(f"Warning: ASSET_CATEGORIES not found or None for asset {asset_name}")
+                    continue
+                
+                try:
+                    for category, sub_category, component in self.app.ASSET_CATEGORIES:
+                        if component == asset_name:
+                            asset_category = category
+                            asset_sub_category = sub_category
+                            break
+                except (TypeError, ValueError) as e:
+                    print(f"Warning: Error iterating ASSET_CATEGORIES for asset {asset_name}: {e}")
+                    continue
+                
+                # Get asset criteria details
+                asset_criteria_data = self._get_asset_detailed_criteria(asset_name)
+                asset_likelihood, asset_impact = self._get_asset_likelihood_impact(asset_name)
+                asset_risk = ""
+                if asset_likelihood and asset_impact:
+                    asset_risk = self.app.RISK_MATRIX.get((asset_likelihood, asset_impact), "")
 
-            row_cells = table.add_row().cells
-            row_cells[0].text = asset_category
-            row_cells[1].text = asset_sub_category
-            row_cells[2].text = asset_name
-            
-            # Add criteria scores (columns 3-11)
-            for i in range(9):
-                criteria_value = asset_criteria_data.get(str(i), "")
-                row_cells[3 + i].text = criteria_value
-            
-            # Add likelihood, impact, risk (columns 12-14)
-            row_cells[12].text = asset_likelihood if asset_likelihood else ""
-            row_cells[13].text = asset_impact if asset_impact else ""
-            row_cells[14].text = asset_risk if asset_risk else ""
+                row_cells = table.add_row().cells
+                row_cells[0].text = asset_category
+                row_cells[1].text = asset_sub_category
+                row_cells[2].text = asset_name
+                
+                # Add criteria scores (columns 3-11)
+                for i in range(9):
+                    criteria_value = asset_criteria_data.get(str(i), "")
+                    row_cells[3 + i].text = str(criteria_value) if criteria_value else ""
+                
+                # Add likelihood, impact, risk (columns 12-14)
+                row_cells[12].text = asset_likelihood if asset_likelihood else ""
+                row_cells[13].text = asset_impact if asset_impact else ""
+                row_cells[14].text = asset_risk if asset_risk else ""
+                
+            except Exception as e:
+                logging.error(f"Error processing asset {asset_name}: {e}")
+                continue
         
         doc.add_paragraph()
 
@@ -1000,14 +1070,27 @@ class ExportImportManager:
         
         # Data
         assets_added = 0
-        if threat_name in sorted(self.app.threat_data):
+        
+        try:
+            sorted_threats = sorted(self.app.threat_data)
+        except Exception as e:
+            sorted_threats = list(self.app.threat_data.keys()) if hasattr(self.app.threat_data, 'keys') else []
+        
+        if threat_name in sorted_threats:
             threat_data = self.app.threat_data[threat_name]
             
             for asset_key, threat_asset_data in threat_data.items():
                 try:
                     asset_index = int(asset_key.split('_')[0]) - 1
+                    
                     if 0 <= asset_index < len(self.app.ASSET_CATEGORIES):
-                        category, sub_category, asset_name = self.app.ASSET_CATEGORIES[asset_index]
+                        asset_category_item = self.app.ASSET_CATEGORIES[asset_index]
+                        
+                        # Check if it's a tuple/list with at least 3 elements
+                        if isinstance(asset_category_item, (tuple, list)) and len(asset_category_item) >= 3:
+                            category, sub_category, asset_name = asset_category_item[:3]
+                        else:
+                            continue
                         
                         # Threat likelihood and impact
                         threat_likelihood = self.app.calculate_likelihood_from_saved_data(threat_asset_data)
@@ -1046,8 +1129,12 @@ class ExportImportManager:
                             
                             # Threat criteria (7 columns)
                             for i in range(7):
-                                criteria_value = threat_criteria_data.get(str(i), "")
-                                row_cells[col_idx].text = criteria_value
+                                if isinstance(threat_criteria_data, dict):
+                                    criteria_value = threat_criteria_data.get(str(i), "")
+                                else:
+                                    criteria_value = ""
+                                
+                                row_cells[col_idx].text = str(criteria_value)
                                 col_idx += 1
                             
                             # Threat likelihood, impact, risk
@@ -1059,7 +1146,7 @@ class ExportImportManager:
                             
                             assets_added += 1
                             
-                except (ValueError, IndexError):
+                except (ValueError, IndexError) as e:
                     continue
         
         if assets_added == 0:
@@ -1071,38 +1158,129 @@ class ExportImportManager:
         doc.add_paragraph()
 
     def _add_threat_controls_table(self, doc, threat_name):
-        """Add mitigation controls table for specific threat"""
-        # Load controls for this threat
-        controls = self.app.load_controls_for_threat(threat_name)
+        """Add mitigation controls table for specific threat with applied/available status"""
+        # Get controls status (applied vs available)
+        controls_status = self.app.get_controls_status_for_threat(threat_name)
         
-        if not controls:
+        # Ensure we have the correct structure
+        if not isinstance(controls_status, dict):
+            print(f"Warning: get_controls_status_for_threat returned unexpected type: {type(controls_status)}")
+            doc.add_paragraph(f"Error loading controls for {threat_name}.")
+            return
+        
+        applied_controls = controls_status.get('applied', [])
+        available_controls = controls_status.get('available_not_applied', [])
+        total_available = controls_status.get('total_available', 0)
+        
+        # Ensure these are lists
+        if not isinstance(applied_controls, list):
+            print(f"Warning: applied_controls is not a list: {type(applied_controls)}")
+            applied_controls = []
+        
+        if not isinstance(available_controls, list):
+            print(f"Warning: available_controls is not a list: {type(available_controls)}")
+            available_controls = []
+        
+        if total_available == 0:
             doc.add_paragraph(f"No specific mitigation controls found for {threat_name}.")
             return
         
         doc.add_heading(f'Mitigation Controls for {threat_name}', level=3)
         
-        # Create controls table
-        table = doc.add_table(rows=1, cols=7)
-        table.style = 'Table Grid'
-        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        # Add summary paragraph
+        summary_text = f"Total controls available: {total_available} | Applied: {len(applied_controls)} | Available but not applied: {len(available_controls)}"
+        summary_para = doc.add_paragraph(summary_text)
+        summary_para.runs[0].bold = True
         
-        # Header
-        header_cells = table.rows[0].cells
-        headers = ['Control Title', 'Control ID', 'Description', 'Reference Frameworks', 'Lifecycle Phase', 'Segment', 'Criteria']
-        for i, header in enumerate(headers):
-            header_cells[i].text = header
-            header_cells[i].paragraphs[0].runs[0].bold = True
+        # === APPLIED CONTROLS SECTION ===
+        if applied_controls:
+            doc.add_heading('Applied Controls', level=4)
+            
+            # Create table for applied controls
+            table_applied = doc.add_table(rows=1, cols=8)
+            table_applied.style = 'Table Grid'
+            table_applied.alignment = WD_TABLE_ALIGNMENT.CENTER
+            
+            # Header for applied controls
+            header_cells = table_applied.rows[0].cells
+            headers = ['Control ID', 'Cluster', 'Control Title', 'Description', 'Reference', 'Lifecycle', 'Segment', 'Criteria']
+            
+            for i, header in enumerate(headers):
+                if i < len(header_cells):
+                    header_cells[i].text = header
+                    header_cells[i].paragraphs[0].runs[0].bold = True
+                else:
+                    print(f"WARNING: Header index {i} out of range for header_cells length {len(header_cells)}")
+            
+            # Data rows for applied controls
+            
+            for control in applied_controls:
+                if not isinstance(control, dict):
+                    print(f"WARNING: control is not a dict: {control}")
+                    continue
+                    
+                row_cells = table_applied.add_row().cells
+                
+                if len(row_cells) >= 8:
+                    row_cells[0].text = str(control.get('id', 'N/A'))
+                    row_cells[1].text = control.get('cluster', '')
+                    row_cells[2].text = control.get('title', '')
+                    row_cells[3].text = control.get('description', '')
+                    row_cells[4].text = control.get('reference', '')
+                    row_cells[5].text = control.get('lifecycle', '')
+                    row_cells[6].text = control.get('segment', '')
+                    row_cells[7].text = control.get('criteria', '')
+                else:
+                    print(f"WARNING: row_cells has only {len(row_cells)} cells, expected 8")
+            
+            doc.add_paragraph()
         
-        # Data rows
-        for control in controls:
-            row_cells = table.add_row().cells
-            row_cells[0].text = control.get('title', '')
-            row_cells[1].text = control.get('control', '')
-            row_cells[2].text = control.get('description', '')
-            row_cells[3].text = control.get('reference', '')
-            row_cells[4].text = control.get('lifecycle', '')
-            row_cells[5].text = control.get('segment', '')
-            row_cells[6].text = control.get('criterio', '')
+        # === AVAILABLE BUT NOT APPLIED CONTROLS SECTION ===
+        if available_controls:
+            doc.add_heading('Available Controls (Not Applied)', level=4)
+            
+            # Create table for available controls
+            table_available = doc.add_table(rows=1, cols=8)
+            table_available.style = 'Table Grid'
+            table_available.alignment = WD_TABLE_ALIGNMENT.CENTER
+            
+            # Header for available controls
+            header_cells = table_available.rows[0].cells
+            headers = ['Control ID', 'Cluster', 'Control Title', 'Description', 'Reference', 'Lifecycle', 'Segment', 'Criteria']
+            
+            for i, header in enumerate(headers):
+                if i < len(header_cells):
+                    header_cells[i].text = header
+                    header_cells[i].paragraphs[0].runs[0].bold = True
+                else:
+                    print(f"WARNING: Available header index {i} out of range for header_cells length {len(header_cells)}")
+            
+            # Data rows for available controls
+            
+            for control in available_controls:
+                if not isinstance(control, dict):
+                    print(f"WARNING: available control is not a dict: {control}")
+                    continue
+                    
+                row_cells = table_available.add_row().cells
+                
+                if len(row_cells) >= 8:
+                    row_cells[0].text = str(control.get('id', 'N/A'))
+                    row_cells[1].text = control.get('cluster', '')
+                    row_cells[2].text = control.get('title', '')
+                    row_cells[3].text = control.get('description', '')
+                    row_cells[4].text = control.get('reference', '')
+                    row_cells[5].text = control.get('lifecycle', '')
+                    row_cells[6].text = control.get('segment', '')
+                    row_cells[7].text = control.get('criteria', '')
+                else:
+                    print(f"WARNING: available row_cells has only {len(row_cells)} cells, expected 8")
+            
+            doc.add_paragraph()
+        
+        # === NO CONTROLS MESSAGE ===
+        if not applied_controls and not available_controls:
+            doc.add_paragraph("No controls have been applied for this threat, and no additional controls are available.")
         
         doc.add_paragraph()
 

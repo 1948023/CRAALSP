@@ -175,8 +175,8 @@ The following Windows executables are provided for easy deployment:
 
 **Assessment Criteria**:
 1. **Vulnerability Level** - Known vulnerabilities and their mitigation status
-2. **Access Control** - Physical and logical access protection measures
-3. **Defense Capability** - Countermeasures and detection systems
+2. **Detection Probability** - Likelihood that malicious activities will be detected
+3. **Defense Capability** - Comprehensive defense including mitigations, access controls, and privilege requirements
 4. **Operational Impact** - Effect on mission operations
 5. **Recovery Time** - Time required to restore normal operations
 
@@ -225,6 +225,43 @@ The following Windows executables are provided for easy deployment:
 - Mitigation recommendations
 - Compliance mapping
 - Executive summary
+
+#### **🛡️ Controls Management** (Enhanced Feature)
+
+**Purpose**: Advanced security controls management with dynamic impact analysis and intelligent asset compatibility
+
+**Key Features**:
+- **Dynamic Control Selection**: Searchable control library organized by clusters
+- **Smart Asset Filtering**: Intelligent control application based on asset segments (Ground, Space, Link, User, Human Resources)
+- **Real-time Impact Analysis**: Live visualization of control effectiveness on threat criteria
+- **Threat Coverage Mapping**: Comprehensive analysis of which threats are addressed by selected controls
+- **Criteria Impact Visualization**: Shows how controls improve specific threat assessment criteria
+
+**Enhanced Capabilities** (Added 5 August 2025):
+- **Segment-aware Control Application**: Controls automatically filter based on asset compatibility
+- **Mouse Wheel Protection**: Prevents accidental changes to checkboxes and comboboxes during scrolling
+- **Dynamic Search Functionality**: Real-time filtering of controls by title, description, threats, or criteria
+- **Expandable Control Clusters**: Organized control categories with collapsible sections
+- **Impact Dashboard**: Right-panel analysis showing control effectiveness and threat coverage
+
+**Control Assessment Process**:
+1. **Browse Available Controls**: Search and filter from comprehensive control library
+2. **Select Relevant Controls**: Choose controls applicable to your assets and threats
+3. **Review Dynamic Impact**: See real-time analysis of control effectiveness
+4. **Apply to Risk Assessment**: Automatically update threat scores based on selected controls
+5. **Export Enhanced Report**: Generate reports including control implementation details
+
+**Smart Features**:
+- **Asset Compatibility Checking**: Controls are automatically matched to compatible asset segments
+- **Threat Criteria Mapping**: Shows which specific threat criteria are improved by each control
+- **Coverage Analysis**: Identifies threats with excellent, good, or basic control coverage
+- **Cluster Organization**: Controls grouped by logical categories (e.g., "Access Control", "Encryption", "Monitoring")
+
+**Output Enhancements**:
+- Control impact integrated into risk assessment reports
+- Detailed control implementation recommendations
+- Asset-specific control filtering and suggestions
+- Threat coverage gap analysis
 
 ---
 
@@ -833,6 +870,14 @@ Denial of Service;Low;Medium;Low
 - **Responsive Design**: Adapts to different screen resolutions
 - **Interactive Elements**: Dynamic forms, real-time calculations
 - **Status Monitoring**: Progress tracking and error handling
+- **🆕 Integrated Help System**: Comprehensive help dialogs with detailed user guides
+
+### Enhanced User Experience (August 2025)
+- **Smart Mouse Wheel Handling**: Prevents accidental value changes during scrolling
+- **Dynamic Search and Filtering**: Real-time content filtering with immediate results
+- **Interactive Help Dialogs**: Built-in comprehensive user guides accessible via ❓ Help buttons
+- **Asset Compatibility Intelligence**: Automatic filtering of relevant controls based on asset segments
+- **Real-time Impact Visualization**: Live updates of control effectiveness and threat coverage
 
 ### Analysis Capabilities
 - **Multi-criteria Assessment**: Comprehensive evaluation frameworks
@@ -845,6 +890,13 @@ Denial of Service;Low;Medium;Low
 - **CSV Files**: Raw data for further analysis
 - **JSON Format**: Structured data exchange
 - **PNG Images**: High-quality visualizations
+
+### 🆕 Help and Documentation System
+- **Interactive Help Dialogs**: Built-in comprehensive user guides
+- **Context-sensitive Help**: Help buttons in complex interfaces (Controls Management)
+- **Feature Explanations**: Detailed descriptions of enhanced features and capabilities
+- **Best Practices Guidance**: Tips for optimal tool usage and configuration
+- **Updated Documentation**: README includes all latest features and enhancements
 
 ## 🔍 Troubleshooting
 

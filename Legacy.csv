@@ -2,17 +2,19 @@ Old Threat; New Threat
 Data Corruption; Data modification
 Physical/Logical Attack; Identity Theft
 Physical/Logical Attack; Social Engineering
+Physical/Logical Attack; Damage / Destruction of segment assets
 Interception/Eavesdropping; Interception of communication
 Interception/Eavesdropping; Man-in-the-Middle (MITM)
 Jamming; Jamming
 Denial-of-Service; Denial of Service (DoS)
 Masquerade/Spoofing; Spoofing
-Software Threats; Malicious code/ software/activity: Cryptographic exploit
-Software Threats; Malicious code/ software/activity: Malicious injection
-Software Threats; Malicious code/ software/activity: Network exploit
-Software Threats; Malicious code/ software/activity: Software and vulnerabilities' exploit
+Software Threats; Malicious code / software / activity: Cryptographic exploit
+Software Threats; Malicious code / software / activity: Malicious injection
+Software Threats; Malicious code / software / activity: Network exploit
+Software Threats; Malicious code / software / activity: Software and vulnerabilities' exploit
 Unauthorized Access/Hijacking; Unauthorized access
 Unauthorized Access/Hijacking; Seizure of control: Satellite bus
+Unauthorized Access/Hijacking; Hijacking
 Tainted hardware components; Rogue hardware
 Supply Chain; Supply Chain Compromise
 Replay; Replay of recorded authentic communication traffic
