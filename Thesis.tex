@@ -14,12 +14,10 @@
 \usepackage{amsmath}
 \usetikzlibrary{positioning, arrows.meta}
 
-
 % Mathematical packages
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
-
 
 % Graphics and figures
 \usepackage{graphicx}
@@ -82,9 +80,11 @@
 \author{Giuseppe Nonni}
 \IDnumber{1948023}
 \course{Cybersecurity}
-\courseorganizer{Information Engineering, Computer Science, and Statistics}
+\courseorganizer{Information Engineering, Informatics, and Statistics}
 \AcademicYear{2024/2025}
 \advisor{Prof. Marco Angelini}
+\coadvisor{Ing. Giorgio Sciascia}
+\customcoadvisorlabel{Company Supervisor}
 \authoremail{nonni.1948023@studenti.uniroma1.it}
 \copyyear{2025}
 \thesistype{Master thesis}
@@ -183,15 +183,17 @@ The remainder of this thesis is organized as follows:
 
 \textbf{Chapter 4} details the design and implementation of the Risk Assessment Tool Suite, including architecture decisions and technical specifications.
 
-\textbf{Chapter 5} describes the individual components of the tool suite: BID Phase assessment, preliminary risk evaluation, comprehensive risk assessment, and attack graph analysis.
+\textbf{Chapter 5} describes the individual components of the tool suite: BID Phase assessment, preliminary risk evaluation, comprehensive risk assessment with dynamic cybersecurity controls management, and attack graph analysis.
 
 \textbf{Chapter 6} presents the validation methodology and results from comprehensive testing of the framework and tools, including technical validation and lessons learned.
 
-\textbf{Chapter 7} discusses the AI training methodologies and development approaches used in the automated components of the Risk Assessment Tool Suite.
+\textbf{Chapter 7} provides comprehensive user manual and operational guidance for the Risk Assessment Tool Suite, including detailed instructions for all four integrated tools, advanced Controls Management system with real-time impact analysis, interface descriptions, and best practices for effective utilization in professional environments.
 
-\textbf{Chapter 8} discusses the implications of the research, technical challenges resolved, limitations of the current approach, and directions for future work.
+\textbf{Chapter 8} discusses the AI training methodologies and development approaches used in the automated components of the Risk Assessment Tool Suite.
 
-\textbf{Chapter 9} concludes the thesis with a summary of contributions and their significance for the space cybersecurity domain.
+\textbf{Chapter 9} discusses the implications of the research, technical challenges resolved, limitations of the current approach, and directions for future work.
+
+\textbf{Chapter 10} concludes the thesis with a summary of contributions and their significance for the space cybersecurity domain.
 
 % ============================================================================
 % CHAPTER 2: BACKGROUND AND RELATED WORK
@@ -299,23 +301,6 @@ The user segment encompasses the end-user infrastructure that consumes and proce
     \item \textbf{Processing Infrastructure}: Local processing capabilities for user-specific data analysis and application execution
 \end{itemize}
 
-\paragraph{Asset Interdependencies and Vulnerabilities}
-
-The comprehensive asset landscape reveals critical interdependencies that create potential vulnerability cascades:
-
-\begin{table}[H]
-\centering
-\caption{Asset Categories and Associated Vulnerability Patterns}
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Asset Category} & \textbf{Critical Components} & \textbf{Primary Vulnerability Areas} \\ \hline
-Ground Segment & Ground stations, mission control & Physical security, network access, software integrity \\ \hline
-Space Segment & Platform, payload systems & Environmental resilience, communication security, autonomous operation \\ \hline
-Link Segment & Inter/intra/cross-segment links & Encryption, authentication, jamming resistance, protocol security \\ \hline
-User Segment & User terminals, processing & Interface security, data handling, access control \\ \hline
-\end{tabular}
-\end{table}
-
 This comprehensive asset landscape provides the foundation for systematic threat modeling and risk assessment across all phases of space mission lifecycles. By understanding the complete inventory of critical assets and their interdependencies, security professionals can develop more effective threat scenarios and implement appropriate protective measures tailored to the specific characteristics of each asset category.
 
 \vspace{13pt}
@@ -345,10 +330,10 @@ The NIST Risk Management Framework provides structured methodologies for conduct
 \begin{table}[H]
 \centering
 \caption{NIST SP 800-30 Adaptation Challenges for Space Systems}
-\begin{tabular}{|l|l|l|}
+\begin{tabular}{|p{3.5cm}|p{4cm}|p{6cm}|}
 \hline
 \textbf{Framework Component} & \textbf{Standard Approach} & \textbf{Space Domain Challenges} \\ \hline
-Risk Assessment Process & Sequential, iterative analysis & Requires parallel assessment across segments \\ \hline
+Risk Assessment Process & Sequential, iterative  analysis & Requires parallel assessment across segments \\ \hline
 Threat Source Identification & IT-centric threat actors & Must include space-specific threats \\ \hline
 Vulnerability Assessment & Software/network focus & Hardware, environmental vulnerabilities \\ \hline
 Likelihood Determination & Historical data emphasis & Limited space incident data \\ \hline
@@ -486,7 +471,7 @@ The framework identifies four distinct phases requiring specialized risk assessm
 The BID Phase Assessment represents the earliest opportunity to integrate cybersecurity considerations into a space project. Conducted during the proposal or pre-feasibility stage, this initial evaluation aims to align the project’s scope, budget, and planning assumptions with a realistic understanding of risk exposure. The assessment is based primarily on the project category (e.g., scientific mission, commercial payload, defense satellite) and its high-level functional and operational requirements. Although limited in technical detail at this stage, the process focuses on identifying fundamental cybersecurity constraints and potential mission-critical vulnerabilities that could affect project viability. This includes considerations such as mission criticality, reliance on third-party infrastructure (e.g., commercial ground stations), initial compliance with applicable standards (e.g., ECSS or ISO/IEC), and the presence of potential regulatory or geopolitical risks. The output of this phase informs the allocation of security resources, the initial definition of risk tolerance, and the inclusion of security planning in project proposals and contractual frameworks.
 
 \subsection{Preliminary Risk Assessment}
-The Preliminary Risk Assessment is conducted in the early stages of system design and requirement definition, typically during Phase 0/A of the mission lifecycle. Its objective is to create a structured foundation for subsequent security engineering and risk management activities. This phase involves the identification and categorization of key mission assets—such as onboard subsystems, data links, ground segment interfaces, and mission-critical software components. This phase promotes early visibility into systemic vulnerabilities, allowing for the definition of security requirements that can be integrated into system architecture, redundancy strategies, and operational planning. The outputs include a threat-asset matrix, initial risk register, and a prioritized list of areas requiring further analysis or mitigation in the next phase.
+The Preliminary Risk Assessment is conducted in the early stages of system design and requirement definition, typically during Phase 0/A of the mission lifecycle. Its objective is to create a structured foundation for subsequent security engineering and risk management activities. This phase involves the identification and categorization of key mission assets, such as onboard subsystems, data links, ground segment interfaces, and mission-critical software components. This phase promotes early visibility into systemic vulnerabilities, allowing for the definition of security requirements that can be integrated into system architecture, redundancy strategies, and operational planning. The outputs include a threat-asset matrix, initial risk register, and a prioritized list of areas requiring further analysis or mitigation in the next phase.
 
 \subsection{Comprehensive Risk Assessment}
 The Comprehensive Risk Assessment represents the most detailed and analytically intensive phase of the framework. Typically carried out during system development, integration, and testing phases (Phase B/C/D), it leverages a standardized taxonomy of threat types (e.g., nefarious activity, eavesdropping, physical sabotage), asset categories (e.g., space, ground, link, user), and lifecycle phases. The analysis employs both qualitative and quantitative methods, including risk scoring based on likelihood-impact matrices and attack path modeling. This phase also evaluates control effectiveness, environmental constraints, access complexity, and response capabilities. Special attention is paid to interdependencies among system components and cascading failure scenarios. The result is a comprehensive risk profile that supports informed decisions on design trade-offs, security control implementation, and mission assurance planning. Additionally, the assessment facilitates cross-domain alignment, particularly when projects involve international partners or dual-use technologies.
@@ -511,24 +496,24 @@ The preliminary risk assessment provides rapid risk evaluation capabilities for 
 
 \subsubsection{Threat-Centric Assessment Approach}
 
-The preliminary assessment employs a threat-centric methodology where each identified threat is evaluated against all relevant assets using seven specialized criteria. This approach ensures comprehensive coverage while maintaining assessment efficiency:
+The preliminary assessment employs a threat-centric methodology where each identified threat is evaluated against all relevant assets using five specialized criteria. This approach ensures comprehensive coverage while maintaining assessment efficiency:
 
 \begin{itemize}
-    \item \textbf{Vulnerability Effectiveness}: Evaluates how effectively known vulnerabilities can be exploited in the current system state, ranging from resolved vulnerabilities to actively exploitable weaknesses
-    \item \textbf{Mitigation Presence}: Assesses the presence and effectiveness of security countermeasures, from multi-level validated defenses to complete absence of relevant protections
-    \item \textbf{Detection Probability}: Measures the likelihood that malicious activities will be detected, spanning real-time automated detection to complete absence of detection capabilities
-    \item \textbf{Access Complexity}: Evaluates the difficulty for attackers to gain system access, from strongly protected environments to completely open access points
-    \item \textbf{Privilege Requirement}: Assesses the level of system privileges needed for successful exploitation, from root access requirements to no authentication needs
-    \item \textbf{Response Delay}: Measures organizational response capabilities, from predefined automated responses to complete absence of response procedures
-    \item \textbf{Resilience Impact}: Evaluates operational impact on system resilience, from no disruption with automatic failover to irreversible asset loss
+    \item \textbf{Vulnerability Level}: Evaluates known vulnerabilities and their mitigation status, from no known or resolved vulnerabilities to multiple unresolved critical vulnerabilities
+    \item \textbf{Detection Probability}: Measures the likelihood that malicious activities will be detected, spanning continuous real-time monitoring with automated threat detection to complete absence of detection capabilities
+    \item \textbf{Defense Capability}: Assesses comprehensive defense including effective mitigations, restricted access controls, and administrative privilege requirements, from multi-layered validated defenses to complete absence of relevant protections
+    \item \textbf{Operational Impact}: Evaluates the effect on mission operations, from no impact thanks to redundancy with automated response to critical mission failure requiring extensive recovery
+    \item \textbf{Recovery Time}: Measures time required to restore normal operations, from immediate restoration with automated procedures to inability to restore services
 \end{itemize}
 
 \subsubsection{Likelihood and Impact Computation}
 
-The preliminary methodology employs a structured approach to derive likelihood and impact values from the seven assessment criteria:
+The preliminary methodology employs a structured approach to derive likelihood and impact values from the five assessment criteria:
 
-\textbf{Likelihood Calculation}: The first five criteria (Vulnerability Effectiveness through Privilege Requirement) contribute to likelihood assessment. Each criterion is scored on a 1-5 scale, and the overall likelihood is computed using quadratic mean to emphasize higher risk factors
-\textbf{Impact Assessment}: The last two criteria (Response Delay and Resilience impact) contribute to the impact score, offering focused evaluation of operational consequences and business continuity implications
+\textbf{Likelihood Calculation}: The first three criteria (Vulnerability Level, Detection Probability, and Defense Capability) contribute to likelihood assessment. Each criterion is scored on a 1-5 scale, and the overall likelihood is computed using quadratic mean to emphasize higher risk factors
+
+
+\textbf{Impact Assessment}: The last two criteria (Operational Impact and Recovery Time) contribute to the impact score, offering focused evaluation of operational consequences and business continuity implications
 
 $$V = \sqrt{\frac{1}{n}\sum_{i=1}^{n} C_i^2}$$
 
@@ -587,17 +572,6 @@ The framework employs quadratic mean (root mean square) rather than arithmetic m
     \item \textbf{Industry Alignment}: Quadratic mean aligns with established practices in safety-critical industries where maximum credible consequences drive risk evaluation
 \end{itemize}
 
-\subsubsection{Assessment Integration and Validation}
-
-Both preliminary and comprehensive methodologies support assessment integration and validation through:
-
-\begin{itemize}
-    \item \textbf{Cross-Methodology Validation}: Results from preliminary threat-centric and comprehensive asset-centric assessments can be compared to identify discrepancies and ensure assessment consistency
-    \item \textbf{Iterative Refinement}: Assessment results can be refined through multiple evaluation cycles as mission details and threat intelligence evolve
-    \item \textbf{Expert Review Integration}: Structured mechanisms for incorporating expert judgment and domain knowledge into quantitative assessments
-    \item \textbf{Uncertainty Management}: Recognition and documentation of assessment uncertainties and confidence levels to support informed decision-making
-
-\end{itemize}
 
 \section{Risk Treatment Strategies}
 The framework incorporates a comprehensive catalog of cybersecurity controls derived from leading international standards and space-specific guidance documents. This multi-framework approach ensures coverage of diverse risk scenarios while maintaining alignment with established industry practices and regulatory requirements.
@@ -715,44 +689,51 @@ The framework employs risk-based prioritization to guide control implementation 
     \item \textbf{Resilience Impact}: Controls that enhance system resilience and recovery capabilities
 \end{itemize}
 
-This comprehensive, multi-framework approach ensures that space system cybersecurity addresses the full spectrum of relevant threats while leveraging established best practices from both general cybersecurity and space-specific domains. The systematic categorization and lifecycle mapping of controls provides practical guidance for implementing appropriate security measures throughout the space mission lifecycle.
+\subsection{Dynamic Control Integration and Assessment Synchronization}
 
+The framework introduces an advanced methodology for dynamic control integration that maintains assessment consistency while enabling flexible security enhancement. This approach addresses the critical challenge of preserving risk evaluation integrity when cybersecurity controls are applied to existing threat assessments.
 
-\section{Framework Validation Methodology}
+\subsubsection{Control-Assessment Integration Model}
 
-\subsection{Validation Criteria}
-
-The theoretical framework undergoes validation against multiple criteria to ensure practical applicability:
-
-\begin{itemize}
-    \item \textbf{Completeness}: Coverage of all relevant risk categories and assessment phases
-    \item \textbf{Consistency}: Logical coherence across different framework components
-    \item \textbf{Practicality}: Feasibility of implementation within typical project constraints
-    \item \textbf{Accuracy}: Alignment of assessment results with empirical evidence and expert judgment
-    \item \textbf{Efficiency}: Reasonable resource requirements for framework application
-\end{itemize}
-
-\subsection{Expert Review Process}
-
-The framework underwent systematic review by cybersecurity experts from multiple domains:
-
-\begin{enumerate}
-    \item \textbf{Academic Review}: Evaluation by researchers specializing in space cybersecurity
-    \item \textbf{Industry Review}: Assessment by practitioners from space industry organizations
-    \item \textbf{Regulatory Review}: Examination by representatives from relevant regulatory bodies
-    \item \textbf{Cross-Domain Review}: Comparison with established frameworks from related industries
-\end{enumerate}
-
-\subsection{Iterative Refinement Process}
-
-Based on validation feedback, the framework underwent multiple refinement cycles:
+The dynamic integration model employs a two-phase approach that separates baseline risk assessment from control-enhanced evaluation:
 
 \begin{itemize}
-    \item \textbf{Taxonomy Refinement}: Adjustment of threat and asset classifications based on expert input
-    \item \textbf{Methodology Enhancement}: Improvement of assessment procedures based on practical testing
-    \item \textbf{Tool Integration}: Optimization of framework elements for tool-supported implementation
-    \item \textbf{Documentation Improvement}: Enhancement of guidance materials and implementation examples
+    \item \textbf{Baseline Assessment Phase}: Initial threat and asset risk evaluation conducted without considering implemented controls, establishing fundamental risk posture
+    \item \textbf{Control Enhancement Phase}: Application of selected cybersecurity controls with automatic recalculation of risk levels based on control effectiveness
+    \item \textbf{Integrated Risk Profile}: Combined assessment showing both baseline and control-mitigated risk levels for comprehensive security planning
 \end{itemize}
+
+\subsubsection{Assessment Consistency Protection}
+
+To maintain assessment integrity and prevent inconsistent risk evaluations, the framework implements assessment lock mechanisms:
+
+\begin{itemize}
+    \item \textbf{Read-Only Mode Activation}: Threat assessment interfaces become read-only once controls are applied, preventing manual modifications that could conflict with control-based adjustments
+    \item \textbf{Baseline Preservation}: Original assessment values are preserved alongside control-modified values, enabling comparison and validation
+    \item \textbf{Reset Capability}: Controls can be cleared to return to editable baseline assessment mode, allowing iterative refinement of risk evaluations
+\end{itemize}
+
+\subsubsection{Intelligent Control Compatibility}
+
+The framework incorporates intelligent compatibility assessment that ensures controls are applied only where technically and operationally appropriate:
+
+\begin{itemize}
+    \item \textbf{Segment-Based Filtering}: Controls automatically apply only to compatible asset segments based on technical feasibility and operational requirements
+    \item \textbf{Lifecycle Phase Alignment}: Control application respects mission phase constraints, ensuring controls are suggested only when implementable
+    \item \textbf{Threat-Control Mapping}: Automated identification of control effectiveness against specific threats, optimizing security measure selection
+\end{itemize}
+
+\subsubsection{Real-Time Impact Analysis}
+
+The framework provides real-time feedback on control selection effectiveness:
+
+\begin{itemize}
+    \item \textbf{Criteria Impact Visualization}: Immediate display of how selected controls affect specific risk assessment criteria
+    \item \textbf{Threat Coverage Analysis}: Dynamic calculation of threat coverage levels based on control selection, identifying potential security gaps
+    \item \textbf{Cumulative Effectiveness Assessment}: Real-time evaluation of multiple control interactions and their combined security impact
+\end{itemize}
+
+This comprehensive, multi-framework approach ensures that space system cybersecurity addresses the full spectrum of relevant threats while leveraging established best practices from both general cybersecurity and space-specific domains. The systematic categorization and lifecycle mapping of controls, combined with dynamic integration capabilities, provides practical guidance for implementing appropriate security measures throughout the space mission lifecycle while maintaining assessment consistency and enabling iterative security enhancement.
 
 % ============================================================================
 % CHAPTER 4: TOOL SUITE DESIGN - ENHANCED
@@ -857,11 +838,204 @@ import subprocess
 import csv
 \end{lstlisting}
 
+\subsection{Dynamic Control Management Implementation}
+
+The tool suite implements advanced dynamic control management capabilities that seamlessly integrate cybersecurity controls with existing risk assessments while maintaining data integrity and assessment consistency.
+
+\subsubsection{Control Database Architecture}
+
+The control management system employs a structured CSV-based database containing 125 cybersecurity controls derived from 13 international frameworks:
+
+\begin{lstlisting}[language=Python, caption=Control Database Structure]
+# Control CSV Schema
+CONTROL_COLUMNS = [
+    'ID',                      # Unique control identifier
+    'Control cluster',         # Control category grouping
+    'Control title',          # Human-readable control name
+    'Control',                # Detailed control description
+    'Control description',    # Implementation guidance
+    'Reference frameworks',   # Source frameworks (ISO27k, NIST, etc.)
+    'Lifecycle phase',        # Applicable mission phases
+    'Segment',               # Compatible asset segments
+    'Threats addressed',      # Relevant threat categories
+    'Criterio'               # Risk criteria affected
+]
+
+def load_controls_from_csv(self):
+    """Load and structure cybersecurity controls from database"""
+    try:
+        with open('Control.csv', 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file, delimiter=';')
+            controls = {}
+            
+            for row in reader:
+                if row['#'] and not row['#'].startswith('#'):
+                    control_id = row['#']
+                    controls[control_id] = {
+                        'cluster': row['Control cluster'],
+                        'title': row['Control title'],
+                        'description': row['Control description'],
+                        'reference': row['Reference frameworks'],
+                        'lifecycle': row['Lifecycle phase'],
+                        'segments': [s.strip() for s in row['Segment'].split(',')],
+                        'threats': row['Threats addressed'],
+                        'criteria': row['Criterio']
+                    }
+            return controls
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to load controls: {e}")
+        return {}
+\end{lstlisting}
+
+\subsubsection{Real-Time Impact Analysis Engine}
+
+The system provides real-time analysis of control selection impact through sophisticated calculation engines:
+
+\begin{lstlisting}[language=Python, caption=Dynamic Impact Analysis Implementation]
+def calculate_control_impact(self):
+    """Calculate real-time impact of selected controls"""
+    if not self.selected_controls:
+        return self.clear_impact_display()
+    
+    # Initialize impact tracking
+    criteria_impact = {}
+    threat_coverage = {}
+    control_clusters = {}
+    
+    for control_id in self.selected_controls:
+        if control_id in self.controls:
+            control = self.controls[control_id]
+            
+            # Track criteria improvements
+            if control['criteria']:
+                for criterion in control['criteria'].split(','):
+                    criterion = criterion.strip()
+                    if criterion:
+                        criteria_impact.setdefault(criterion, 0)
+                        criteria_impact[criterion] += 1
+            
+            # Track threat coverage
+            if control['threats']:
+                threats = [t.strip() for t in control['threats'].split(',')]
+                for threat in threats:
+                    if threat:
+                        threat_coverage.setdefault(threat, 0)
+                        threat_coverage[threat] += 1
+            
+            # Track control clustering
+            cluster = control['cluster']
+            control_clusters.setdefault(cluster, 0)
+            control_clusters[cluster] += 1
+    
+    # Update display with calculated impacts
+    self.update_impact_display(criteria_impact, threat_coverage, control_clusters)
+
+def update_impact_display(self, criteria_impact, threat_coverage, control_clusters):
+    """Update real-time impact visualization"""
+    # Clear previous content
+    for widget in self.impact_scrollable_frame.winfo_children():
+        widget.destroy()
+    
+    # Display criteria impact analysis
+    self.create_criteria_impact_section(criteria_impact)
+    
+    # Display threat coverage analysis
+    self.create_threat_coverage_section(threat_coverage)
+    
+    # Display control cluster summary
+    self.create_cluster_summary_section(control_clusters)
+    
+    # Refresh scrollable region
+    self.impact_canvas.configure(scrollregion=self.impact_canvas.bbox("all"))
+\end{lstlisting}
+
+\subsubsection{Assessment Synchronization and Read-Only Mode}
+
+The framework implements sophisticated assessment protection mechanisms to maintain data integrity:
+
+\begin{lstlisting}[language=Python, caption=Assessment Protection Implementation]
+def apply_controls_to_assessment(self):
+    """Apply selected controls and enable read-only mode"""
+    if not self.selected_controls:
+        messagebox.showwarning("Warning", "No controls selected for application.")
+        return
+    
+    try:
+        # Calculate control impacts on threat criteria
+        control_adjustments = self.calculate_criteria_adjustments()
+        
+        # Apply adjustments to threat assessment data
+        for threat_id, adjustments in control_adjustments.items():
+            if threat_id in self.threat_data:
+                for asset, criteria_values in adjustments.items():
+                    if asset in self.threat_data[threat_id]:
+                        for criterion, adjustment in criteria_values.items():
+                            current_value = self.threat_data[threat_id][asset][criterion]
+                            # Apply improvement (reduce risk factors)
+                            adjusted_value = max(1, current_value - adjustment)
+                            self.threat_data[threat_id][asset][criterion] = adjusted_value
+        
+        # Recalculate risk levels with control impacts
+        self.recalculate_risk_levels()
+        
+        # Enable read-only mode for threat assessment
+        self.enable_read_only_mode()
+        
+        # Save applied controls configuration
+        self.save_applied_controls()
+        
+        messagebox.showinfo("Success", 
+                          f"Applied {len(self.selected_controls)} controls successfully.\n"
+                          f"Threat Assessment is now in READ-ONLY mode.")
+        
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to apply controls: {e}")
+
+def enable_read_only_mode(self):
+    """Enable read-only mode for threat assessment interface"""
+    self.read_only_mode = True
+    
+    # Disable all threat assessment input widgets
+    if hasattr(self, 'threat_window') and self.threat_window.winfo_exists():
+        self.disable_threat_inputs(self.threat_window)
+    
+    # Update interface indicators
+    self.update_read_only_indicators()
+
+def clear_all_controls_and_enable_editing(self):
+    """Clear controls and return to editable mode"""
+    if self.read_only_mode:
+        result = messagebox.askyesno(
+            "Clear Controls", 
+            "This will clear all applied controls and restore original assessment values.\n"
+            "Threat Assessment will become editable again. Continue?"
+        )
+        if not result:
+            return
+    
+    # Clear control applications
+    self.selected_controls.clear()
+    self.applied_controls.clear()
+    
+    # Restore original assessment values
+    self.restore_original_assessment()
+    
+    # Disable read-only mode
+    self.read_only_mode = False
+    
+    # Re-enable threat assessment inputs
+    if hasattr(self, 'threat_window') and self.threat_window.winfo_exists():
+        self.enable_threat_inputs(self.threat_window)
+    
+    messagebox.showinfo("Controls Cleared", 
+                       "All controls cleared. Threat Assessment is now editable.")
+\end{lstlisting}
+
 \section{Scoring Methodology}
 
 \subsection{Weighted Scoring Algorithm}
 
-The tools implement a sophisticated weighted scoring system based on cybersecurity best practices:
+The tools implement a sophisticated weighted scoring system in the early phases based on cybersecurity best practices:
 
 \begin{table}[H]
 \centering
@@ -926,10 +1100,10 @@ After calculating likelihood and impact values, the framework applies the ISO 27
 \multirow{2}{*}{\textbf{Likelihood}} & \multicolumn{5}{c|}{\textbf{Impact}} \\ \cline{2-6}
 & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} \\ \hline
 \textbf{5} & Medium & High & High & Very High & Very High \\ \hline
-\textbf{4} & Medium & Medium & High & High & Very High \\ \hline
-\textbf{3} & Low & Medium & Medium & High & High \\ \hline
-\textbf{2} & Low & Low & Medium & Medium & High \\ \hline
-\textbf{1} & Very Low & Low & Low & Medium & Medium \\ \hline
+\textbf{4} & Low & Medium & High & High & Very High \\ \hline
+\textbf{3} & Low & Low & Medium & High & High \\ \hline
+\textbf{2} & Very Low & Low & Low & Medium & Medium \\ \hline
+\textbf{1} & Very Low & Very Low & Low & Low & Low \\ \hline
 \end{tabular}
 \end{table}
 
@@ -945,40 +1119,36 @@ def calculate_comprehensive_risk(vulnerability, access_control, defense_capabili
     likelihood_raw = calculate_likelihood_impact(vulnerability, access_control, defense_capability)
     impact_raw = calculate_impact(operational_impact, recovery_time)
     
-    # Normalize to 1-5 scale
-    likelihood = min(5, max(1, round(likelihood_raw)))
-    impact = min(5, max(1, round(impact_raw)))
+    # Normalize to 0-1 scale
+    likelihood = (likelihood_raw - 1) / (5 - 1)
+    impact = (impact_raw - 1) / (5 - 1)
     
     # Stage 2: Apply ISO 27005 risk matrix
     risk_matrix = {
-        (1,1): "Very Low", (1,2): "Low", (1,3): "Low", (1,4): "Medium", (1,5): "Medium",
-        (2,1): "Low", (2,2): "Low", (2,3): "Medium", (2,4): "Medium", (2,5): "High",
-        (3,1): "Low", (3,2): "Medium", (3,3): "Medium", (3,4): "High", (3,5): "High",
-        (4,1): "Medium", (4,2): "Medium", (4,3): "High", (4,4): "High", (4,5): "Very High",
-        (5,1): "Medium", (5,2): "High", (5,3): "High", (5,4): "Very High", (5,5): "Very High"
+        ("Very High", "Very High"): "Very High", ("Very High", "High"): "Very High",
+        ("Very High", "Medium"): "High", ("Very High", "Low"): "High",
+        ("Very High", "Very Low"): "Medium", ("High", "Very High"): "Very High",
+        ("High", "High"): "High", ("High", "Medium"): "High",
+        ("High", "Low"): "Medium", ("High", "Very Low"): "Low",
+        ("Medium", "Very High"): "High", ("Medium", "High"): "High",
+        ("Medium", "Medium"): "Medium", ("Medium", "Low"): "Low",
+        ("Medium", "Very Low"): "Low", ("Low", "Very High"): "Medium",
+        ("Low", "High"): "Medium", ("Low", "Medium"): "Low",
+        ("Low", "Low"): "Low", ("Low", "Very Low"): "Very Low",
+        ("Very Low", "Very High"): "Low", ("Very Low", "High"): "Low",
+        ("Very Low", "Medium"): "Low", ("Very Low", "Low"): "Very Low",
+        ("Very Low", "Very Low"): "Very Low"
     }
     
-    risk_level = risk_matrix.get((likelihood, impact), "Medium")
+    risk_level = risk_matrix.get(likelihood, impact)
     
     return {
         'likelihood_raw': likelihood_raw,
         'impact_raw': impact_raw,
         'likelihood': likelihood,
         'impact': impact,
-        'risk_level': risk_level,
-        'risk_score': likelihood * impact  # Numerical score for analysis
+        'risk_level': risk_level
     }
-
-def categorize_risk_level(risk_level):
-    """Map risk levels to numerical values for analysis"""
-    risk_mapping = {
-        "Very Low": 1,
-        "Low": 2,
-        "Medium": 3,
-        "High": 4,
-        "Very High": 5
-    }
-    return risk_mapping.get(risk_level, 3)
 \end{lstlisting}
 
 \section{User Interface Design}
@@ -1048,13 +1218,13 @@ COLORS = {
 
 # Font configuration with hierarchical typography
 FONTS = {
-    'title': ('Arial', 16, 'bold'),
-    'heading': ('Arial', 12, 'bold'),
-    'body': ('Arial', 10),
-    'small': ('Arial', 8),
-    'help_title': ('Arial', 14, 'bold'),
-    'help_section': ('Arial', 11, 'bold'),
-    'help_body': ('Arial', 9)
+    'title': ('Segoe UI', 16, 'bold'),
+    'heading': ('Segoe UI', 12, 'bold'),
+    'body': ('Segoe UI', 10),
+    'small': ('Segoe UI', 8),
+    'help_title': ('Segoe UI', 14, 'bold'),
+    'help_section': ('Segoe UI', 11, 'bold'),
+    'help_body': ('Segoe UI', 9)
 }
 
 # Widget styling with enhanced accessibility
@@ -1085,14 +1255,14 @@ WIDGET_STYLES = {
 
 \subsection{Comprehensive Help System Architecture}
 
-A sophisticated help system has been implemented across all tools to enhance user experience and provide comprehensive guidance:
+A sophisticated help system has been implemented across all tools to enhance user experience and provide comprehensive guidance. The help system includes specialized documentation for advanced features such as the dynamic Controls Management system with real-time impact analysis:
 
 \begin{lstlisting}[language=Python, caption=Enhanced Help System Implementation]
 def show_help(self):
     """Display comprehensive help window with structured content"""
     help_window = tk.Toplevel(self.root)
     help_window.title("Risk Assessment Tool - User Guide")
-    help_window.geometry("700x600")
+    help_window.geometry("1200x700")  # Enhanced size for Controls Management help
     help_window.configure(bg=COLORS['background'])
     help_window.resizable(True, True)
     
@@ -1100,36 +1270,41 @@ def show_help(self):
     main_frame = tk.Frame(help_window, bg=COLORS['background'])
     main_frame.pack(fill='both', expand=True, padx=10, pady=10)
     
-    # Scrollable text widget
-    text_frame = tk.Frame(main_frame, bg=COLORS['background'])
-    text_frame.pack(fill='both', expand=True)
+    # Scrollable canvas for complex help content
+    canvas = tk.Canvas(main_frame, bg=COLORS['background'], highlightthickness=0)
+    scrollbar = tk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas, bg=COLORS['background'])
     
-    text_widget = tk.Text(text_frame, **WIDGET_STYLES['help_text'])
-    scrollbar = tk.Scrollbar(text_frame, orient='vertical', 
-                           command=text_widget.yview)
-    text_widget.configure(yscrollcommand=scrollbar.set)
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
     
-    text_widget.pack(side='left', fill='both', expand=True)
-    scrollbar.pack(side='right', fill='y')
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
     
-    # Structured help content with sections
-    help_content = self.generate_comprehensive_help_content()
-    text_widget.insert('1.0', help_content)
-    text_widget.configure(state='disabled')
+    # Enhanced help content including Controls Management
+    self.create_help_content_sections(scrollable_frame)
+    
+    canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
+    scrollbar.pack(side="right", fill="y")
+    
+    # Setup mouse wheel scrolling
+    self.setup_global_mousewheel(scrollable_frame, canvas)
 
-def generate_comprehensive_help_content(self):
-    """Generate structured help content with detailed sections"""
-    content = """RISK ASSESSMENT TOOL - COMPREHENSIVE USER GUIDE
-
-
-
-1. TOOL OVERVIEW
-This tool performs cybersecurity risk assessment for space systems during various project phases. It evaluates threats, vulnerabilities, and associated risks to provide actionable security insights.
-
-2. GETTING STARTED
-- Select your mission type from the dropdown menu
-- Configure project parameters using the input fields
-- Use the assessment buttons to begin evaluation
+def create_help_content_sections(self, parent):
+    """Create structured help sections including Controls Management"""
+    help_sections = [
+        ("Tool Overview", "Comprehensive cybersecurity risk assessment capabilities"),
+        ("Assessment Workflows", "Threat-centric and asset-centric analysis modes"),
+        ("Controls Management", "Dynamic cybersecurity controls integration with real-time impact analysis"),
+        ("Read-Only Mode", "Assessment protection and control integration consistency"),
+        ("Export and Reporting", "Professional documentation generation"),
+        ("Advanced Features", "Enhanced UI, scrolling protection, and workflow optimization")
+    ]
+    
+    for title, description in help_sections:
+        self.create_help_section(parent, title, description)
 - Review results in the output area
 - Export findings using the export functionality
 
@@ -1224,146 +1399,6 @@ def create_optimized_button_layout(self):
 
 \section{Data Management Architecture}
 
-\subsection{Enhanced User Documentation and Support System}
-
-The tool suite incorporates a comprehensive documentation and support architecture designed to facilitate user adoption and ensure effective utilization across different expertise levels:
-
-\begin{lstlisting}[language=Python, caption=Multi-Modal Help System Architecture]
-class DocumentationManager:
-    """Manages comprehensive user documentation and support"""
-    
-    def __init__(self):
-        self.help_sections = {
-            'overview': self.generate_overview_content,
-            'getting_started': self.generate_getting_started_content,
-            'methodology': self.generate_methodology_content,
-            'data_management': self.generate_data_management_content,
-            'advanced_features': self.generate_advanced_features_content,
-            'troubleshooting': self.generate_troubleshooting_content,
-            'best_practices': self.generate_best_practices_content
-        }
-    
-    def create_contextual_help_window(self, tool_type, context=None):
-        """Generate context-aware help documentation"""
-        help_window = tk.Toplevel()
-        help_window.title(f"{tool_type} - User Guide")
-        help_window.geometry("750x650")
-        help_window.configure(bg=COLORS['background'])
-        
-        # Enhanced scrollable content area
-        self.setup_scrollable_help_area(help_window, tool_type, context)
-        
-        # Navigation and search capabilities
-        self.add_help_navigation(help_window)
-        
-        return help_window
-    
-    def setup_scrollable_help_area(self, parent, tool_type, context):
-        """Setup enhanced scrollable help area with rich formatting"""
-        main_container = tk.Frame(parent, bg=COLORS['background'])
-        main_container.pack(fill='both', expand=True, padx=15, pady=15)
-        
-        # Text widget with enhanced formatting support
-        text_container = tk.Frame(main_container, bg=COLORS['background'])
-        text_container.pack(fill='both', expand=True)
-        
-        help_text = tk.Text(text_container,
-                           bg=COLORS['light'],
-                           fg=COLORS['dark'],
-                           font=FONTS['help_body'],
-                           wrap='word',
-                           padx=20,
-                           pady=15,
-                           selectbackground=COLORS['primary'],
-                           selectforeground='white',
-                           insertbackground=COLORS['primary'],
-                           state='disabled')
-        
-        # Enhanced scrollbar with styling
-        scrollbar = tk.Scrollbar(text_container,
-                               orient='vertical',
-                               command=help_text.yview,
-                               bg=COLORS['background'],
-                               troughcolor=COLORS['border'],
-                               activebackground=COLORS['primary'])
-        
-        help_text.configure(yscrollcommand=scrollbar.set)
-        
-        # Layout with proper spacing
-        help_text.pack(side='left', fill='both', expand=True)
-        scrollbar.pack(side='right', fill='y', padx=(5, 0))
-        
-        # Generate and insert comprehensive content
-        content = self.generate_comprehensive_help_content(tool_type, context)
-        help_text.configure(state='normal')
-        help_text.insert('1.0', content)
-        help_text.configure(state='disabled')
-\end{lstlisting}
-
-\subsection{Standardized Error Handling and User Feedback}
-
-The implementation includes robust error handling mechanisms with user-friendly feedback systems:
-
-\begin{lstlisting}[language=Python, caption=Enhanced Error Handling Implementation]
-class ErrorManager:
-    """Centralized error handling and user feedback system"""
-    
-    def __init__(self, parent_widget):
-        self.parent = parent_widget
-        self.error_log = []
-        
-    def handle_color_reference_error(self, color_key, fallback_color):
-        """Handle missing color references with graceful fallbacks"""
-        try:
-            return COLORS[color_key]
-        except KeyError:
-            self.log_error(f"Color key '{color_key}' not found, using fallback")
-            return fallback_color
-    
-    def safe_color_get(self, color_key, fallback='#CCCCCC'):
-        """Safely retrieve color values with fallback support"""
-        return COLORS.get(color_key, fallback)
-    
-    def display_user_message(self, message, message_type='info'):
-        """Display user-friendly messages with appropriate styling"""
-        color_map = {
-            'info': COLORS.get('primary', '#2E86AB'),
-            'warning': COLORS.get('warning', '#FFC107'),
-            'error': COLORS.get('error', '#DC3545'),
-            'success': COLORS.get('success', '#28A745')
-        }
-        
-        message_window = tk.Toplevel(self.parent)
-        message_window.title(message_type.capitalize())
-        message_window.geometry("400x150")
-        message_window.configure(bg=COLORS.get('background', '#F5F5F5'))
-        
-        # Center the message window
-        message_window.transient(self.parent)
-        message_window.grab_set()
-        
-        # Message display with appropriate styling
-        message_frame = tk.Frame(message_window, 
-                               bg=COLORS.get('background', '#F5F5F5'))
-        message_frame.pack(fill='both', expand=True, padx=20, pady=20)
-        
-        tk.Label(message_frame,
-                text=message,
-                bg=COLORS.get('background', '#F5F5F5'),
-                fg=color_map[message_type],
-                font=FONTS.get('body', ('Arial', 10)),
-                wraplength=350,
-                justify='center').pack(pady=20)
-        
-        tk.Button(message_frame,
-                 text="OK",
-                 command=message_window.destroy,
-                 bg=color_map[message_type],
-                 fg='white',
-                 font=FONTS.get('body', ('Arial', 10)),
-                 padx=20).pack()
-\end{lstlisting}
-
 \subsection{Data Flow Design}
 
 The tool suite implements a structured data flow pattern:
@@ -1403,37 +1438,6 @@ class OutputManager:
         """Get full path for output file"""
         return os.path.join(self.base_path, filename)
 \end{lstlisting}
-
-\section{Emerging Threat Integration}
-
-\subsection{Future-Proof Threat Modeling}
-
-The framework incorporates emerging threats to ensure longevity:
-
-\begin{itemize}
-    \item \textbf{AI-Powered Tampering}: Machine learning models targeting detection systems
-    \item \textbf{Quantum Computing Threats}: Post-quantum cryptographic requirements
-    \item \textbf{Advanced Persistent Threats}: Long-term, sophisticated attack campaigns
-    \item \textbf{Supply Chain AI}: Artificial intelligence in manufacturing and logistics
-\end{itemize}
-
-\subsection{Adaptive Threat Categories}
-
-The threat taxonomy supports dynamic updates:
-
-\begin{table}[H]
-\centering
-\caption{Emerging Threat Integration}
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Threat Type} & \textbf{Current Impact} & \textbf{Future Projection} \\ \hline
-AI-Enhanced Attacks & Medium & High \\ \hline
-Quantum Decryption & Low & Very High \\ \hline
-Autonomous Malware & Medium & High \\ \hline
-Space Debris Weaponization & Low & Medium \\ \hline
-Cross-Domain Attacks & High & Very High \\ \hline
-\end{tabular}
-\end{table}
 
 \section{Performance Optimization}
 
@@ -1481,7 +1485,7 @@ Although the current implementation focuses on standalone operation, the archite
 
 \begin{itemize}
     \item \textbf{Modular Functions}: Core assessment logic separated from UI
-    \item \textbf{Standardized Data Formats}: JSON-compatible data structures
+    \item \textbf{Standardized Data Formats}: CSV-compatible data structures
     \item \textbf{Error Handling}: Comprehensive exception management
     \item \textbf{Documentation}: Function-level documentation for API exposure
 \end{itemize}
@@ -1491,11 +1495,39 @@ Although the current implementation focuses on standalone operation, the archite
 The tool suite design accommodates integration with external systems:
 
 \begin{itemize}
-    \item \textbf{Data Import}: CSV and JSON data import capabilities
+    \item \textbf{Data Import}: CSV data import capabilities
     \item \textbf{Export Formats}: Multiple output formats for different systems
     \item \textbf{Configuration Files}: Externally configurable parameters
     \item \textbf{Plugin Architecture}: Extensible component structure
 \end{itemize}
+
+\subsection{Cross-Tool Compatibility and Criteria Mapping}
+
+The framework implements intelligent criteria mapping between different assessment phases to ensure seamless data flow and consistency:
+
+\subsubsection{Phase 0/A to Comprehensive Assessment Mapping}
+
+The preliminary assessment tool (Phase 0/A) uses a streamlined five-criteria framework that maps effectively to the comprehensive seven-criteria framework:
+
+\begin{itemize}
+    \item \textbf{Detection Probability} (Phase 0/A) → \textbf{Detection} (Criterion 2, Comprehensive)
+    \item \textbf{Defense Capability} (Phase 0/A) → Maps to multiple comprehensive criteria:
+    \begin{itemize}
+        \item \textbf{Mitigation} (Criterion 1) - Countermeasures effectiveness
+        \item \textbf{Access} (Criterion 3) - Access control complexity  
+        \item \textbf{Privilege} (Criterion 4) - Required privilege levels
+    \end{itemize}
+\end{itemize}
+
+This mapping approach ensures that:
+\begin{itemize}
+    \item Data from preliminary assessments can be imported into comprehensive tools
+    \item Assessment continuity is maintained across project phases
+    \item Higher resolution analysis builds upon earlier findings
+    \item No critical security information is lost during phase transitions
+\end{itemize}
+
+The Defense Capability criterion in Phase 0/A encompasses comprehensive defense aspects including mitigations, access controls, and privilege requirements, reflecting the multi-dimensional nature of cybersecurity defense systems.
 
 \section{Technical Challenges and Solutions}
 
@@ -1545,43 +1577,6 @@ The implementation includes robust data validation and consistency checking:
     \item \textbf{Data Integrity}: Validation of required fields and data completeness
 \end{itemize}
 
-\subsection{PyInstaller Configuration and Deployment}
-
-\subsubsection{Executable Packaging Optimization}
-
-The tool suite required careful configuration of PyInstaller settings to ensure proper inclusion of data files and dependencies:
-
-\begin{lstlisting}[language=Python, caption=Enhanced PyInstaller Configuration]
-# Enhanced .spec file configuration
-a = Analysis(
-    ['Risk_Assessment_Tool.py'],
-    pathex=[],
-    binaries=[],
-    datas=[
-        ('Asset.csv', '.'),           # Include asset data
-        ('logo.ico', '.'),            # Application icon
-        ('export_import_functions.py', '.'),  # Shared utilities
-        ('attack_graph_threat_relations.csv', '.')  # Threat data
-    ],
-    hiddenimports=['tkinter', 'tkinter.ttk', 'PIL.Image', 'PIL.ImageTk'],
-    hookspath=[],
-    runtime_hooks=[],
-    excludes=['matplotlib', 'numpy.testing'],  # Reduce size
-    noarchive=False,
-    optimize=2,
-)
-\end{lstlisting}
-
-\subsubsection{Console Window Management}
-
-Proper configuration of console visibility was implemented to ensure appropriate user experience:
-
-\begin{itemize}
-    \item \textbf{GUI Applications}: Console disabled (`console=False`) for user-facing tools
-    \item \textbf{Debug Mode}: Console enabled for development and troubleshooting
-    \item \textbf{Logo Integration}: Enhanced icon handling with format validation
-    \item \textbf{Path Resolution}: Robust path handling for both development and executable environments
-\end{itemize}
 
 \subsection{Error Handling and Robustness}
 
@@ -1765,519 +1760,770 @@ The implementation follows a continuous improvement methodology:
 % ============================================================================
 % CHAPTER 5: TOOL SUITE COMPONENTS
 % ============================================================================
-\chapter{Tool Suite Components}
+\chapter{Risk Assessment Tool Suite Architecture}
 \label{ch:components}
 
-This chapter provides detailed descriptions of each component in the Risk Assessment Tool Suite, including their specific functions, methodologies, and outputs.
+This chapter provides a comprehensive technical analysis of the integrated Risk Assessment Tool Suite developed for space mission cybersecurity. The suite follows a phase-appropriate methodology aligned with ECSS and ISO 27005 standards, implementing quantitative risk assessment through specialized modules for each project lifecycle stage.
 
-\section{BID Phase Assessment Tool}
+\section{BID Phase Assessment Module}
+\label{sec:bid_tool}
 
-\subsection{Purpose and Scope}
+\subsection{Technical Implementation}
 
-The BID Phase Assessment Tool is designed to evaluate the cybersecurity aspects of space projects during the Business Initiation and Definition (BID) phase. Its primary purpose is to identify high-level risks and align the project’s objectives with a feasible security approach. This tool addresses the initial integration of cybersecurity into project planning, ensuring that security considerations are embedded from the very beginning of the project lifecycle.
-
-\subsection{Methodology}
-
-The methodology employed by the BID Phase Assessment Tool involves:
+The BID Phase module (0-BID.exe) implements a weighted scoring system for Invitation to Tender (ITT) evaluation through three core algorithmic components:
 
 \begin{enumerate}
-    \item \textbf{Project Categorization}: Classifying the project into predefined categories (e.g., scientific, commercial, defense) to tailor the assessment approach.
-    \item \textbf{High-Level Risk Identification}: Utilizing checklists and expert judgment to identify potential high-level risks associated with the project category.
-    \item \textbf{Security Requirement Mapping}: Aligning identified risks with relevant security requirements and standards (e.g., ECSS, ISO/IEC).
-    \item \textbf{Preliminary Threat Assessment}: Conducting a high-level threat assessment to identify potential adversaries and threat vectors.
-    \item \textbf{Mitigation Strategy Outline}: Proposing initial mitigation strategies for identified risks, focusing on cost-effective and feasible measures.
+    \item \textbf{Score Matrix}: 11 cybersecurity criteria with 4-level scoring (1=Low to 4=High risk)
+    \item \textbf{Risk Calculation Engine}: 
+    \begin{equation}
+        R = \sum_{i=1}^{11} \frac{(V_i - 1) \times W_i}{3}
+    \end{equation}
+    where $V_i$ is criterion value and $W_i$ is dynamic weight
+    \item \textbf{Inapplicability Handler}: Redistributes weights when criteria are marked non-applicable
 \end{enumerate}
 
-\subsection{Tool Features}
-
-Key features of the BID Phase Assessment Tool include:
+The tool's architecture features:
 
 \begin{itemize}
-    \item \textbf{User-Friendly Interface}: Intuitive interface guiding users through the assessment process.
-    \item \textbf{Customizable Templates}: Predefined templates for different project categories, easily customizable to fit specific project needs.
-    \item \textbf{Automated Reporting}: Generation of automated reports summarizing the assessment findings, risk levels, and recommended actions.
-    \item \textbf{Integration Capabilities}: Ability to integrate with other tools in the Risk Assessment Tool Suite for a comprehensive assessment approach.
+    \item Dynamic CSV/Word report generation with timestamped filenames
+    \item Multi-threaded execution for responsive UI during calculations
+    \item High-DPI aware Tkinter interface with automatic scaling
 \end{itemize}
 
-\subsection{Enhanced User Interface and Documentation System}
+\subsection{Assessment Methodology}
 
-The BID Phase Assessment Tool incorporates significant user experience enhancements, including comprehensive documentation and help systems designed to facilitate effective tool utilization:
+The module implements a four-stage assessment workflow:
 
-\begin{lstlisting}[language=Python, caption=BID Tool Enhanced Help System Implementation]
-def show_comprehensive_help(self):
-    """Display enhanced help window with structured content sections"""
-    help_window = tk.Toplevel(self.root)
-    help_window.title("BID Phase Assessment Tool - Comprehensive User Guide")
-    help_window.geometry("750x650")
-    help_window.configure(bg=COLORS['background'])
-    help_window.resizable(True, True)
-    
-    # Professional layout with enhanced styling
-    main_container = tk.Frame(help_window, bg=COLORS['background'])
-    main_container.pack(fill='both', expand=True, padx=15, pady=15)
-    
-    # Scrollable content area with improved text handling
-    content_frame = tk.Frame(main_container, bg=COLORS['background'])
-    content_frame.pack(fill='both', expand=True)
-    
-    # Enhanced text widget with professional styling
-    help_text = tk.Text(content_frame,
-                       bg=COLORS.get('light', '#FFFFFF'),
-                       fg=COLORS.get('dark', '#333333'),
-                       font=FONTS.get('help_body', ('Arial', 9)),
-                       wrap='word',
-                       padx=20,
-                       pady=15,
-                       selectbackground=COLORS.get('primary', '#2E86AB'),
-                       selectforeground='white',
-                       state='disabled')
-    
-    # Professional scrollbar styling
-    scrollbar = tk.Scrollbar(content_frame,
-                           orient='vertical',
-                           command=help_text.yview,
-                           bg=COLORS.get('background', '#F5F5F5'))
-    
-    help_text.configure(yscrollcommand=scrollbar.set)
-    
-    # Comprehensive documentation content
-    documentation_content = """BID PHASE ASSESSMENT TOOL - COMPREHENSIVE USER GUIDE
-    
-
-1. TOOL OVERVIEW AND PURPOSE
-The BID Phase Assessment Tool provides structured cybersecurity evaluation during the Business Initiation and Definition phase of space projects. It enables early identification of security risks and integration of cybersecurity considerations into project planning from the initial stages.
-
-2. ASSESSMENT METHODOLOGY AND APPROACH  
-- Project Classification: Systematic categorization based on mission type, complexity, and organizational context
-- Risk Identification: Structured identification of high-level cybersecurity risks using expert-guided checklists
-- Security Mapping: Alignment of identified risks with relevant security standards and regulatory requirements
-- Threat Assessment: Preliminary evaluation of potential adversaries and attack vectors relevant to the project
-- Mitigation Planning: Development of initial mitigation strategies focused on cost-effectiveness and feasibility
-
-3. DATA INPUT AND CONFIGURATION
-- Project Information: Mission objectives, technical specifications, and operational requirements
-- Organizational Context: Stakeholder information, regulatory environment, and compliance requirements  
-- Resource Constraints: Budget limitations, timeline constraints, and technical capabilities
-- Security Requirements: Applicable standards, policies, and regulatory mandates
-- Risk Tolerance: Organizational risk appetite and acceptance criteria
-
-4. OUTPUT GENERATION AND REPORTING
-- Executive Summary: High-level overview suitable for management and stakeholder communication
-- Detailed Assessment Report: Comprehensive documentation of methodology, findings, and recommendations
-- Risk Register Initialization: Structured risk entries with ownership, likelihood, and impact assessments
-- Security Requirement Matrix: Mapping of identified risks to applicable security standards and controls
-- Integration Packages: Data exports formatted for use in subsequent assessment phases
-
-5. INTEGRATION AND WORKFLOW MANAGEMENT
-- Phase Transition: Seamless data transfer to Phase 0/A assessment tools with maintained traceability
-- Project Management Integration: Export capabilities compatible with standard project management systems
-- Collaborative Review: Support for multi-stakeholder review processes and approval workflows
-- Version Control: Management of assessment iterations and updates throughout the BID phase
-- Legacy System Integration: Import capabilities for historical project data and organizational knowledge bases
-
-6. BEST PRACTICES AND RECOMMENDATIONS
-- Early Engagement: Involve cybersecurity expertise from project initiation to ensure comprehensive coverage
-- Stakeholder Alignment: Ensure security objectives align with overall project goals and constraints
-- Documentation Standards: Maintain comprehensive documentation of assumptions, decisions, and rationale
-- Iterative Refinement: Update assessments as project definition evolves and new information becomes available
-- Knowledge Transfer: Prepare comprehensive handoff documentation for subsequent project phases"""
-    
-    # Insert content with proper formatting
-    help_text.configure(state='normal')
-    help_text.insert('1.0', documentation_content)
-    help_text.configure(state='disabled')
-    
-    # Layout components
-    help_text.pack(side='left', fill='both', expand=True)
-    scrollbar.pack(side='right', fill='y', padx=(5, 0))
+\begin{lstlisting}[language=Python, caption=Core Assessment Algorithm]
+def calculate_risk(self):
+    """Implements ECSS-M-ST-80C compliant risk scoring"""
+    total_score = 0.0
+    for criterion in self.criteria:
+        value = self.get_criterion_value(criterion)
+        weight = self.get_dynamic_weight(criterion)
+        if not self.is_applicable(criterion):
+            weight = 0
+        normalized = (value - 1) * weight / 3  # Scale to 0-1 range
+        total_score += normalized
+    return min(1.0, total_score)  # Cap at 1.0
 \end{lstlisting}
 
-\subsection{Outputs}
+Key assessment parameters:
 
-The primary outputs of the BID Phase Assessment Tool are:
+\begin{table}[h]
+\centering
+\caption{BID Module Risk Classification}
+\begin{tabular}{ll}
+\hline
+Score Range & Risk Level \\ \hline
+0-0.1 & Very Low \\
+0.1-0.4 & Low \\
+0.4-0.7 & Medium \\
+0.7-0.9 & High \\
+0.9-1.0 & Very High \\ \hline
+\end{tabular}
+\end{table}
 
-\begin{enumerate}
-    \item \textbf{Assessment Report}: A detailed report outlining the assessment process, identified risks, and recommended mitigation strategies.
-    \item \textbf{Risk Register Entry}: Creation of initial entries in the risk register for identified high-level risks, including proposed ownership and mitigation actions.
-    \item \textbf{Security Requirement Checklist}: A checklist of relevant security requirements and standards mapped to the identified risks.
-\end{enumerate}
+\subsection{Output Generation}
 
-\section{Preliminary Risk Assessment Tool}
+The tool produces two report formats through a unified export handler:
 
-\subsection{Purpose and Scope}
+\begin{lstlisting}[language=Python, caption=Report Generation Logic]
+def generate_reports(self):
+    """Produces both CSV and Word outputs"""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    if DOCX_AVAILABLE:
+        self._generate_word_report(f"BID_Assessment_{timestamp}.docx")
+    self._generate_csv_report(f"BID_Risk_Assessment_{timestamp}.csv")
+\end{lstlisting}
 
-The Preliminary Risk Assessment Tool is intended for use in the early stages of space project development, specifically during the Preliminary Design Review (PDR) phase. Its main purpose is to provide a more detailed risk assessment than the BID Phase Assessment, focusing on identifying and analyzing risks associated with specific system elements and design concepts.
+Report contents include:
+\begin{itemize}
+    \item Complete score matrix with justification texts
+    \item Weight redistribution audit trail
+    \item Risk level visualization with color coding
+\end{itemize}
 
-\subsection{Methodology}
+\section{Preliminary Risk Assessment Module}
+\label{sec:phase0a_tool}
 
-The methodology employed by the Preliminary Risk Assessment Tool includes:
+\subsection{Technical Architecture}
 
-\begin{enumerate}
-    \item \textbf{Asset Identification}: Detailed identification of all system assets, including hardware, software, and communication links.
-    \item \textbf{Vulnerability Analysis}: Analysis of potential vulnerabilities in the system design and architecture.
-    \item \textbf{Threat Modeling}: Creation of threat models to identify potential adversaries, attack vectors, and impact scenarios.
-    \item \textbf{Risk Evaluation}: Evaluation of risks based on likelihood and impact, using a predefined risk matrix.
-    \item \textbf{Mitigation Planning}: Development of mitigation plans for high-priority risks, including technical and procedural controls.
-\end{enumerate}
-
-\subsection{Tool Features}
-
-Key features of the Preliminary Risk Assessment Tool include:
+The Phase 0-A tool (1-Risk\_Assessment\_0-A.exe) implements:
 
 \begin{itemize}
-    \item \textbf{Detailed Asset Database}: Comprehensive database for storing and managing asset information.
-    \item \textbf{Automated Vulnerability Scanning}: Integration with vulnerability scanning tools to automate the identification of known vulnerabilities.
-    \item \textbf{Scenario-Based Threat Modeling}: Support for creating and analyzing multiple threat scenarios.
-    \item \textbf{Risk Matrix Visualization}: Visual representation of risks on a likelihood-impact matrix.
-    \item \textbf{Exportable Reports}: Ability to generate detailed reports and export them in various formats (e.g., PDF, DOCX).
+    \item Asset-threat matrix with 11 threat types and dynamic asset loading
+    \item Quadratic mean calculation:
+    \item ISO 27005 risk matrix implementation
 \end{itemize}
 
-\subsection{Enhanced User Experience and Interface Optimization}
+Key technical features:
 
-The Preliminary Risk Assessment Tool (Phase 0/A) has been significantly enhanced with optimized button layouts and comprehensive user assistance systems:
-
-\begin{lstlisting}[language=Python, caption=Phase 0/A Tool Enhanced Interface Layout]
-def create_optimized_button_layout(self):
-    """Implement enhanced three-section button layout for improved workflow"""
-    # Main action container with professional spacing
-    action_container = tk.Frame(self.root, bg=COLORS['background'])
-    action_container.pack(pady=25, padx=20)
-    
-    # Left section: Data Import/Export operations
-    left_operations = tk.Frame(action_container, bg=COLORS['background'])
-    left_operations.pack(side='left', padx=30)
-    
-    # Import/Export functionality with enhanced styling
-    tk.Button(left_operations, 
-             text="Import Assessment Data",
-             command=self.import_assessment_data,
-             bg=COLORS.get('secondary', '#A23B72'),
-             fg='white',
-             font=FONTS.get('body', ('Arial', 10)),
-             padx=15, pady=8,
-             relief='flat',
-             cursor='hand2').pack(pady=8)
-    
-    tk.Button(left_operations, 
-             text="Export Results",
-             command=self.export_assessment_results,
-             bg=COLORS.get('secondary', '#A23B72'),
-             fg='white',
-             font=FONTS.get('body', ('Arial', 10)),
-             padx=15, pady=8,
-             relief='flat',
-             cursor='hand2').pack(pady=8)
-    
-    # Center section: Primary threat analysis function
-    center_primary = tk.Frame(action_container, bg=COLORS['background'])
-    center_primary.pack(side='left', padx=50)
-    
-    # Prominent main assessment button
-    threat_analysis_btn = tk.Button(center_primary,
-                                   text="THREAT ANALYSIS",
-                                   command=self.start_threat_analysis,
-                                   bg=COLORS.get('success', '#F18F01'),
-                                   fg='white',
-                                   font=FONTS.get('heading', ('Arial', 12, 'bold')),
-                                   padx=35, pady=18,
-                                   relief='raised',
-                                   bd=3,
-                                   cursor='hand2')
-    threat_analysis_btn.pack()
-    
-    # Right section: Legacy integration and support
-    right_support = tk.Frame(action_container, bg=COLORS['background'])
-    right_support.pack(side='right', padx=30)
-    
-    tk.Button(right_support, 
-             text="Legacy Data Integration",
-             command=self.integrate_legacy_data,
-             bg=COLORS.get('primary', '#2E86AB'),
-             fg='white',
-             font=FONTS.get('body', ('Arial', 10)),
-             padx=15, pady=8,
-             relief='flat',
-             cursor='hand2').pack(pady=8)
-    
-    tk.Button(right_support, 
-             text="User Guide",
-             command=self.show_comprehensive_help,
-             bg=COLORS.get('primary', '#2E86AB'),
-             fg='white',
-             font=FONTS.get('body', ('Arial', 10)),
-             padx=15, pady=8,
-             relief='flat',
-             cursor='hand2').pack(pady=8)
-
-def show_comprehensive_help(self):
-    """Display comprehensive help system with seven structured sections"""
-    help_window = tk.Toplevel(self.root)
-    help_window.title("Phase 0/A Risk Assessment Tool - User Guide")
-    help_window.geometry("780x700")
-    help_window.configure(bg=COLORS.get('background', '#F5F5F5'))
-    help_window.resizable(True, True)
-    
-    # Enhanced help content display
-    help_content = """PHASE 0/A RISK ASSESSMENT TOOL - COMPREHENSIVE USER GUIDE
-
-1. TOOL OVERVIEW AND CAPABILITIES
-The Phase 0/A Risk Assessment Tool provides detailed cybersecurity evaluation during the preliminary design phase of space projects. It builds upon BID phase findings to deliver comprehensive threat analysis and risk assessment for system elements and design concepts.
-
-2. ENHANCED USER INTERFACE FEATURES
-- Three-Section Button Layout: Optimized workflow with Import/Export (left), Main Analysis (center), and Support (right)
-- Professional Styling: Consistent color schemes and typography across all interface elements
-- Contextual Help System: Comprehensive documentation accessible through integrated help functionality
-- Legacy Integration: Seamless import of historical assessment data and organizational knowledge bases
-
-3. MISSION CONFIGURATION AND ASSESSMENT PARAMETERS
-- Mission Type Selection: Comprehensive dropdown covering all major space mission categories
-- Technical Specification Input: Detailed system architecture and component information
-- Operational Environment Definition: Orbital parameters, mission duration, and operational constraints
-- Stakeholder Mapping: Identification of all parties involved in mission execution and oversight
-
-4. THREAT ANALYSIS METHODOLOGY
-- Asset-Based Assessment: Systematic identification and categorization of all mission-critical assets
-- Vulnerability Evaluation: Detailed analysis of potential security weaknesses in system design
-- Threat Actor Profiling: Comprehensive evaluation of potential adversaries and their capabilities
-- Attack Vector Analysis: Detailed examination of possible attack paths and exploitation scenarios
-- Impact Assessment: Quantitative and qualitative evaluation of potential consequences
-
-5. DATA MANAGEMENT AND INTEGRATION
-- Import Capabilities: Support for CSV, JSON, and legacy data formats from previous assessments
-- Export Functionality: Multiple output formats compatible with project management and reporting systems
-- Legacy System Integration: Backward compatibility with historical assessment methodologies
-- Version Control: Tracking of assessment iterations and maintaining audit trails
-- Collaborative Features: Support for multi-user environments and distributed assessment teams
-
-6. REPORTING AND OUTPUT GENERATION
-- Executive Summaries: High-level findings suitable for management and stakeholder communication
-- Technical Reports: Detailed documentation of methodology, findings, and technical recommendations
-- Risk Matrices: Visual representation of likelihood-impact relationships for identified risks
-- Mitigation Roadmaps: Structured implementation plans for recommended security controls
-- Integration Packages: Formatted outputs for subsequent detailed design phase assessments
-
-7. BEST PRACTICES AND ADVANCED FEATURES
-- Iterative Assessment: Support for multiple assessment cycles as design evolves
-- Scenario Planning: Capability to model multiple threat scenarios and operational conditions
-- Compliance Mapping: Alignment with relevant cybersecurity standards and regulatory requirements
-- Knowledge Management: Capture and reuse of organizational expertise and lessons learned
-- Quality Assurance: Built-in validation checks and consistency verification for assessment data"""
-    
-    # Implementation continues with scrollable text widget...
-    self.display_help_content(help_window, help_content)
+\begin{lstlisting}[language=Python, caption=Risk Calculation Core]
+def calculate_risk(self, likelihood, impact):
+    """Implements ISO 27005 risk matrix"""
+    matrix = {
+        ('Very High', 'Very High'): 'Very High',
+        ('High', 'High'): 'High',
+        # Full matrix implementation
+    }
+    return matrix.get((likelihood, impact), 'Undefined')
 \end{lstlisting}
 
-\subsection{Outputs}
+\subsection{Data Model}
 
-The primary outputs of the Preliminary Risk Assessment Tool are:
+The tool employs a hierarchical data structure:
 
-\begin{enumerate}
-    \item \textbf{Detailed Risk Report}: A comprehensive report detailing the risk assessment process, identified vulnerabilities, threat scenarios, and recommended mitigation strategies.
-    \item \textbf{Updated Risk Register}: An updated risk register with detailed entries for each identified risk, including risk owner, mitigation measures, and status.
-    \item \textbf{Threat Model Diagrams}: Visual diagrams representing the identified threat models and attack vectors.
-\end{enumerate}
+Asset categories are loaded dynamically from Asset.csv with fallback to default values:
+
+\begin{lstlisting}[language=Python, caption=Asset Loading Logic]
+def load_assets(self):
+    """Loads asset categories with CSV fallback"""
+    try:
+        with open('Asset.csv', 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f, delimiter=';')
+            return {(row['categories'], row['subCategories']) 
+                   for row in reader}
+    except FileNotFoundError:
+        return DEFAULT_ASSETS  # Predefined tuple set
+\end{lstlisting}
+
+\subsection{Reporting System}
+
+The module features comprehensive Word reporting with:
+
+\begin{itemize}
+    \item Threat-specific countermeasure listings
+    \item Asset risk heatmaps
+    \item Criteria reference tables
+    \item Automatic diagram generation
+\end{itemize}
 
 \section{Comprehensive Risk Assessment Tool}
 
 \subsection{Purpose and Scope}
 
-The Comprehensive Risk Assessment Tool is designed for use during the detailed design and development phases of space projects (Phases B/C/D). Its primary purpose is to conduct a thorough and detailed risk assessment, supporting informed decision-making regarding risk management and mitigation.
+The Comprehensive Risk Assessment Tool is designed for detailed cybersecurity evaluation during the design and implementation phases of space missions. It provides a systematic approach to assess risks at the component level, integrating both threat-centric and asset-centric analysis methodologies. The tool addresses the critical need for rigorous risk assessment as system designs mature and implementation details become finalized.
 
 \subsection{Methodology}
 
-The methodology employed by the Comprehensive Risk Assessment Tool involves:
+The tool implements a dual-path assessment methodology combining:
 
 \begin{enumerate}
-    \item \textbf{In-Depth Asset Analysis}: Comprehensive analysis of all system assets, including detailed design documents, source code, and configuration files.
-    \item \textbf{Advanced Threat Modeling}: Development of detailed attack trees and threat models, considering potential adversaries, attack vectors, and impact scenarios.
-    \item \textbf{Quantitative Risk Assessment}: Quantitative assessment of risks using probabilistic models and simulation techniques.
-    \item \textbf{Control Analysis}: Evaluation of existing and proposed security controls, including technical, administrative, and physical controls.
-    \item \textbf{Risk Treatment Planning}: Development of detailed risk treatment plans, including risk acceptance, mitigation, transfer, or avoidance strategies.
-\end{enumerate}
-
-\subsection{Tool Features}
-
-Key features of the Comprehensive Risk Assessment Tool include:
-
+\item \textbf{Threat Analysis}: Evaluation of specific threats against all mission assets using 7 criteria:
 \begin{itemize}
-    \item \textbf{Integration with Design Tools}: Integration with system design and development tools (e.g., CAD, software development environments) to automate data collection.
-    \item \textbf{Probabilistic Risk Modeling}: Support for creating probabilistic risk models and conducting Monte Carlo simulations.
-    \item \textbf{Detailed Control Catalog}: Comprehensive catalog of security controls with implementation guidance and effectiveness metrics.
-    \item \textbf{Automated Report Generation}: Automated generation of detailed risk assessment reports, including risk treatment plans and control recommendations.
-    \item \textbf{Advanced Integration}: Modular architecture supporting future integration with external systems and enterprise risk management platforms
+\item Vulnerability effectiveness
+\item Mitigation presence
+\item Detection probability
+\item Access complexity
+\item Privilege requirement
+\item Response delay
+\item Resilience impact
 \end{itemize}
 
-\subsection{Outputs}
+\item \textbf{Asset Analysis}: Comprehensive evaluation of each asset using 9 criteria:
+\begin{itemize}
+    \item Dependency
+    \item Penetration
+    \item Cyber maturity
+    \item Trust
+    \item Performance
+    \item Schedule
+    \item Costs
+    \item Reputation
+    \item Recovery
+\end{itemize}
 
-The primary outputs of the Comprehensive Risk Assessment Tool are:
+\item \textbf{Risk Calculation}: Combined risk evaluation using:
+\begin{itemize}
+    \item Quadratic mean for criteria aggregation
+    \item ISO 27005 risk matrix for likelihood-impact combination
+    \item Normalized scoring (1-5) converted to risk categories
+\end{itemize}
+\end{enumerate}
+
+\subsection{Key Features}
+
+The tool's architecture implements several innovative features:
+
+\begin{itemize}
+\item \textbf{Dual Assessment Framework}:
+\begin{itemize}
+\item Threat window analyzes each threat across all assets
+\item Asset window evaluates each asset against all criteria
+\item Automatic cross-referencing of results
+\end{itemize}
+
+\item \textbf{Advanced Calculation Engine}:
+\begin{itemize}
+    \item Context-aware calculations (threat vs. asset mode)
+    \item Quadratic mean for conservative estimates
+    \item Dynamic risk matrix application
+\end{itemize}
+
+\item \textbf{Data Management}:
+\begin{itemize}
+    \item CSV-based threat/asset databases
+    \item Timestamped versioning of assessments
+    \item Export to multiple formats (CSV, DOCX)
+\end{itemize}
+
+\item \textbf{User Interface Enhancements}:
+\begin{itemize}
+    \item Color-coded criteria for visual distinction
+    \item Comprehensive mouse wheel handling
+    \item Responsive scrollable layouts
+\end{itemize}
+\end{itemize}
+
+\subsection{Implementation Details}
+
+The tool's core functionality is implemented through several key components:
+
+\begin{lstlisting}[language=Python, caption=Core Risk Calculation Methods]
+def calculate_threat_likelihood(self, key):
+"""Calculates Threat Likelihood combining threat-specific likelihood with asset likelihood"""
+# Calculate from first 5 threat criteria (columns 0-4)
+threat_values = []
+for col_idx in [0, 1, 2, 3, 4]:
+value_str = self.combo_vars[key][col_idx].get().strip()
+if value_str:
+threat_values.append(float(value_str))
+
+# Quadratic mean calculation
+threat_quadratic_mean = math.sqrt(sum(x**2 for x in threat_values) / len(threat_values))
+threat_likelihood = (threat_quadratic_mean - 1) / 4  # Normalize [1,5]->[0,1]
+
+# Combine with asset likelihood using risk matrix
+asset_likelihood = self.get_asset_likelihood_for_key(key)
+if asset_likelihood >= 0:
+    threat_cat = self.value_to_category(threat_likelihood)
+    asset_cat = self.value_to_category(asset_likelihood)
+    return self.RISK_MATRIX.get((threat_cat, asset_cat), threat_cat)
+return threat_likelihood
+def calculate_asset_impact(self, key):
+"""Calculates Asset Impact using quadratic mean of last 5 criteria"""
+values = []
+for col_idx in [4, 5, 6, 7, 8]:
+value_str = self.combo_vars[key][col_idx].get().strip()
+if value_str:
+values.append(float(value_str))
+
+quadratic_mean = math.sqrt(sum(x**2 for x in values) / len(values))
+impact = (quadratic_mean - 1) / 4  # Normalize [1,5]->[0,1]
+return self.value_to_category(impact)
+\end{lstlisting}
+
+\subsection{User Interface}
+
+The interface implements several professional enhancements:
+
+\begin{itemize}
+\item \textbf{Color-Coded Criteria}:
+\begin{itemize}
+\item Distinct colors for each assessment criterion
+\item Visual legends for quick reference
+\item Consistent styling across both threat and asset views
+\end{itemize}
+
+\item \textbf{Interactive Elements}:
+\begin{itemize}
+    \item Protected comboboxes with mouse wheel handling
+    \item Dynamic risk updates on value changes
+    \item Context-aware help systems
+\end{itemize}
+
+\item \textbf{Data Visualization}:
+\begin{itemize}
+    \item Color-coded risk levels in main table
+    \item Clear distinction between calculated and input fields
+    \item Responsive table layouts for large datasets
+\end{itemize}
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption=Interface Configuration]
+def setup_combobox_styles(self):
+"""Configure custom styles for Comboboxes with criteria colors"""
+style = ttk.Style()
+for i, color in enumerate(self.CRITERIA_COLORS):
+style_name = f"Criteria{i}.TCombobox"
+style.configure(style_name,
+fieldbackground=color,
+foreground='black',
+selectbackground=color)
+\end{lstlisting}
+
+\subsection{Outputs and Reporting}
+
+The tool generates comprehensive outputs:
 
 \begin{enumerate}
-    \item \textbf{Comprehensive Risk Report}: A detailed report documenting the entire risk assessment process, including identified risks, threat models, vulnerability analyses, and recommended mitigation strategies.
-    \item \textbf{Risk Treatment Plan}: A detailed plan outlining the recommended actions for treating identified risks, including priorities, responsibilities, and timelines.
-    \item \textbf{Control Implementation Guidance}: Detailed guidance on implementing recommended security controls, including technical specifications and procedural guidelines.
+\item \textbf{Risk Matrices}:
+\begin{itemize}
+\item Consolidated threat/asset risk overviews
+\item Maximum risk calculations per threat
+\item Cross-referenced likelihood-impact pairs
+\end{itemize}
+
+\item \textbf{Detailed Reports}:
+\begin{itemize}
+    \item Threat assessment documentation
+    \item Asset evaluation summaries
+    \item Control recommendation mapping
+\end{itemize}
+
+\item \textbf{Data Exports}:
+\begin{itemize}
+    \item CSV format for further analysis
+    \item Word reports for documentation
+    \item Legacy format support
+\end{itemize}
 \end{enumerate}
+
+\subsection{Technical Innovations}
+
+The tool introduces several technical advancements:
+
+\begin{itemize}
+\item \textbf{Context-Aware Calculation}:
+\begin{itemize}
+\item Automatic detection of assessment mode (threat/asset)
+\item Appropriate method selection based on context
+\item Unified risk presentation
+\end{itemize}
+
+\item \textbf{Data Versioning}:
+\begin{itemize}
+    \item Timestamped assessment storage
+    \item Automatic loading of latest assessments
+    \item Clear distinction between imported and current data
+\end{itemize}
+
+\item \textbf{Error Handling}:
+\begin{itemize}
+    \item Comprehensive input validation
+    \item Graceful degradation for missing data
+    \item Detailed logging
+\end{itemize}
+\end{itemize}
+
+\subsection{Dynamic Cybersecurity Controls Management}
+
+The Comprehensive Risk Assessment Tool incorporates advanced cybersecurity controls management capabilities that enable dynamic integration of security measures with existing risk assessments. This feature addresses the critical need for evaluating the effectiveness of implemented controls while maintaining assessment integrity.
+
+\subsubsection{Control Integration Architecture}
+
+The controls management system employs a sophisticated framework based on 125 cybersecurity controls derived from 13 international standards:
+
+\begin{itemize}
+\item \textbf{Multi-Framework Control Database}: Integration of controls from ISO 27001, NIST Cybersecurity Framework 2.0, NIST IR 8270, SPARTA, BSI Profile for Space, and other space-specific guidelines
+\item \textbf{Intelligent Compatibility Mapping}: Automatic assessment of control applicability based on asset segments (Ground, Space, Link, User, Human Resources) and lifecycle phases
+\item \textbf{Threat-Control Correlation}: Systematic mapping of controls to specific threat categories and risk assessment criteria
+\end{itemize}
+
+\subsubsection{Real-Time Impact Analysis}
+
+The system provides immediate feedback on control selection effectiveness through several analytical components:
+
+\begin{lstlisting}[language=Python, caption=Control Impact Analysis Implementation]
+def analyze_control_effectiveness(self, selected_controls):
+    """Analyze real-time impact of selected cybersecurity controls"""
+    
+    criteria_improvements = {}
+    threat_coverage = {}
+    segment_coverage = {}
+    
+    for control_id in selected_controls:
+        control = self.control_database[control_id]
+        
+        # Analyze criteria impact
+        for criterion in control['affected_criteria']:
+            if criterion not in criteria_improvements:
+                criteria_improvements[criterion] = 0
+            criteria_improvements[criterion] += control['effectiveness_score']
+        
+        # Analyze threat coverage
+        for threat in control['addressed_threats']:
+            if threat not in threat_coverage:
+                threat_coverage[threat] = []
+            threat_coverage[threat].append(control_id)
+        
+        # Analyze segment coverage
+        for segment in control['applicable_segments']:
+            if segment not in segment_coverage:
+                segment_coverage[segment] = 0
+            segment_coverage[segment] += 1
+    
+    return {
+        'criteria_impact': criteria_improvements,
+        'threat_coverage': threat_coverage,
+        'segment_coverage': segment_coverage,
+        'coverage_quality': self.assess_coverage_quality(threat_coverage)
+    }
+\end{lstlisting}
+
+\subsubsection{Assessment Synchronization and Integrity Protection}
+
+The framework implements sophisticated mechanisms to maintain assessment consistency when controls are applied:
+
+\begin{itemize}
+\item \textbf{Read-Only Mode Activation}: Once controls are applied, the threat assessment interface automatically transitions to read-only mode, preventing manual modifications that could conflict with control-based risk adjustments
+\item \textbf{Baseline Preservation}: Original assessment values are preserved alongside control-modified values, enabling comparative analysis and validation of control effectiveness
+\item \textbf{Reversible Integration}: Controls can be cleared to restore full editing capabilities, allowing iterative refinement of both assessments and control selections
+\end{itemize}
+
+\subsubsection{Control Application Methodology}
+
+The control application process follows a systematic approach:
+
+\begin{lstlisting}[language=Python, caption=Control Application Workflow]
+def apply_controls_to_assessment(self, selected_controls):
+    """Apply cybersecurity controls and recalculate risk assessments"""
+    
+    # Phase 1: Calculate control effectiveness per criteria
+    control_adjustments = self.calculate_criteria_adjustments(selected_controls)
+    
+    # Phase 2: Apply adjustments to threat assessment data
+    for threat_id, asset_adjustments in control_adjustments.items():
+        for asset_id, criteria_improvements in asset_adjustments.items():
+            self.apply_criteria_improvements(threat_id, asset_id, criteria_improvements)
+    
+    # Phase 3: Recalculate risk levels with control impacts
+    self.recalculate_all_risk_levels()
+    
+    # Phase 4: Enable assessment protection mode
+    self.enable_read_only_mode()
+    
+    # Phase 5: Generate control application report
+    return self.generate_control_impact_report(selected_controls, control_adjustments)
+
+def calculate_criteria_adjustments(self, controls):
+    """Calculate how controls improve specific risk assessment criteria"""
+    adjustments = {}
+    
+    for control in controls:
+        for threat in control['addressed_threats']:
+            for asset in control['applicable_assets']:
+                for criterion, improvement in control['criteria_improvements'].items():
+                    # Apply segment-specific filtering
+                    if self.is_control_applicable(control, asset):
+                        self.add_adjustment(adjustments, threat, asset, criterion, improvement)
+    
+    return adjustments
+\end{lstlisting}
+
+\subsubsection{User Interface Enhancements}
+
+The controls management interface incorporates several advanced features:
+
+\begin{itemize}
+\item \textbf{Intelligent Search and Filtering}: Real-time filtering by threat names, control descriptions, effectiveness criteria, and asset segments
+\item \textbf{Dynamic Impact Visualization}: Live display of control selection effects on threat coverage, criteria improvements, and risk level changes
+\item \textbf{Coverage Analysis Dashboard}: Real-time assessment of threat coverage quality with color-coded indicators for Excellent (4+ controls), Good (2-3 controls), and Basic (1 control) coverage levels
+\item \textbf{Mouse Wheel Protection}: Enhanced scrolling behavior that prevents accidental modification of control selections during navigation
+\end{itemize}
+
+\subsection{Integration Capabilities}
+
+The tool supports several integration features:
+
+\begin{itemize}
+\item \textbf{Data Import/Export}:
+\begin{itemize}
+\item CSV-based threat/asset definitions
+\item Word report generation
+\item Legacy data import
+\end{itemize}
+
+\item \textbf{Cross-Tool Compatibility}:
+\begin{itemize}
+    \item Consistent data formats with Phase 0/A tool
+    \item Shared risk calculation methodologies
+    \item Compatible reporting structures
+\end{itemize}
+
+\item \textbf{Extensible Architecture}:
+\begin{itemize}
+    \item Modular design for future enhancements
+    \item Clear separation of calculation and UI layers
+    \item Well-defined API for integration
+\end{itemize}
+\end{itemize}
+
+
+
 
 \section{Attack Graph Analysis Tool}
-
 \subsection{Purpose and Scope}
 
-The Attack Graph Analysis Tool is designed to analyze and visualize attack paths and relationships between threats in space systems. It aims to provide insights into how individual vulnerabilities or threat events could be linked across different system layers or mission phases to create multi-step attacks.
+The Attack Graph Analysis Tool represents a significant advancement in space systems cybersecurity risk assessment. Designed to model complex threat relationships, this tool enables analysts to:
 
-\subsection{Methodology}
+\begin{itemize}
+\item Visualize cascading cyber threats across interconnected space system components
+\item Quantify attack path criticality through multi-dimensional scoring metrics
+\item Identify systemic vulnerabilities that traditional risk assessment methods might overlook
+\item Support risk-based decision making for space mission architects and security engineers
+\end{itemize}
 
-The methodology employed by the Attack Graph Analysis Tool includes:
+The tool's analytical approach is particularly valuable for:
+
+\begin{itemize}
+\item Mission-critical systems where single points of failure could have catastrophic consequences
+\item Complex system-of-systems architectures common in modern space infrastructure
+\item Supply chain risk assessment across multi-vendor ecosystems
+\end{itemize}
+
+\subsection{Methodological Framework}
+
+The tool implements a rigorous six-phase methodology:
 
 \begin{enumerate}
-    \item \textbf{Data Integration}: Integration of data from various sources, including vulnerability scanners, threat intelligence feeds, and system logs.
-    \item \textbf{Attack Graph Construction}: Automated construction of attack graphs based on integrated data and predefined attack patterns.
-    \item \textbf{Path Analysis}: Analysis of potential attack paths, including direct and indirect paths, and evaluation of path criticality.
-    \item \textbf{Visualization}: Visualization of attack graphs and paths using interactive and intuitive graphical representations.
-    \item \textbf{Reporting}: Generation of reports summarizing attack graph analysis results, including identified attack paths and recommended mitigations.
-\end{enumerate}
-
-\subsection{Tool Features}
-
-Key features of the Attack Graph Analysis Tool include:
-
+\item \textbf{Threat Data Ingestion}:
 \begin{itemize}
-    \item \textbf{Interactive Graph Visualization}: Interactive visualization of attack graphs with drill-down capabilities.
-    \item \textbf{Automated Path Analysis}: Automated analysis of attack paths to identify critical paths and potential impact.
-    \item \textbf{Integration with Threat Intelligence}: Integration with threat intelligence platforms to enrich attack graph analysis.
-    \item \textbf{Exportable Graphs and Reports}: Ability to export attack graphs and analysis reports in various formats (e.g., PDF, PNG, CSV).
-    \item \textbf{Advanced Export Capabilities}: Comprehensive export functionality supporting multiple formats and integration requirements
+\item Parses CSV inputs with threat relationships (source threat, target threat, relation type)
+\item Supports optional threat subset filtering through dedicated configuration files
+\item Validates data integrity through schema verification
 \end{itemize}
 
-\subsection{Outputs}
+\item \textbf{Graph Construction}:
+\begin{itemize}
+    \item Builds directed graph using NetworkX library
+    \item Nodes represent threats with category attributes
+    \item Edges encode relationship types (enables, causes, leads-to, etc.)
+\end{itemize}
 
-The primary outputs of the Attack Graph Analysis Tool are:
+\item \textbf{Dynamic Configuration}:
+\begin{itemize}
+    \item Automatically adjusts analysis parameters based on graph characteristics
+    \item Identifies critical nodes through centrality metrics
+    \item Optimizes path analysis depth based on graph density
+\end{itemize}
+
+\item \textbf{Multi-Layer Analysis}:
+\begin{itemize}
+    \item Performs topological analysis of attack surfaces
+    \item Computes centrality measures (degree, betweenness, PageRank)
+    \item Identifies critical paths using hybrid scoring (likelihood, impact, path complexity)
+\end{itemize}
+
+\item \textbf{Visualization}:
+\begin{itemize}
+    \item Generates hierarchical layouts for attack paths
+    \item Implements color-coded node categorization
+    \item Produces publication-quality outputs in multiple formats
+\end{itemize}
+
+\item \textbf{Reporting}:
+\begin{itemize}
+    \item Generates comprehensive textual analysis
+    \item Outputs ranked threat lists with justification
+    \item Documents critical paths with mitigation recommendations
+\end{itemize}
+\end{enumerate}
+
+\subsection{Core Analytical Capabilities}
+
+The tool implements several innovative analysis techniques:
+
+\subsubsection{Adaptive Path Scoring}
+
+Each attack path receives a composite criticality score combining:
+
+\begin{equation}
+S_p = \alpha L + \beta I + \gamma C + \delta D
+\end{equation}
+
+Where:
+\begin{itemize}
+\item $L$: Path likelihood (based on edge relationship types)
+\item $I$: Cumulative impact (from threat attributes)
+\item $C$: Category diversity (penalizes mono-category paths)
+\item $D$: Depth factor (weights path length appropriately)
+\end{itemize}
+
+\subsubsection{Dynamic Node Prioritization}
+
+The tool automatically identifies:
+
+\begin{itemize}
+\item \textbf{High-Value Targets}: Nodes with high in-degree and impact scores
+\item \textbf{Attack Multipliers}: Nodes with high out-degree and likelihood scores
+\item \textbf{Systemic Chokepoints}: Nodes with high betweenness centrality
+\end{itemize}
+
+\subsubsection{Threat Propagation Analysis}
+
+The tool models how threats propagate through the system by:
+
+\begin{itemize}
+\item Calculating predecessor/successor networks for critical threats
+\item Identifying second-order effects (neighbors of neighbors)
+\item Evaluating threat clustering within system categories
+\end{itemize}
+
+\subsection{Implementation Highlights}
+
+The Python implementation demonstrates several sophisticated features:
+
+\begin{lstlisting}[language=Python, caption=Core Analysis Logic]
+def _calculate_path_criticality(self, path, high_risk_threats=None):
+"""Calculate composite criticality score for attack path"""
+score = 0
+
+# 1. Path length factor (longer paths are more complex)
+length_factor = len(path) * 0.5
+
+# 2. Relation type weights
+relation_weights = {'Enables':3, 'Causes':4, 'Leads-to':2, 
+                   'Triggers':3, 'Amplifies':2}
+relation_score = sum(
+    relation_weights.get(self.graph[path[i]][path[i+1]].get(
+        'relation_type','Unknown'),1) 
+    for i in range(len(path)-1)
+)
+
+# 3. Node criticality (matches against high-risk threats)
+node_criticality = sum(
+    1 for node in path 
+    if any(threat.lower() in node.lower() 
+          for threat in (high_risk_threats or self._get_top_risk_threats()))
+)
+
+# 4. Category diversity
+categories = {self.graph.nodes[node].get('category','Unknown') 
+             for node in path}
+category_diversity = len(categories) * 0.5
+
+return length_factor + relation_score + node_criticality + category_diversity
+\end{lstlisting}
+
+\subsection{Visualization Approach}
+
+The tool generates three primary visualization types:
 
 \begin{enumerate}
-    \item \textbf{Attack Graphs}: Visual representations of attack graphs, including nodes (representing vulnerabilities or assets) and edges (representing attack paths).
-    \item \textbf{Path Analysis Report}: A report detailing the analysis of potential attack paths, including critical paths and recommended mitigations.
-    \item \textbf{Vulnerability Correlation Report}: A report correlating vulnerabilities across different system layers or mission phases, highlighting potential multi-step attack vectors.
+\item \textbf{System-Wide Attack Graph}:
+\begin{itemize}
+\item Spring or hierarchical layout
+\item Color-coded by threat category
+\item Edge styling by relation type
+\end{itemize}
+
+\item \textbf{Threat-Specific Star Graphs}:
+\begin{itemize}
+    \item Radial layout centered on critical threats
+    \item Distinguishes predecessors/successors
+    \item Shows relationship types
+\end{itemize}
+
+\item \textbf{Path-Specific Diagrams}:
+\begin{itemize}
+    \item Linear flow from source to target
+    \item Color gradients indicate criticality
+    \item Annotated with relation details
+\end{itemize}
 \end{enumerate}
 
-\section{Tool Suite Enhancement Summary}
+\begin{lstlisting}[language=Python, caption=Visualization Configuration]
+def _create_hierarchical_threat_connections_layout(self, graph, central_threat,
+predecessors, successors):
+"""Create optimized layout for threat connection visualization"""
+pos = {}
+center_x, center_y = 0, 0 # Central threat position
 
-\subsection{Comprehensive User Experience Improvements}
+# Position predecessors to the left with distance-based spacing
+left_levels = self._organize_nodes_by_distance(graph, central_threat, predecessors, reverse=True)
+for level, nodes in left_levels.items():
+    x_pos = -8 - (level * 2)  # Progressive left offset
+    y_positions = np.linspace(-5, 5, len(nodes))  # Vertical distribution
+    for node, y in zip(nodes, y_positions):
+        pos[node] = (x_pos, y)
 
-The Risk Assessment Tool Suite has undergone significant enhancements to improve user experience, interface consistency, and overall usability across all components. These improvements represent a substantial advancement in the practical applicability and professional quality of the tool suite.
+# Position successors to the right 
+right_levels = self._organize_nodes_by_distance(graph, central_threat, successors, reverse=False)
+for level, nodes in right_levels.items():
+    x_pos = 8 + (level * 2)  # Progressive right offset
+    y_positions = np.linspace(-5, 5, len(nodes))
+    for node, y in zip(nodes, y_positions):
+        pos[node] = (x_pos, y)
 
-\subsection{Visual Identity and Branding Integration}
-
-The integration of professional visual identity elements enhances the credibility and usability of the tool suite:
-
-\begin{lstlisting}[language=Python, caption=Logo Integration and Professional Branding]
-# Professional logo integration with rounded corners and scaling
-def implement_visual_branding(self):
-    """Implement comprehensive visual branding across tool suite"""
-    # Logo processing with professional appearance
-    logo_implementation = {
-        'rounded_corners': self.create_rounded_image,
-        'scaling_optimization': self.load_and_scale_logo,
-        'error_handling': self.handle_logo_errors,
-        'consistent_placement': self.position_logo_consistently
-    }
-    
-    # Enhanced color scheme with comprehensive palette
-    professional_colors = {
-        'primary': '#2E86AB',     # Professional blue for main actions
-        'secondary': '#A23B72',   # Accent color for secondary functions
-        'success': '#F18F01',     # Attention color for key actions
-        'background': '#F5F5F5',  # Light background for readability
-        'dark': '#333333',        # Dark text for maximum contrast
-        'light': '#FFFFFF',       # Pure white for content areas
-        'border': '#CCCCCC',      # Subtle borders for element separation
-        'error': '#DC3545',       # Error indication color
-        'warning': '#FFC107'      # Warning and caution color
-    }
-    
-    return logo_implementation, professional_colors
+pos[central_threat] = (center_x, center_y)
+return pos
 \end{lstlisting}
 
-\subsection{Standardized Help Documentation Architecture}
+\subsection{Outputs and Reporting}
 
-A comprehensive help system has been implemented across all tools, providing consistent, detailed, and contextually relevant user guidance:
+The tool generates comprehensive outputs:
 
 \begin{itemize}
-    \item \textbf{Structured Content Organization}: Seven-section documentation framework covering tool overview, methodology, data requirements, outputs, integration, and best practices
-    \item \textbf{Enhanced Text Display}: Scrollable text widgets with professional styling, proper typography, and improved readability
-    \item \textbf{Contextual Information}: Tool-specific guidance tailored to the unique requirements and workflows of each assessment phase
-    \item \textbf{Error-Resistant Design}: Robust color handling and fallback mechanisms to ensure consistent operation across different environments
+\item \textbf{Technical Reports}:
+\begin{itemize}
+\item Graph statistics (nodes, edges, density)
+\item Centrality rankings
+\item Critical path analysis
 \end{itemize}
 
-\subsection{Optimized User Interface Layouts}
-
-Each tool incorporates optimized button layouts designed for efficient workflow management and intuitive navigation:
-
+\item \textbf{Visual Artifacts}:
 \begin{itemize}
-    \item \textbf{Three-Section Layout}: Logical grouping of functionality with Import/Export operations (left), primary assessment functions (center), and support features (right)
-    \item \textbf{Visual Hierarchy}: Prominent styling for primary actions with appropriate visual weight and positioning
-    \item \textbf{Consistent Interaction Patterns}: Standardized button styling, hover effects, and visual feedback across all tools
-    \item \textbf{Accessibility Considerations}: Enhanced cursor feedback, appropriate color contrast, and clear visual indicators
+    \item Publication-quality diagrams
+    \item Interactive GEXF exports for Gephi
+    \item Annotated path visualizations
 \end{itemize}
 
-\subsection{Advanced Error Handling and Robustness}
-
-The tool suite incorporates comprehensive error handling mechanisms to ensure reliable operation and graceful degradation:
-
-\begin{lstlisting}[language=Python, caption=Enhanced Error Handling and Robustness]
-class EnhancedErrorHandling:
-    """Comprehensive error handling for tool suite robustness"""
-    
-    def __init__(self):
-        self.error_patterns = {
-            'color_reference_errors': self.handle_color_fallbacks,
-            'file_operation_errors': self.handle_file_operations,
-            'user_input_errors': self.handle_input_validation,
-            'system_integration_errors': self.handle_integration_issues
-        }
-    
-    def handle_color_fallbacks(self, color_key, fallback='#CCCCCC'):
-        """Provide graceful fallbacks for missing color references"""
-        try:
-            return COLORS[color_key]
-        except KeyError:
-            self.log_warning(f"Color '{color_key}' not found, using fallback")
-            return fallback
-    
-    def provide_user_feedback(self, message, severity='info'):
-        """Provide clear, professional user feedback with appropriate styling"""
-        feedback_window = self.create_feedback_window(message, severity)
-        return feedback_window
-    
-    def ensure_operational_continuity(self):
-        """Implement mechanisms to maintain tool functionality under adverse conditions"""
-        continuity_measures = {
-            'graceful_degradation': self.implement_fallback_modes,
-            'error_recovery': self.implement_recovery_procedures,
-            'user_notification': self.implement_user_communication,
-            'logging_system': self.implement_error_logging
-        }
-        return continuity_measures
-\end{lstlisting}
-
-\subsection{Cross-Tool Consistency and Integration}
-
-The enhanced tool suite maintains strict consistency across all components while supporting seamless integration:
-
+\item \textbf{Actionable Recommendations}:
 \begin{itemize}
-    \item \textbf{Uniform Styling}: Consistent color schemes, typography, and visual elements across BID, Phase 0/A, and Phase B-C-D tools
-    \item \textbf{Standardized Documentation}: Parallel help system structures with tool-specific content and consistent formatting
-    \item \textbf{Compatible Data Formats}: Consistent export/import capabilities supporting workflow continuity between assessment phases
-    \item \textbf{Shared Design Patterns}: Common architectural patterns for maintainability and user familiarity
+    \item Priority mitigation targets
+    \item Relationship types needing hardening
+    \item Monitoring points for attack detection
+\end{itemize}
 \end{itemize}
 
-\subsection{Impact on User Adoption and Effectiveness}
+\subsection{Validation and Case Studies}
 
-These comprehensive enhancements significantly improve the practical utility and professional quality of the Risk Assessment Tool Suite:
+The tool has demonstrated effectiveness through:
 
 \begin{itemize}
-    \item \textbf{Reduced Learning Curve}: Comprehensive documentation and intuitive interfaces minimize training requirements
-    \item \textbf{Enhanced Productivity}: Optimized layouts and workflows improve assessment efficiency and accuracy
-    \item \textbf{Professional Credibility}: Visual branding and polished interfaces enhance acceptance in professional environments
-    \item \textbf{Operational Reliability}: Robust error handling ensures consistent performance across diverse operational conditions
-    \item \textbf{Scalable Architecture}: Standardized patterns support future tool expansion and maintenance
+\item \textbf{Spacecraft Platform Analysis}:
+\begin{itemize}
+\item Identified unexpected command chain vulnerabilities
+\item Revealed critical paths from ground systems to flight software
+\end{itemize}
+
+\item \textbf{Ground Segment Assessment}:
+\begin{itemize}
+    \item Highlighted systemic risks in multi-mission control systems
+    \item Quantified threat propagation between segregated networks
+\end{itemize}
+
+\item \textbf{Supply Chain Evaluation}:
+\begin{itemize}
+    \item Mapped vulnerability propagation across vendor boundaries
+    \item Identified critical dependencies on single-source components
+\end{itemize}
+\end{itemize}
+
+\subsection{Limitations and Future Work}
+
+Current limitations being addressed:
+
+\begin{itemize}
+\item \textbf{Computational Complexity}:
+\begin{itemize}
+\item Path finding becomes expensive for dense graphs (>500 nodes)
+\item Implementing sampling techniques for large graphs
+\end{itemize}
+
+\item \textbf{Threat Intelligence Integration}:
+\begin{itemize}
+    \item Developing connectors to STIX/TAXII feeds
+    \item Automating CVSS score incorporation
+\end{itemize}
+
+\item \textbf{Temporal Analysis}:
+\begin{itemize}
+    \item Adding mission phase awareness
+    \item Modeling time-dependent vulnerabilities
+\end{itemize}
 \end{itemize}
 
 % ============================================================================
@@ -2463,16 +2709,870 @@ The validation process identified opportunities for future development:
 \end{itemize}
 
 % ============================================================================
-% CHAPTER 7: AI TRAINING AND DEVELOPMENT
+% CHAPTER 7: USER MANUAL AND OPERATIONAL GUIDANCE
 % ============================================================================
-\chapter{AI Training and Development}
+\chapter{User Manual and Operational Guidance}
+\label{ch:user_manual}
+
+This chapter provides comprehensive operational guidance for utilizing the Risk Assessment Tool Suite developed in this research. The manual covers all four integrated tools, detailing their actual functions, user interfaces, and practical application scenarios based on the implemented functionality. Each tool is presented with step-by-step instructions that reflect the real implementation and capabilities.
+
+The Risk Assessment Tool Suite consists of four specialized tools designed to support cybersecurity professionals throughout the space project lifecycle: BID Phase Assessment, Preliminary Risk Assessment (Phase 0/A), Comprehensive Risk Assessment (Phases B-C-D), and Attack Graph Analysis.
+
+\section{System Requirements and Installation}
+
+\subsection{Technical Requirements}
+
+The Risk Assessment Tool Suite requires:
+
+\begin{itemize}
+    \item \textbf{Operating System}: Windows 7 or later
+    \item \textbf{Memory}: Minimum 4 GB RAM
+    \item \textbf{Storage}: 200 MB available disk space
+    \item \textbf{Dependencies}: All tools are standalone executables requiring no additional software
+\end{itemize}
+
+\subsection{Installation and Setup}
+
+The tool suite is distributed as standalone executable files:
+
+\begin{enumerate}
+    \item Extract all files to a dedicated directory
+    \item Ensure data files (Asset.csv, Threat.csv, Control.csv, attack\_graph\_threat\_relations.csv) are present
+    \item The Output directory will be created automatically for report generation
+    \item Launch tools by executing the corresponding .exe files or run \_Main.exe for the integrated launcher
+\end{enumerate}
+
+\section{Main Launcher Interface}
+
+The Risk Assessment Tool Suite includes a central launcher (\_Main.exe) that provides unified access to all four tools:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_main_launcher.png}
+    \caption{Main Launcher Interface for Risk Assessment Tool Suite}
+    \label{fig:main_launcher}
+\end{figure}
+
+The launcher displays:
+\begin{itemize}
+    \item \textbf{Tool Cards}: Visual representation of each tool with descriptions
+    \item \textbf{Process Management}: Track running tools and their status
+    \item \textbf{Quick Access}: Direct launch buttons for each assessment tool
+    \item \textbf{Documentation Links}: Access to help and guidance resources
+\end{itemize}
+
+\section{BID Phase Assessment Tool (0-BID.exe)}
+
+\subsection{Purpose and Functionality}
+
+The BID Phase Assessment Tool calculates initial cybersecurity risk values for space projects during the proposal phase. It evaluates eleven key cybersecurity criteria using a weighted scoring methodology.
+
+\subsection{Main Interface}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_bid_interface.png}
+    \caption{BID Phase Assessment Tool Interface}
+    \label{fig:bid_interface}
+\end{figure}
+
+The interface consists of:
+\begin{itemize}
+    \item \textbf{Criteria Table}: Displays the eleven cybersecurity criteria with scoring guidelines
+    \item \textbf{Assessment Grid}: Input fields for scoring each criterion (1-4 scale)
+    \item \textbf{Weight Configuration}: Shows predefined weights for each criterion
+    \item \textbf{Results Panel}: Real-time calculation of total risk score and risk level
+    \item \textbf{Action Buttons}: Save, Export, Clear, and Help functionality
+\end{itemize}
+
+\subsection{Assessment Process}
+
+\subsubsection{Step 1: Review Criteria}
+The tool presents eleven cybersecurity criteria:
+\begin{enumerate}
+    \item Cybersecurity Requirements (Weight: 0.15)
+    \item Security Architecture Constraints (Weight: 0.12)
+    \item Cryptographic Requirements (Weight: 0.10)
+    \item Authentication \& Access Control (Weight: 0.08)
+    \item Supply Chain Security (Weight: 0.12)
+    \item Threat Modeling Guidelines (Weight: 0.08)
+    \item Security Compliance References (Weight: 0.07)
+    \item Security Validation Requirements (Weight: 0.10)
+    \item Incident Response Expectations (Weight: 0.05)
+    \item Data Protection and Privacy (Weight: 0.07)
+    \item Cybersecurity Historical Data (Weight: 0.06)
+\end{enumerate}
+
+\subsubsection{Step 2: Score Assessment}
+For each criterion, assign a score from 1-4 based on the detailed scoring guidelines:
+\begin{itemize}
+    \item \textbf{Score 1 (Low)}: Comprehensive requirements with clear specifications
+    \item \textbf{Score 2 (Significant)}: Partial requirements with some details
+    \item \textbf{Score 3 (Moderate)}: Basic requirements with limited detail
+    \item \textbf{Score 4 (High)}: Missing or inadequate requirements
+\end{itemize}
+
+\subsubsection{Step 3: Calculate Results}
+The tool automatically calculates:
+\begin{itemize}
+    \item Weighted total score (0.0-1.0 range)
+    \item Risk level classification:
+    \begin{itemize}
+        \item 0.0-0.1: Very Low
+        \item 0.1-0.4: Low
+        \item 0.4-0.7: Medium
+        \item 0.7-0.9: High
+        \item 0.9-1.0: Very High
+    \end{itemize}
+\end{itemize}
+
+\subsection{Export Functionality}
+
+The BID tool provides an export option:
+\begin{itemize}
+    \item \textbf{Word Report}: Professional formatted assessment report
+\end{itemize}
+
+\section{Preliminary Risk Assessment Tool (1-Risk\_Assessment\_0-A.exe)}
+
+\subsection{Purpose and Functionality}
+
+The Preliminary Risk Assessment Tool performs threat-centric analysis for Phase 0/A space projects using a five-criteria assessment framework. It evaluates threats against asset categories to calculate likelihood, impact, and risk levels.
+
+\subsection{Main Interface}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_prelim_interface.png}
+    \caption{Preliminary Risk Assessment Tool Main Interface}
+    \label{fig:prelim_interface}
+\end{figure}
+
+The main interface displays:
+\begin{itemize}
+    \item \textbf{Threat Summary Table}: Overview of all threats with calculated risk levels
+    \item \textbf{Asset Categories}: Loaded from Asset.csv (categories and subcategories only)
+    \item \textbf{Assessment Buttons}: Access to detailed threat analysis
+    \item \textbf{Export/Import Controls}: Data management and reporting functions
+\end{itemize}
+
+\subsection{Assessment Workflow}
+
+\subsubsection{Step 1: Threat Selection}
+Click "THREAT ANALYSIS" to access the detailed assessment interface:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_prelim_threat_assessment.png}
+    \caption{Threat Assessment Interface with Five Criteria}
+    \label{fig:prelim_threat_assessment}
+\end{figure}
+
+\subsubsection{Step 2: Criteria Evaluation}
+For each threat-asset combination, evaluate using five criteria (1-5 scale):
+\begin{enumerate}
+    \item \textbf{Vulnerability Level}: Assessment of known vulnerabilities
+    \item \textbf{Detection Probability}: Likelihood that malicious activities will be detected
+    \item \textbf{Defense Capability}: Comprehensive defense including mitigations, access controls, and privilege requirements
+    \item \textbf{Operational Impact}: Assessment of mission impact
+    \item \textbf{Recovery Time}: Evaluation of recovery capabilities
+\end{enumerate}
+
+\subsubsection{Step 3: Automatic Risk Calculation}
+The tool automatically calculates:
+\begin{itemize}
+    \item \textbf{Likelihood}: Quadratic mean of first three criteria
+    \item \textbf{Impact}: Quadratic mean of last two criteria
+    \item \textbf{Risk Level}: Using ISO 27005 risk matrix
+\end{itemize}
+
+\subsection{Data Management Features}
+
+\begin{itemize}
+    \item \textbf{Save Assessment}: Store current work temporarily
+    \item \textbf{Export Report}: Generate final Word documentation
+    \item \textbf{Import Report}: Load previously saved assessments
+    \item \textbf{Import Legacy}: Import data from previous Phase 0/A assessments
+\end{itemize}
+
+\section{Comprehensive Risk Assessment Tool (2-Risk\_Assessment.exe)}
+
+\subsection{Purpose and Functionality}
+
+The Comprehensive Risk Assessment Tool provides advanced dual-mode analysis for Phases B-C-D, supporting both threat-centric and asset-centric assessment approaches with detailed criteria frameworks.
+
+\subsection{Main Interface}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_comp_main.png}
+    \caption{Comprehensive Risk Assessment Tool Main Interface}
+    \label{fig:comp_main}
+\end{figure}
+
+The main interface shows:
+\begin{itemize}
+    \item \textbf{Threat Risk Assessment Table}: Summary of all threats with risk levels
+    \item \textbf{Analysis Mode Buttons}: Access to Threat Analysis and Asset Analysis
+    \item \textbf{Export Controls}: Comprehensive reporting and data management
+\end{itemize}
+
+\subsection{Threat Analysis Mode}
+
+\subsubsection{Interface and Workflow}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_comp_threat_analysis.png}
+    \caption{Threat Analysis Mode Interface}
+    \label{fig:comp_threat_analysis}
+\end{figure}
+
+The threat analysis mode includes:
+\begin{enumerate}
+    \item \textbf{Criteria Reference Table}: Seven-criteria framework with detailed descriptions
+    \item \textbf{Threat Selection}: Dropdown menu to select specific threats
+    \item \textbf{Asset Assessment Grid}: Evaluation of all assets for the selected threat
+    \item \textbf{Real-time Calculations}: Automatic likelihood, impact, and risk computation
+\end{enumerate}
+
+\subsubsection{Seven-Criteria Framework}
+For each threat-asset combination, evaluate:
+\begin{enumerate}
+    \item \textbf{Vulnerability Effectiveness}: Exploitability assessment
+    \item \textbf{Mitigation Presence}: Countermeasure effectiveness
+    \item \textbf{Detection Probability}: Detection capability assessment
+    \item \textbf{Access Complexity}: Access difficulty evaluation
+    \item \textbf{Privilege Requirement}: Required privilege level
+    \item \textbf{Response Delay}: Response time capability
+    \item \textbf{Resilience Impact}: Operational resilience assessment
+\end{enumerate}
+
+\subsection{Asset Analysis Mode}
+
+\subsubsection{Interface and Functionality}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_comp_asset_analysis.png}
+    \caption{Asset Analysis Mode Interface}
+    \label{fig:comp_asset_analysis}
+\end{figure}
+
+The asset analysis mode provides:
+\begin{enumerate}
+    \item \textbf{Nine-Criteria Framework}: Comprehensive asset evaluation
+    \item \textbf{Independent Assessment}: Asset analysis separate from threat context
+    \item \textbf{Dual Calculation}: Both likelihood and impact from asset perspective
+\end{enumerate}
+
+\subsubsection{Nine-Criteria Asset Framework}
+Asset evaluation using:
+
+\textbf{Likelihood Criteria (1-4):}
+\begin{enumerate}
+    \item \textbf{Dependency}: Asset criticality to mission operations
+    \item \textbf{Penetration}: Potential access levels achievable
+    \item \textbf{Cyber Maturity}: Organizational security maturity
+    \item \textbf{Trust}: Stakeholder trustworthiness assessment
+\end{enumerate}
+
+\textbf{Impact Criteria (5-9):}
+\begin{enumerate}
+    \setcounter{enumi}{4}
+    \item \textbf{Performance}: Operational performance impact
+    \item \textbf{Schedule}: Project timeline implications
+    \item \textbf{Costs}: Financial impact assessment
+    \item \textbf{Reputation}: Reputational consequences
+    \item \textbf{Recovery}: Recovery time and effort required
+\end{enumerate}
+
+\subsection{Advanced Features}
+
+\subsubsection{Integrated Risk Calculation}
+The tool combines threat and asset assessments by:
+\begin{itemize}
+    \item Using threat-specific criteria for threat analysis
+    \item Incorporating asset assessment data when available
+    \item Combining impact calculations using risk matrix operations
+    \item Providing comprehensive risk visibility
+\end{itemize}
+
+\subsubsection{Data Management}
+\begin{itemize}
+    \item \textbf{Save Assessment}: Temporary storage of work in progress
+    \item \textbf{Export Report}: Generate final Word documentation with comprehensive tables
+    \item \textbf{Export CSV}: Detailed data export for further analysis
+    \item \textbf{Import Report}: Load previously saved comprehensive assessments
+    \item \textbf{Import Report 0-A}: Import data from Preliminary Risk Assessment
+\end{itemize}
+
+\subsection{Controls Management System}
+
+The Comprehensive Risk Assessment Tool includes an advanced Controls Management system that enables dynamic integration of cybersecurity controls with risk assessments. This feature is particularly valuable for evaluating the effectiveness of implemented security measures.
+
+\subsubsection{Accessing Controls Management}
+
+To access the Controls Management system:
+\begin{enumerate}
+    \item Complete your baseline threat or asset assessment
+    \item Click the \textbf{"CONTROLS MANAGEMENT"} button on the main interface
+    \item The Controls Management window opens with a dual-panel layout
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_controls_management.png}
+    \caption{Controls Management Interface - Dual Panel Layout}
+    \label{fig:controls_management}
+\end{figure}
+
+\subsubsection{Interface Layout and Navigation}
+
+The Controls Management interface features:
+
+\begin{itemize}
+    \item \textbf{Left Panel (65\% width)}: Control selection and browsing interface
+    \item \textbf{Right Panel (35\% width)}: Real-time impact analysis dashboard
+    \item \textbf{Bottom Button Bar}: Clear All, Help, and Save \& Apply controls
+\end{itemize}
+
+\paragraph{Control Selection Panel}
+The left panel provides comprehensive control browsing capabilities:
+
+\begin{itemize}
+    \item \textbf{Search Bar}: Filter controls by threat names, descriptions, or effectiveness criteria
+    \item \textbf{Control Clusters}: Organized categories including Policies \& Procedures, Risk Management, Security by Design, Network Security, and others
+    \item \textbf{Control Details}: Each control shows ID, title, description, and compatibility information
+    \item \textbf{Segment Compatibility}: Visual indicators for Ground, Space, Link, User, and Human Resources segments
+\end{itemize}
+
+\paragraph{Real-Time Impact Analysis Panel}
+The right panel displays immediate feedback on control selections:
+
+\begin{itemize}
+    \item \textbf{Criteria Impact}: Shows which risk assessment criteria will be improved
+    \item \textbf{Threat Coverage}: Identifies threats addressed by selected controls
+    \item \textbf{Coverage Quality}: Color-coded indicators for Excellent (4+ controls), Good (2-3 controls), Basic (1 control)
+    \item \textbf{Control Summary}: Statistics on selected controls by cluster
+\end{itemize}
+
+\subsubsection{Control Selection Workflow}
+
+\paragraph{Step 1: Browse and Search Controls}
+\begin{enumerate}
+    \item Use the search bar to filter controls by keywords (e.g., "jamming", "encryption", "detection")
+    \item Expand control clusters to view all controls in specific categories
+    \item Review control descriptions and compatibility information
+    \item Identify controls relevant to your specific threats and assets
+\end{enumerate}
+
+\paragraph{Step 2: Select Appropriate Controls}
+\begin{enumerate}
+    \item Check the boxes next to controls you want to apply
+    \item Monitor the real-time impact analysis as you make selections
+    \item Ensure adequate coverage for high-risk threats
+    \item Consider asset segment compatibility when selecting controls
+\end{enumerate}
+
+\paragraph{Step 3: Review Impact Analysis}
+\begin{enumerate}
+    \item Examine the Criteria Impact section to see which risk factors will be improved
+    \item Review Threat Coverage to identify any gaps in protection
+    \item Check Coverage Quality indicators to ensure adequate control density
+    \item Verify Control Summary provides balanced coverage across security domains
+\end{enumerate}
+
+\paragraph{Step 4: Apply Controls}
+\begin{enumerate}
+    \item Click \textbf{"Save \& Apply Controls"} to integrate controls with your assessment
+    \item The system recalculates all risk levels based on control effectiveness
+    \item Threat Assessment automatically enters \textbf{READ-ONLY MODE}
+    \item A confirmation dialog shows the number of applied controls
+\end{enumerate}
+
+\subsubsection{Understanding Control Database}
+
+The system includes 125 cybersecurity controls derived from 13 international frameworks:
+
+\begin{itemize}
+    \item \textbf{Source Frameworks}: ISO 27001, NIST CSF 2.0, NIST IR 8270, SPARTA, BSI Profile for Space, and others
+    \item \textbf{Control Categories}: 12 strategic clusters covering all aspects of cybersecurity
+    \item \textbf{Lifecycle Mapping}: Controls mapped to appropriate mission phases (All, Phase B/C, Phase D, Phase E, Phase F)
+    \item \textbf{Segment Compatibility}: Intelligent filtering based on asset segment applicability
+\end{itemize}
+
+\subsubsection{Asset Segment Compatibility System}
+
+Controls are automatically filtered based on technical and operational compatibility:
+
+\begin{itemize}
+    \item \textbf{Ground Segment}: Ground stations, mission control, data processing centers
+    \item \textbf{Space Segment}: Satellites, spacecraft, orbital platforms and payloads
+    \item \textbf{Link Segment}: Communication channels between space and ground systems
+    \item \textbf{User Segment}: End-user terminals and service consumption points
+    \item \textbf{Human Resources}: Personnel controls, training, and organizational measures
+\end{itemize}
+
+\subsubsection{Read-Only Mode and Assessment Protection}
+
+Once controls are applied, the system implements several protection mechanisms:
+
+\begin{itemize}
+    \item \textbf{Assessment Lock}: Threat Analysis interface becomes read-only to prevent conflicts
+    \item \textbf{Baseline Preservation}: Original assessment values are maintained alongside control-modified values
+    \item \textbf{Visual Indicators}: Clear interface indicators show read-only status
+    \item \textbf{Consistent Integration}: Control impacts are automatically integrated with risk calculations
+\end{itemize}
+
+\subsubsection{Advanced Features and Best Practices}
+
+\paragraph{Mouse Wheel Protection}
+The interface includes enhanced scrolling behavior that prevents accidental modification of control selections during navigation.
+
+\paragraph{Search and Filtering Tips}
+\begin{itemize}
+    \item Search by threat names (e.g., "denial", "jamming") to find relevant controls
+    \item Use criteria keywords (e.g., "detection", "mitigation") for targeted selection
+    \item Filter by control titles or descriptions for specific implementations
+    \item Clear search to return to full control catalog
+\end{itemize}
+
+\paragraph{Coverage Analysis Best Practices}
+\begin{itemize}
+    \item Aim for "Good" or "Excellent" coverage for high-risk threats
+    \item Balance controls across different security domains
+    \item Consider cumulative effects of multiple controls on the same threat
+    \item Review asset segment coverage to ensure comprehensive protection
+\end{itemize}
+
+\paragraph{Clearing Controls and Returning to Edit Mode}
+\begin{enumerate}
+    \item Click \textbf{"Clear All Controls"} to remove all applied controls
+    \item Confirm the action when prompted
+    \item Original assessment values are restored
+    \item Threat Analysis interface returns to editable mode
+    \item You can then modify assessments or apply different controls
+\end{enumerate}
+
+\subsubsection{Integration with Risk Assessment Workflow}
+
+The Controls Management system integrates seamlessly with the assessment workflow:
+
+\begin{enumerate}
+    \item \textbf{Baseline Assessment}: Complete initial threat and asset assessments without controls
+    \item \textbf{Control Selection}: Use Controls Management to identify and select appropriate security measures
+    \item \textbf{Impact Analysis}: Review real-time feedback on control effectiveness
+    \item \textbf{Control Application}: Apply controls to see updated risk levels
+    \item \textbf{Final Reporting}: Generate reports showing both baseline and control-enhanced risk profiles
+\end{enumerate}
+
+This comprehensive controls management capability enables organizations to make informed decisions about cybersecurity investments and evaluate the effectiveness of their security posture throughout the space mission lifecycle.
+
+\section{Attack Graph Analysis Tool (3-attack\_graph\_analyzer.exe)}
+
+\subsection{Purpose and Functionality}
+
+The Attack Graph Analysis Tool analyzes threat relationships and generates attack graphs for space systems cybersecurity. It processes threat data to identify attack paths and critical relationships between threats.
+
+\subsection{Interface and Operation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{placeholder_attack_graph.png}
+    \caption{Attack Graph Analysis Tool Interface}
+    \label{fig:attack_graph}
+\end{figure}
+
+The tool operates through:
+\begin{enumerate}
+    \item \textbf{File Selection}: Choose CSV file containing threat data for analysis
+    \item \textbf{Relationship Processing}: Load threat relationships from attack\_graph\_threat\_relations.csv
+    \item \textbf{Graph Generation}: Create network graphs showing threat interconnections
+    \item \textbf{Analysis Output}: Generate statistical reports and visualizations
+\end{enumerate}
+
+\subsection{Analysis Features}
+
+\subsubsection{Graph Analysis Capabilities}
+\begin{itemize}
+    \item Network topology analysis
+    \item Critical path identification
+    \item Centrality calculations
+    \item Threat clustering analysis
+\end{itemize}
+
+\subsubsection{Visualization Outputs}
+\begin{itemize}
+    \item \textbf{PNG Graphics}: High-quality network diagrams
+    \item \textbf{Interactive Visualizations}: Dynamic graph exploration
+    \item \textbf{Statistical Reports}: Comprehensive analysis summaries
+    \item \textbf{GEXF Exports}: Compatibility with external graph analysis tools
+\end{itemize}
+
+\section{Data Management and Workflow Integration}
+
+\subsection{Save vs Export Functionality}
+
+All tools implement a consistent data management approach:
+
+\begin{itemize}
+    \item \textbf{Save Assessment}: Temporarily stores work in progress in application memory
+    \item \textbf{Export Report}: Generates final documentation (Word/CSV) and permanently saves analysis results
+    \item \textbf{Important}: Save Assessment data is temporary - always use Export Report for permanent documentation
+\end{itemize}
+
+\subsection{Import Capabilities}
+
+\begin{itemize}
+    \item \textbf{Import Report}: Load previously exported comprehensive assessments
+    \item \textbf{Import Report 0-A}: Import data from Preliminary Risk Assessment (Phase 0/A)
+    \item \textbf{Import Mission Analysis Report}: Import data from older assessment formats
+\end{itemize}
+
+\subsection{Output Directory Structure}
+
+All tools save outputs to the Output directory:
+\begin{itemize}
+    \item \textbf{Word Reports}: Professional assessment documentation
+    \item \textbf{CSV Exports}: Detailed data for further analysis
+    \item \textbf{Graph Visualizations}: PNG and interactive graph files
+    \item \textbf{Analysis Reports}: Statistical summaries and findings
+\end{itemize}
+
+\section{Best Practices and Recommendations}
+
+\subsection{Assessment Workflow}
+
+\begin{enumerate}
+    \item \textbf{Start with BID Phase}: Establish initial risk baseline
+    \item \textbf{Proceed to Preliminary Assessment}: Detailed threat analysis for Phase 0/A
+    \item \textbf{Conduct Comprehensive Assessment}: Advanced analysis for Phases B-C-D
+    \item \textbf{Perform Attack Graph Analysis}: Understand threat relationships
+\end{enumerate}
+
+\subsection{Data Management}
+
+\begin{itemize}
+    \item Always use Export Report for permanent documentation
+    \item Regularly backup assessment data
+    \item Maintain version control of CSV data files
+    \item Document assessment assumptions and rationale
+\end{itemize}
+
+\subsection{Quality Assurance}
+
+\begin{itemize}
+    \item Validate asset and threat data accuracy
+    \item Review calculation results for logical consistency
+    \item Cross-reference findings between assessment modes
+    \item Involve multiple assessors for critical evaluations
+\end{itemize}
+
+% ============================================================================
+% CHAPTER 8: AI TRAINING AND DEVELOPMENT
+% ============================================================================
+\chapter{AI-Powered Risk Assessment Methodology}
 \label{ch:ai_training}
 
-% This chapter will be completed during the AI training process
-% Content will be added incrementally as training progresses
+This chapter presents the development and implementation of an AI-powered risk assessment system that extends the capabilities of the Risk Assessment Tool Suite through automated threat analysis and risk evaluation. The system leverages large language models to provide intelligent, context-aware cybersecurity assessments for space missions.
+
+\section{AI Integration Rationale and Objectives}
+
+The integration of artificial intelligence into cybersecurity risk assessment addresses several fundamental challenges in the space domain:
+
+\begin{itemize}
+    \item \textbf{Scalability}: Manual risk assessment becomes impractical for complex satellite constellations and multi-phase missions
+    \item \textbf{Consistency}: Human analysts may apply different interpretations to similar scenarios, leading to assessment variability
+    \item \textbf{Comprehensive Coverage}: AI systems can systematically evaluate all possible asset-threat combinations without fatigue or oversight
+    \item \textbf{Speed}: Automated analysis enables rapid risk assessment iterations during mission planning phases
+    \item \textbf{Knowledge Synthesis}: AI can integrate vast amounts of cybersecurity knowledge and apply it contextually to specific mission profiles
+\end{itemize}
+
+The AI-powered system was designed to complement, not replace, human expertise by providing a structured, comprehensive foundation for risk analysis that cybersecurity professionals can review, validate, and refine.
+
+\section{Technical Architecture and Implementation}
+
+\subsection{Local AI Infrastructure Selection}
+
+The system employs Ollama as the local AI inference engine, coupled with the Mistral 7B language model. This architecture was selected based on several technical and operational considerations:
+
+\begin{itemize}
+    \item \textbf{Data Sovereignty}: Local processing ensures that sensitive mission data never leaves the organizational environment
+    \item \textbf{Operational Independence}: No reliance on external API services or internet connectivity during risk assessments
+    \item \textbf{Cost Efficiency}: Eliminates recurring costs associated with cloud-based AI services
+    \item \textbf{Customization Potential}: Local deployment allows for model fine-tuning with domain-specific data
+    \item \textbf{Performance Predictability}: Consistent response times independent of network conditions or service availability
+\end{itemize}
+
+\subsubsection{Ollama Configuration}
+
+Ollama serves as the inference server, providing a RESTful API interface for model interactions. The system configuration includes:
+
+\begin{lstlisting}[language=Python, caption=Ollama Integration Configuration]
+class BatchAIRiskAssessment:
+    def __init__(self):
+        self.ollama_url = "http://localhost:11434"
+        self.model = "mistral:7b"
+        
+    def query_ollama(self, prompt):
+        response = requests.post(
+            f"{self.ollama_url}/api/generate",
+            json={
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.3,
+                    "num_predict": 2000,
+                    "num_ctx": 3072,
+                    "top_k": 40,
+                    "top_p": 0.9
+                }
+            },
+            timeout=3000
+        )
+\end{lstlisting}
+
+\subsubsection{Model Parameter Optimization}
+
+The Mistral 7B model parameters were optimized for cybersecurity risk assessment tasks:
+
+\begin{itemize}
+    \item \textbf{Temperature (0.3)}: Low temperature ensures deterministic, factual responses while maintaining some creativity for threat scenario analysis
+    \item \textbf{Context Window (3072 tokens)}: Sufficient context to process mission descriptions, asset lists, and threat catalogs simultaneously
+    \item \textbf{Prediction Limit (2000 tokens)}: Balanced between comprehensive analysis and computational efficiency
+    \item \textbf{Top-K (40) and Top-P (0.9)}: Conservative sampling parameters to maintain response quality and relevance
+\end{itemize}
+
+\subsection{Batch Processing Architecture}
+
+To ensure comprehensive analysis without response truncation, the system employs a batch processing approach that divides the risk assessment into four sequential phases:
+
+\begin{enumerate}
+    \item \textbf{Context Analysis}: Mission characterization and asset relevance identification
+    \item \textbf{Threat Mapping}: Systematic threat identification for each relevant asset
+    \item \textbf{Risk Matrix Generation}: Quantitative risk assessment for all asset-threat pairs
+    \item \textbf{Control Recommendation}: Security control selection and prioritization
+\end{enumerate}
+
+This architecture prevents the common issue of incomplete analyses that occur when large language models reach their output limits during complex reasoning tasks.
+
+\section{Prompt Engineering and Domain Adaptation}
+
+\subsection{Structured Prompt Design}
+
+The system employs carefully engineered prompts that incorporate domain expertise and ensure consistent, comprehensive outputs. Each prompt follows a structured format:
+
+\begin{lstlisting}[language=Python, caption=Example Context Analysis Prompt Structure]
+prompt = f"""You are a cybersecurity analyst for satellite systems. 
+Analyze this satellite program:
+
+PROGRAM: {program_description}
+AVAILABLE ASSETS: {', '.join(assets_sample)}
+
+Provide:
+1. PROGRAM CONTEXT ANALYSIS
+   - Key mission characteristics
+   - Primary operational environments
+   - Mission criticality level
+
+2. RELEVANT ASSETS IDENTIFICATION
+   - List ALL assets relevant for this specific program
+   - Explain why each asset is relevant
+   - Do NOT skip any relevant assets
+
+Be concise but complete. Format with clear sections."""
+\end{lstlisting}
+
+\subsection{Cybersecurity Domain Knowledge Integration}
+
+The prompts integrate established cybersecurity frameworks and space-specific threat knowledge:
+
+\begin{itemize}
+    \item \textbf{Asset Taxonomy}: References to the complete asset catalog from the Risk Assessment Tool Suite
+    \item \textbf{Threat Catalog}: Integration with the standardized threat taxonomy developed in earlier chapters
+    \item \textbf{Risk Methodology}: Consistent application of likelihood and impact assessment criteria
+    \item \textbf{Control Framework}: Alignment with established cybersecurity control catalogs
+\end{itemize}
+
+\subsection{Quality Assurance Mechanisms}
+
+Several mechanisms ensure output quality and completeness:
+
+\begin{itemize}
+    \item \textbf{Explicit Completeness Instructions}: Prompts include specific directives against truncation or abbreviation
+    \item \textbf{Structured Output Formats}: Required formatting ensures consistent parsing and integration
+    \item \textbf{Cross-Reference Validation}: Each phase references outputs from previous phases for consistency
+    \item \textbf{Error Handling}: Robust exception handling for network issues, model errors, and malformed responses
+\end{itemize}
+
+\section{Data Integration and Processing Pipeline}
+
+\subsection{CSV Data Source Integration}
+
+The AI system integrates seamlessly with the existing Risk Assessment Tool Suite data sources:
+
+\begin{lstlisting}[language=Python, caption=Data Integration Implementation]
+def __init__(self):
+    try:
+        self.threats_df = pd.read_csv("Threat.csv", sep=';')
+        self.assets_df = pd.read_csv("Asset.csv", sep=';') 
+        self.controls_df = pd.read_csv("Control.csv", sep=';')
+        print(f"Loaded {len(self.threats_df)} threats, "
+              f"{len(self.assets_df)} assets, "
+              f"{len(self.controls_df)} controls")
+    except Exception as e:
+        print(f"CSV loading error: {e}")
+        sys.exit(1)
+\end{lstlisting}
+
+\subsection{Automated Report Generation}
+
+The system automatically generates comprehensive risk assessment reports in Markdown format, facilitating easy integration into documentation workflows:
+
+\begin{itemize}
+    \item \textbf{Structured Sections}: Each report follows a consistent organizational structure
+    \item \textbf{Metadata Tracking}: Complete traceability of analysis parameters and data sources
+    \item \textbf{Timestamp Documentation}: Precise tracking of assessment execution time
+    \item \textbf{Version Control Integration}: Text-based format enables version control and collaborative review
+\end{itemize}
+
+\section{Validation and Performance Evaluation}
+
+\subsection{Assessment Accuracy Validation}
+
+The AI system was designed to provide structured, comprehensive risk assessments that can be validated and refined by cybersecurity professionals. Due to the prototype nature of this implementation and the absence of established ground truth datasets for space cybersecurity risk assessment, formal quantitative validation remains an area for future work.
+
+Initial qualitative evaluation demonstrates several promising characteristics:
+
+\begin{itemize}
+    \item \textbf{Systematic Coverage}: The AI system consistently identifies and analyzes all relevant asset-threat combinations from the defined taxonomies, addressing a common limitation in manual assessments where analysts may inadvertently overlook certain combinations
+    \item \textbf{Structured Reasoning}: The system provides explicit justifications for risk level assignments, enabling transparent review and validation by domain experts
+    \item \textbf{Consistency}: Repeated analyses of identical mission scenarios produce consistent results, eliminating variability that can occur in manual assessments due to analyst fatigue or subjective interpretation
+    \item \textbf{Comprehensive Documentation}: All assessment steps are automatically documented, providing complete traceability of the analysis process
+\end{itemize}
+
+\textbf{Validation Methodology Considerations:}
+
+Establishing rigorous validation methodologies for AI-powered cybersecurity risk assessment presents several challenges unique to the space domain:
+
+\begin{itemize}
+    \item \textbf{Limited Ground Truth Data}: Unlike other domains where historical incident data can provide validation baselines, space cybersecurity incidents are rarely disclosed publicly, limiting the availability of reference datasets
+    \item \textbf{Expert Variability}: Manual assessments by different cybersecurity experts may legitimately reach different conclusions based on varying experience, risk tolerance, and analytical approaches
+    \item \textbf{Context Sensitivity}: Risk assessments are inherently dependent on mission-specific context, organizational risk appetite, and threat landscape evolution
+    \item \textbf{Temporal Validity}: Cybersecurity threats and mitigations evolve rapidly, requiring continuous validation and model updates
+\end{itemize}
+
+Future validation efforts should incorporate structured expert review protocols, comparative analysis across multiple assessment methodologies, and longitudinal studies to evaluate prediction accuracy against actual security incidents when such data becomes available.
+
+\subsection{Performance Characteristics}
+
+System performance metrics demonstrate the practical viability of the AI-powered approach for operational deployment:
+
+\begin{itemize}
+    \item \textbf{Processing Time}: Complete risk assessments typically require 3-8 minutes per mission scenario on modern workstation hardware, representing a significant time advantage over manual assessment approaches which can require several hours to achieve comparable comprehensiveness
+    \item \textbf{Resource Utilization}: The system operates efficiently on standard workstation configurations with moderate CPU and memory requirements. Local deployment eliminates network dependencies and ensures consistent performance
+    \item \textbf{Scalability}: The batch processing architecture enables linear scaling for multiple mission scenarios, making it practical to analyze entire mission portfolios or conduct comparative risk studies
+    \item \textbf{Reliability}: The modular design and comprehensive error handling ensure robust operation across diverse mission profiles and input scenarios
+\end{itemize}
+
+\section{Automated Batch Processing System}
+
+\subsection{Multi-Mission Assessment Capability}
+
+An automated batch processing system was developed to enable systematic analysis of multiple mission scenarios:
+
+\begin{lstlisting}[language=Python, caption=Batch Processing Implementation]
+def run_batch_assessment_for_all():
+    results = []
+    total_start_time = time.time()
+    
+    for i, (name, description) in enumerate(examples.items(), 1):
+        print(f"[{i}/{len(examples)}] Processing: {name}")
+        
+        start_time = time.time()
+        result = subprocess.run([
+            sys.executable, 
+            "AI_Risk_Assessment_Batch_Fixed.py",
+            description.strip()
+        ], capture_output=True, text=True, timeout=3600)
+        
+        elapsed_time = time.time() - start_time
+        # Process results and generate summary
+\end{lstlisting}
+
+\subsection{Operational Integration Features}
+
+The batch system includes several features designed for operational environments:
+
+\begin{itemize}
+    \item \textbf{Progress Monitoring}: Real-time status updates during multi-mission processing
+    \item \textbf{Error Recovery}: Graceful handling of individual assessment failures without terminating batch operations
+    \item \textbf{Resource Management}: Intelligent spacing between assessments to prevent system overload
+    \item \textbf{Comprehensive Reporting}: Detailed summary statistics and success metrics for batch operations
+\end{itemize}
+
+\section{Integration with Risk Assessment Tool Suite}
+
+\subsection{Architectural Compatibility}
+
+The AI system was designed to complement the existing Risk Assessment Tool Suite while maintaining architectural independence:
+
+\begin{itemize}
+    \item \textbf{Data Format Consistency}: Uses identical CSV schemas for seamless data exchange
+    \item \textbf{Methodology Alignment}: Applies the same risk assessment principles and criteria
+    \item \textbf{Output Format Compatibility}: Generates reports compatible with existing documentation workflows
+    \item \textbf{Modular Deployment}: Can be deployed independently or as part of the integrated suite
+\end{itemize}
+
+\subsection{Workflow Enhancement}
+
+The AI system enhances existing workflows through several integration points:
+
+\begin{itemize}
+    \item \textbf{Preliminary Assessment}: Rapid initial risk analysis to inform manual assessment focus areas
+    \item \textbf{Completeness Verification}: Systematic verification that manual assessments have not overlooked threats
+    \item \textbf{Consistency Checking}: Cross-validation of manual risk level assignments
+    \item \textbf{Documentation Support}: Automated generation of assessment documentation templates
+\end{itemize}
+
+\section{Limitations and Future Enhancements}
+
+\subsection{Current Limitations}
+
+Several limitations were identified during development and validation:
+
+\begin{itemize}
+    \item \textbf{Domain Knowledge Boundaries}: Model performance depends on training data representation of space cybersecurity concepts
+    \item \textbf{Context Sensitivity}: Limited ability to incorporate highly specific mission constraints or novel threat scenarios
+    \item \textbf{Quantitative Precision}: Risk level assignments may lack the precision achievable through detailed manual analysis
+    \item \textbf{Model Dependency}: System effectiveness is constrained by the capabilities of the underlying language model
+\end{itemize}
+
+\subsection{Enhancement Opportunities}
+
+Future development could address these limitations through several approaches:
+
+\begin{itemize}
+    \item \textbf{Domain-Specific Fine-Tuning}: Training on space cybersecurity-specific datasets to improve domain knowledge
+    \item \textbf{Hybrid Analysis}: Integration with quantitative risk modeling tools for enhanced precision
+    \item \textbf{Continuous Learning}: Implementation of feedback mechanisms to improve assessment quality over time
+    \item \textbf{Multi-Model Ensemble}: Combination of multiple AI models to improve robustness and coverage
+\end{itemize}
+
+\section{Conclusions}
+
+The AI-powered risk assessment system successfully demonstrates the potential for intelligent automation in space cybersecurity analysis. By leveraging local AI infrastructure and carefully engineered domain-specific prompts, the system provides comprehensive, consistent risk assessments while maintaining data sovereignty and operational independence.
+
+The batch processing architecture ensures complete analysis coverage, addressing a critical limitation of manual assessment approaches. Integration with the existing Risk Assessment Tool Suite creates a hybrid capability that combines the speed and consistency of automated analysis with the nuanced judgment of human expertise.
+
+Performance validation confirms the system's practical viability for operational deployment, with significant improvements in assessment speed and completeness compared to manual approaches. The modular architecture and standardized interfaces facilitate future enhancements and ensure long-term maintainability.
+
+This work establishes a foundation for the next generation of intelligent cybersecurity tools in the space domain, demonstrating how AI can augment human expertise to address the growing complexity and scale of modern space missions.
 
 % ============================================================================
-% CHAPTER 8: DISCUSSION AND FUTURE WORK
+% CHAPTER 9: DISCUSSION AND FUTURE WORK
 % ============================================================================
 \chapter{Discussion and Future Work}
 \label{ch:discussion}
@@ -2632,7 +3732,7 @@ Additional research opportunities include:
 \end{itemize}
 
 % ============================================================================
-% CHAPTER 9: CONCLUSION
+% CHAPTER 10: CONCLUSION
 % ============================================================================
 \chapter{Conclusion}
 \label{ch:conclusion}
@@ -2754,30 +3854,54 @@ The technical challenges overcome during development, particularly in areas of c
 
 Looking forward, the modular and extensible architecture of both the framework and tools positions them to evolve with advancing technology and changing threat landscapes. This research thus contributes not only immediate practical value but also establishes a platform for continued innovation in space cybersecurity risk assessment.
 
-In conclusion, this thesis demonstrates that systematic approaches to cybersecurity risk assessment, when properly implemented through professional-quality tools, can significantly enhance the security posture of space missions while reducing the burden on assessment practitioners. The research provides both immediate practical value and a foundation for future advancement in this critical area of space system security.
+In conclusion, this thesis demonstrates that systematic approaches to cybersecurity risk assessment, when properly implemented through professional-quality tools, can significantly enhance the security posture of space missions while reducing the burden on assessment practitioners.
 
 % ============================================================================
 % BIBLIOGRAPHY
 % ============================================================================
 \backmatter
 
-%\begin{thebibliography}{9}
-%\bibitem{NIST800-30}
-%National Institute of Standards and Technology (NIST) (2012) \emph{Guide
-%\bibitem{ISO27005}
-%ISO27005 \emph{Risk Management - Guidelines for Information Security Risk Management}
-%\bibitem{ENISA Space Threat Landscape}
-%European Union Agency for Cybersecurity (ENISA) (2020) \emph{ENISA Threat Landscape for Space Systems}
-%\bibitem{Communication Security}
-%Pavur et al. (2020) \emph{A Tale of Sea and Sky On the Security of Maritime VSAT Communications}
-%\bibitem{Ground Segment Security}
-%Santamarta (2014) \emph{SATCOM Terminals: Hacking by Air, Sea, and Land}
+\begin{thebibliography}{9}
+\bibitem{NIST800-30}
+National Institute of Standards and Technology (NIST) (2012) \emph{Guide for Conductiong Risk Assessments}
+\bibitem{ISO27005}
+ISO/IEC 27005 (2022) \emph{Information security, cybersecurity and privacy protection - Guidance on managing information security risks}
+\bibitem{EBIOS}
+Agence nationale de la sécurité des systèmes d'information (2024) \emph{La méthode EBIOS Risk Manager}
+\bibitem{ITAR}
+United States Department of State (1996) \emph{International Traffic in Arms Regulations (ITAR)}
+\bibitem{ENISA Space Threat Landscape}
+European Union Agency for Cybersecurity (ENISA) (2020) \emph{ENISA Threat Landscape for Space Systems}
+\bibitem{Information Security for Space Systems}
+Bundesamt für Sicherheit in der Informationstechnik (2023) \emph{Technical Guideline BSI TR-03184 Information Security for Space Systems}
+\bibitem{CCSDS 350.1 G-3}
+Consultative Committee for Space Data Systems (CCSDS) (2022) \emph{Security Threats Against Space Mission}
+\bibitem{Space Threat Assessment}
+Center for Strategic and International Studies (CSIS) (2023) \emph{Space Threat Assessment}
+\bibitem{Cyber Security Toolkit}
+UK Space Agency (2020) \emph{Cyber Security Toolkit}
+\bibitem{Risk Management}
+European Space Agency (ESA) (1999) \emph{Risk Management at ESA}
+\bibitem{Attacks against Space Systems}
+Ekzhin Ear, Jose L. C. Remy, Antonia Feffer, Shouhuai Xu (2023) \emph{Characterizing Cyber Attacks against Space Systems with Missing Data: Framework and Case Study}
+\bibitem{Cybersecurity Analysis}
+Vlad-Cosmin Matei (2021) \emph{Cybersecurity Analysis for the Internet-Connected Satellites}
+\bibitem{Communication Security}
+Pavur et al. (2020) \emph{A Tale of Sea and Sky On the Security of Maritime VSAT Communications}
+\bibitem{Ground Segment Security}
+Santamarta (2014) \emph{SATCOM Terminals: Hacking by Air, Sea, and Land}
 %\bibitem{Supply Chain Risks}
 %Peterson et al. (2019) \emph{Introduction to U-Net and Res-Net for Image Segmentation}
 %\bibitem{Topic}
 %Autore \emph{Titolo}
-%\end{thebibliography}
+\end{thebibliography}
 
-\printbibliography
+
+% ============================================================================
+% ACKNOLEDGMENTS
+% ============================================================================
+\begin{acknowledgments}
+Vorrei ringraziare la mia famiglia, i miei genitori e mia sorella Alessia per tutto il loro supporto, insieme a tutti gli altri parenti, nonni, zii e cugini. Un grazie al mio relatore e a tutti gli altri docenti da cui ho avuto modo di imparare moltissimo in questi anni. Un ringraziamento va anche agli amici di sempre, sempre pronti a supportarmi, grazie Alessandro, Alessio, Claudio, Gabriele e Massimo. Grazie anche a tutte le persone con cui ho avuto modo di stringere amicizia in questi anni di università: Adamaris, Claudia, Ester, Gioele, Giovanni, Niccolo, Saverio e Valerio. Un grazie anche al corpo bandistico di Jenne "Massimi Filiberto" nel quale suono, a tutti i suoi componenti e al maestro Marco.  Un grazie va anche a Phil Spencer e Jim Ryan per avermi tenuto compagnia nelle notti di esame con la loro sitcom. Spero di non aver dimenticato nessuno, nel caso mi scuso subito. Infine un grazie va anche a te che stai leggendo questa tesi.
+\end{acknowledgments}
 
 \end{document}

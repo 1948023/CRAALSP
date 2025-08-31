@@ -137,7 +137,14 @@ class RiskAssessmentTool:
         
         # Initialize export/import manager
         self.export_import_manager = ExportImportManager(self)
-    
+        
+        # ========== CONTROLS STATE MANAGEMENT ==========
+        # Track applied controls (simplified approach)
+        self.applied_controls = []  # List of applied control IDs
+        
+        # Mission info
+        self.mission_name = ""
+        self.mission_type = ""
 
         # Load external data
         self.load_threats_from_csv()
@@ -152,6 +159,9 @@ class RiskAssessmentTool:
         # Create interface
         self.create_interface()
         
+        # Initialize button states
+        self.update_threat_analysis_button_state()
+        
         # Set up close confirmation
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -164,6 +174,352 @@ class RiskAssessmentTool:
         )
         if result:
             self.root.destroy()
+
+    # ========== CONTROLS STATE MANAGEMENT (SIMPLIFIED) ==========
+    
+    def is_control_applied(self, control_id):
+        """Check if a control is already applied"""
+        return control_id in self.applied_controls
+    
+    def apply_control(self, control_id, control_data):
+        """Apply a single control and modify threat criteria directly"""
+        if self.is_control_applied(control_id):
+            print(f"[CONTROLS] Control {control_id} already applied")
+            return False
+        
+        # Apply control effects directly to threat data
+        self.apply_control_effects(control_data)
+        
+        # Add to applied list
+        self.applied_controls.append(control_id)
+        
+        # Update button state
+        self.update_threat_analysis_button_state()
+        
+        print(f"[CONTROLS] Applied control {control_id}: {control_data['title']}")
+        return True
+    
+    def remove_control(self, control_id):
+        """Remove a control and reverse its effects"""
+        if not self.is_control_applied(control_id):
+            print(f"[CONTROLS] Control {control_id} not applied")
+            return False
+        
+        # Get control data to reverse effects
+        control_data = self.get_control_by_id(control_id)
+        if control_data:
+            self.reverse_control_effects(control_data)
+        
+        # Remove from applied list
+        self.applied_controls.remove(control_id)
+        
+        # Update button state
+        self.update_threat_analysis_button_state()
+        
+        print(f"[CONTROLS] Removed control {control_id}")
+        return True
+    
+    def get_control_by_id(self, control_id):
+        """Get control data by ID"""
+        for control in self.CONTROLS:
+            if control['id'] == control_id:
+                return control
+        return None
+    
+    def find_matching_threats(self, threat_name):
+        """Find threats that match the given threat name using flexible matching"""
+        matching_threats = []
+        threat_name_lower = threat_name.lower().strip()
+        
+        # First try exact match
+        if threat_name in self.threat_data:
+            matching_threats.append(threat_name)
+            return matching_threats
+        
+        # Then try flexible matching with all threats in the dataset
+        for actual_threat in self.threat_data.keys():
+            actual_lower = actual_threat.lower()
+            
+            # Check if names contain each other
+            if (threat_name_lower in actual_lower or 
+                actual_lower in threat_name_lower or
+                self.normalize_threat_name(threat_name_lower) == self.normalize_threat_name(actual_lower)):
+                matching_threats.append(actual_threat)
+        
+        # If no matches found, try against the THREATS list
+        if not matching_threats:
+            for threat in self.THREATS:
+                threat_lower = threat.lower()
+                if (threat_name_lower in threat_lower or 
+                    threat_lower in threat_name_lower or
+                    self.normalize_threat_name(threat_name_lower) == self.normalize_threat_name(threat_lower)):
+                    if threat in self.threat_data:
+                        matching_threats.append(threat)
+        
+        return matching_threats
+    
+    def get_assets_for_segment(self, control_segment):
+        """Get asset keys that match the control segment (supports multiple segments separated by comma)"""
+        if not control_segment:
+            return []
+        
+        # Split multiple segments separated by comma and normalize each
+        segments = [s.strip().lower() for s in control_segment.split(',') if s.strip()]
+        
+        # Special case mappings for each segment
+        normalized_segments = []
+        for segment in segments:
+            if segment == 'human':
+                normalized_segments.append('user ground segment')
+            else:
+                normalized_segments.append(segment)
+        
+        matching_asset_keys = []
+        
+        # Check each asset category
+        for i, (category, subcategory, asset) in enumerate(self.ASSET_CATEGORIES):
+            category_lower = category.lower()
+            subcategory_lower = subcategory.lower()
+            
+            # Check if this asset matches any of the segments
+            match_found = False
+            
+            for segment_lower in normalized_segments:
+                # 1. Direct category match (Ground, Space, Link, User)
+                if segment_lower == category_lower:
+                    match_found = True
+                    break
+                
+                # 2. Subcategory match
+                elif segment_lower in subcategory_lower or subcategory_lower == segment_lower:
+                    match_found = True
+                    break
+                
+                # 3. Special case mappings
+                elif (segment_lower == 'user ground segment' and 
+                      category_lower == 'ground' and 'user' in subcategory_lower):
+                    match_found = True
+                    break
+                
+                elif (segment_lower == 'human resources' and 
+                      category_lower == 'ground' and 'user' in subcategory_lower):
+                    match_found = True
+                    break
+            
+            if match_found:
+                # Add the asset key in the format used by the threat assessment
+                # Format: "{i+1}_probability" for threat assessment
+                asset_key_threat = f"{i+1}_probability"
+                matching_asset_keys.append(asset_key_threat)
+                
+                # Also add the index-based key for other potential uses
+                matching_asset_keys.append(str(i))
+                
+                # Add full description format if different systems use it
+                full_description = f"{category}.{subcategory}.{asset}"
+                matching_asset_keys.append(full_description)
+        
+        print(f"[CONTROLS] Segment '{control_segment}' (parsed as: {segments}) matches asset keys: {matching_asset_keys}")
+        return matching_asset_keys
+    
+    def apply_control_effects(self, control_data):
+        """Apply control effects directly to threat criteria for compatible assets only"""
+        # Parse threats and criteria from control
+        threats_addressed = [t.strip() for t in control_data.get('threats_addressed', '').split(',') if t.strip()]
+        criteria_list = [c.strip() for c in control_data.get('criteria', '').split(',') if c.strip()]
+        control_segment = control_data.get('segment', '').strip()
+        
+        # Get compatible asset keys for this control's segment
+        compatible_assets = self.get_assets_for_segment(control_segment)
+        
+        if not compatible_assets:
+            print(f"[CONTROLS] Warning: No compatible assets found for segment '{control_segment}'")
+            return
+        
+        # Map criteria names to threat table column indices (0-based for actual data storage)
+        criteria_mapping = {
+            'vulnerability effectiveness': 0,  # Column 0 - Likelihood
+            'vulnerability': 0,
+            'mitigation presence': 1,          # Column 1 - Likelihood  
+            'mitigation': 1,
+            'detection probability': 2,        # Column 2 - Likelihood
+            'detection': 2,
+            'access complexity': 3,            # Column 3 - Likelihood
+            'access': 3,
+            'privilege requirement': 4,        # Column 4 - Likelihood
+            'privilege': 4,
+            'response delay': 5,               # Column 5 - Impact
+            'response': 5,
+            'resilience impact': 6,            # Column 6 - Impact
+            'resilience': 6
+        }
+        
+        # For each threat this control addresses
+        for threat_name in threats_addressed:
+            # Find matching threats using flexible matching
+            matching_threats = self.find_matching_threats(threat_name)
+            
+            for actual_threat in matching_threats:
+                if actual_threat in self.threat_data:
+                    threat_info = self.threat_data[actual_threat]
+                    
+                    # For each criteria this control improves
+                    for criteria_name in criteria_list:
+                        criteria_lower = criteria_name.lower()
+                        
+                        # Find matching criteria mapping
+                        for key, column_index in criteria_mapping.items():
+                            if key in criteria_lower:
+                                # Apply only to compatible assets for this threat
+                                for asset_key, asset_scores in threat_info.items():
+                                    # Check if this asset is compatible with the control's segment
+                                    if asset_key in compatible_assets:
+                                        if isinstance(asset_scores, dict) and str(column_index) in asset_scores:
+                                            try:
+                                                # Improve the score (decrease by 1, minimum 1)
+                                                current_score = int(asset_scores[str(column_index)])
+                                                new_score = max(1, current_score - 1)
+                                                asset_scores[str(column_index)] = str(new_score)
+                                                
+                                                print(f"[CONTROLS]  Improved {actual_threat}.{asset_key}[{column_index}]: {current_score} -> {new_score} (segment: {control_segment})")
+                                            except ValueError:
+                                                print(f"[CONTROLS] Warning: Invalid score format for {actual_threat}.{asset_key}[{column_index}]")
+                                        else:
+                                            print(f"[CONTROLS] Warning: {actual_threat}.{asset_key}[{column_index}] not found")
+                                    else:
+                                        print(f"[CONTROLS]  Skipping {actual_threat}.{asset_key} - incompatible with segment '{control_segment}' (compatible: {compatible_assets[:3]}...)")
+                                # Continue to check other criteria mappings for this criteria_name
+    
+    def reverse_control_effects(self, control_data):
+        """Reverse control effects by increasing criteria scores for compatible assets only"""
+        # Parse threats and criteria from control
+        threats_addressed = [t.strip() for t in control_data.get('threats_addressed', '').split(',') if t.strip()]
+        criteria_list = [c.strip() for c in control_data.get('criteria', '').split(',') if c.strip()]
+        control_segment = control_data.get('segment', '').strip()
+        
+        # Get compatible asset keys for this control's segment
+        compatible_assets = self.get_assets_for_segment(control_segment)
+        
+        if not compatible_assets:
+            print(f"[CONTROLS] Warning: No compatible assets found for segment '{control_segment}' during reversal")
+            return
+        
+        # Map criteria names to threat table column indices (0-based for actual data storage)
+        criteria_mapping = {
+            'vulnerability effectiveness': 0,  # Column 0 - Likelihood
+            'vulnerability': 0,
+            'mitigation presence': 1,          # Column 1 - Likelihood  
+            'mitigation': 1,
+            'detection probability': 2,        # Column 2 - Likelihood
+            'detection': 2,
+            'access complexity': 3,            # Column 3 - Likelihood
+            'access': 3,
+            'privilege requirement': 4,        # Column 4 - Likelihood
+            'privilege': 4,
+            'response delay': 5,               # Column 5 - Impact
+            'response': 5,
+            'resilience impact': 6,            # Column 6 - Impact
+            'resilience': 6
+        }
+        
+        # For each threat this control addressed
+        for threat_name in threats_addressed:
+            # Find matching threats using flexible matching
+            matching_threats = self.find_matching_threats(threat_name)
+            
+            for actual_threat in matching_threats:
+                if actual_threat in self.threat_data:
+                    threat_info = self.threat_data[actual_threat]
+                    
+                    # For each criteria this control improved
+                    for criteria_name in criteria_list:
+                        criteria_lower = criteria_name.lower()
+                        
+                        # Find matching criteria mapping  
+                        for key, column_index in criteria_mapping.items():
+                            if key in criteria_lower:
+                                # Reverse effects only for compatible assets for this threat
+                                for asset_key, asset_scores in threat_info.items():
+                                    # Check if this asset is compatible with the control's segment
+                                    if asset_key in compatible_assets:
+                                        if isinstance(asset_scores, dict) and str(column_index) in asset_scores:
+                                            try:
+                                                # Reverse the improvement (increase by 1, maximum 5)
+                                                current_score = int(asset_scores[str(column_index)])
+                                                new_score = min(5, current_score + 1)
+                                                asset_scores[str(column_index)] = str(new_score)
+                                                
+                                                print(f"[CONTROLS]  Reversed {actual_threat}.{asset_key}[{column_index}]: {current_score} -> {new_score} (segment: {control_segment})")
+                                            except ValueError:
+                                                print(f"[CONTROLS] Warning: Invalid score format for reversal {actual_threat}.{asset_key}[{column_index}]")
+                                        else:
+                                            print(f"[CONTROLS] Warning: {actual_threat}.{asset_key}[{column_index}] not found for reversal")
+                                    else:
+                                        print(f"[CONTROLS]  Skipping reversal {actual_threat}.{asset_key} - incompatible with segment '{control_segment}' (compatible: {compatible_assets[:3]}...)")
+                                # Continue to check other criteria mappings for this criteria_name
+    
+    def clear_all_controls(self):
+        """Clear all applied controls by reversing their effects"""
+        if not self.applied_controls:
+            messagebox.showinfo("No Controls", "No controls are currently applied.")
+            return
+        
+        result = messagebox.askyesno(
+            "Clear All Controls",
+            f"Remove all {len(self.applied_controls)} applied controls?",
+            icon='warning'
+        )
+        
+        if result:
+            controls_count = len(self.applied_controls)
+            
+            # Reverse all applied controls
+            for control_id in self.applied_controls.copy():
+                self.remove_control(control_id)
+            
+            # Update main table
+            self.update_all_threats_in_main_table()
+            
+            # Update button state
+            self.update_threat_analysis_button_state()
+            
+            messagebox.showinfo("Success", f"All {controls_count} controls cleared!")
+            print(f"[CONTROLS] All {controls_count} controls cleared")
+
+    def clear_all_controls_gui(self):
+        """GUI method to clear all controls and update interface"""
+        if not hasattr(self, 'applied_controls') or not self.applied_controls:
+            messagebox.showinfo("No Controls", "No controls are currently applied.")
+            return
+        
+        # Use the core clear method
+        self.clear_all_controls()
+        
+        # Update controls window if open
+        if hasattr(self, 'controls_window') and self.controls_window.winfo_exists():
+            try:
+                # Refresh controls display to remove visual indicators
+                if hasattr(self, 'all_controls_data'):
+                    self.display_controls(self.all_controls_data)
+                    
+                # Clear selected controls checkboxes
+                if hasattr(self, 'selected_controls'):
+                    for control_id in list(self.selected_controls.keys()):
+                        self.selected_controls[control_id].set(False)
+                
+                # Update impact analysis display
+                self.update_impact_analysis()
+                
+            except Exception as e:
+                print(f"[CONTROLS] Warning: Error updating GUI after clear: {e}")
+        
+        # Close the controls window after clearing
+        if hasattr(self, 'controls_window') and self.controls_window.winfo_exists():
+            try:
+                print(f"[CONTROLS] Closing controls window after clearing all controls")
+                self.controls_window.destroy()
+            except Exception as e:
+                print(f"[CONTROLS] Warning: Error closing controls window: {e}")
 
     def disable_mousewheel_on_combobox(self, combo):
         """Intelligently handle mouse wheel on combobox to prevent accidental value changes while allowing scroll"""
@@ -221,6 +577,10 @@ class RiskAssessmentTool:
             except:
                 pass
         
+        # Store the canvas and scroll function for dynamic content updates
+        self.impact_canvas = canvas
+        self.impact_scroll_function = on_impact_mousewheel
+        
         # Bind to the widget and all its children recursively but ONLY for impact
         def bind_impact_mousewheel_recursive(w):
             try:
@@ -241,6 +601,24 @@ class RiskAssessmentTool:
             canvas.bind("<MouseWheel>", on_impact_mousewheel)
         except:
             pass
+    
+    def apply_impact_mousewheel_to_new_content(self, widget):
+        """Apply mouse wheel scrolling to newly created impact content"""
+        if not hasattr(self, 'impact_scroll_function'):
+            return
+            
+        def bind_recursive(w):
+            try:
+                # Skip checkbox and combobox widgets to prevent accidental value changes
+                if not isinstance(w, (tk.Checkbutton, ttk.Combobox)):
+                    w.bind("<MouseWheel>", self.impact_scroll_function)
+                
+                for child in w.winfo_children():
+                    bind_recursive(child)
+            except:
+                pass
+        
+        bind_recursive(widget)
 
     def setup_controls_mousewheel(self, widget, canvas):
         """Setup mouse wheel scrolling specifically for the controls section"""
@@ -339,10 +717,10 @@ class RiskAssessmentTool:
                     if threat_name:
                         self.THREATS.append(threat_name)
             self.THREATS.sort()
-            #print(f"✅ Loaded {len(self.THREATS)} threats from {threats_file}")
+            #print(f" Loaded {len(self.THREATS)} threats from {threats_file}")
             
         except FileNotFoundError:
-            #print(f"❌ File not found: {threats_file}")
+            #print(f" File not found: {threats_file}")
             # Fallback threats
             self.THREATS = [
                 "Data Corruption", "Physical/Logical Attack", "Interception/Eavesdropping",
@@ -351,7 +729,7 @@ class RiskAssessmentTool:
                 "Tainted hardware components", "Supply Chain"
             ]
         except Exception as e:
-            #print(f"❌ Error loading threats: {e}")
+            #print(f" Error loading threats: {e}")
             self.THREATS = []
 
     def load_assets_from_csv(self):
@@ -410,7 +788,9 @@ class RiskAssessmentTool:
                     control_description = row.get('Control', '').strip()
                     threats_addressed = row.get('Threats addressed', '').strip()
                     criteria = row.get('Criterio', '').strip()
-                    segment = row.get('Segment', '').strip()  # Add this line!
+                    segment = row.get('Segment', '').strip()
+                    reference = row.get('Reference frameworks', '').strip()  # Add reference column
+                    lifecycle = row.get('Lifecycle phase', '').strip()  # Add lifecycle column
                     
                     if control_id and control_title:
                         self.CONTROLS.append({
@@ -420,7 +800,9 @@ class RiskAssessmentTool:
                             'description': control_description,
                             'threats_addressed': threats_addressed,
                             'criteria': criteria,
-                            'segment': segment  # Add this line!
+                            'segment': segment,
+                            'reference': reference,  # Add reference field
+                            'lifecycle': lifecycle   # Add lifecycle field
                         })
             
             print(f"[OK] Loaded {len(self.CONTROLS)} controls from {controls_file}")
@@ -550,21 +932,21 @@ class RiskAssessmentTool:
                                     command=self.export_import_manager.import_word_report)
         import_report_btn.pack(side='left', padx=(0, 10))
 
-        # THREAT ANALYSIS button (third)
-        add_threat_btn = tk.Button(buttons_container, text="THREAT ANALYSIS",
-                                  font=('Segoe UI', 12, 'bold'),
-                                  bg=self.COLORS['primary'], fg=self.COLORS['white'],
-                                  relief='flat', padx=30, pady=10,
-                                  command=self.open_threat_window)
-        add_threat_btn.pack(side='left', padx=(0, 10))
-
-        # ASSET ANALYSIS button (fourth)
+        # ASSET ANALYSIS button (third)
         add_asset_btn = tk.Button(buttons_container, text="ASSET ANALYSIS",
                                  font=('Segoe UI', 12, 'bold'),
                                  bg=self.COLORS['success'], fg=self.COLORS['white'],
                                  relief='flat', padx=30, pady=10,
                                  command=self.open_asset_window)
         add_asset_btn.pack(side='left', padx=(0, 10))
+
+        # THREAT ANALYSIS button (fourth)
+        self.threat_analysis_btn = tk.Button(buttons_container, text="THREAT ANALYSIS",
+                                           font=('Segoe UI', 12, 'bold'),
+                                           bg=self.COLORS['primary'], fg=self.COLORS['white'],
+                                           relief='flat', padx=30, pady=10,
+                                           command=self.open_threat_window)
+        self.threat_analysis_btn.pack(side='left', padx=(0, 10))
 
         # CONTROLS MANAGEMENT button (fifth) - NEW!
         controls_btn = tk.Button(buttons_container, text="CONTROLS MANAGEMENT",
@@ -590,23 +972,65 @@ class RiskAssessmentTool:
                                      command=self.export_import_manager.export_word_report)
         export_report_btn.pack(side='left', padx=(0, 0))
 
+    def update_threat_analysis_button_state(self):
+        """Update the visual state of the Threat Analysis button based on active controls"""
+        if hasattr(self, 'threat_analysis_btn') and hasattr(self, 'applied_controls'):
+            if self.applied_controls:
+                # Controls are active - make button orange to indicate read-only mode
+                self.threat_analysis_btn.config(
+                    bg='#f39c12',  # Orange color to indicate read-only
+                    fg='white',    # White text
+                    state='normal'
+                )
+            else:
+                # No controls active - restore original color for full editing
+                self.threat_analysis_btn.config(
+                    bg=self.COLORS['primary'],  # Original blue color
+                    fg=self.COLORS['white'],    # White text
+                    state='normal'
+                )
+
     def open_threat_window(self):
         """Open Threat Analysis window"""
+        # Check if there are active controls - open in read-only mode if present
+        read_only_mode = hasattr(self, 'applied_controls') and bool(self.applied_controls)
+        
+        if read_only_mode:
+            # Show info message for read-only mode
+            messagebox.showinfo(
+                "Read-Only Mode",
+                f"Threat Analysis opened in READ-ONLY mode.\n\n"
+                f"Currently active controls: {len(self.applied_controls)}\n\n"
+                f"You can view existing assessments but cannot modify criteria.\n"
+                f"To enable editing, go to 'CONTROLS MANAGEMENT' and click 'CLEAR ALL CONTROLS'.",
+                icon='info'
+            )
+        
         window = tk.Toplevel(self.root)
-        window.title("Threat Analysis")
+        window.title("Threat Analysis" + (" - READ ONLY" if read_only_mode else ""))
         window.geometry("1670x800")
         window.configure(bg=self.COLORS['white'])
         window.transient(self.root)
         window.grab_set()
         
-        # Header
-        header = tk.Frame(window, bg=self.COLORS['light'], height=50)
+        # Header with read-only indicator
+        header = tk.Frame(window, bg=self.COLORS['light'] if not read_only_mode else '#f39c12', height=50)
         header.pack(fill='x')
         header.pack_propagate(False)
         
-        tk.Label(header, text="Threat Analysis",
+        header_text = "Threat Analysis"
+        if read_only_mode:
+            header_text += " - READ ONLY MODE"
+        
+        tk.Label(header, text=header_text,
                 font=('Segoe UI', 14, 'bold'),
-                bg=self.COLORS['light'], fg=self.COLORS['dark']).pack(pady=12)        # Main content with scroll
+                bg=self.COLORS['light'] if not read_only_mode else '#f39c12', 
+                fg=self.COLORS['dark'] if not read_only_mode else 'white').pack(pady=12)
+        
+        # Store read-only state for use in create_threat_content
+        self.threat_window_read_only = read_only_mode
+        
+        # Main content with scroll
         self.create_threat_content(window)
 
     def open_asset_window(self):
@@ -640,168 +1064,179 @@ class RiskAssessmentTool:
         """Open Controls Management window"""
         self.controls_window = tk.Toplevel(self.root)
         self.controls_window.title("🛡️ Controls Management - Dynamic Impact Analysis")
-        self.controls_window.geometry("1800x900")  # Increased width from 1600 to 1800 and height from 850 to 900
+        self.controls_window.geometry("1680x950")  # Optimized for 1920x1080 screens
         self.controls_window.configure(bg=self.COLORS['white'])
         self.controls_window.transient(self.root)
         self.controls_window.grab_set()
         
-        # Header
-        header = tk.Frame(self.controls_window, bg='#9b59b6', height=70)
+        # Header (style consistent with assessment windows)
+        header = tk.Frame(self.controls_window, bg=self.COLORS['primary'], height=60)
         header.pack(fill='x')
         header.pack_propagate(False)
         
-        # Header content with title and description
-        header_content = tk.Frame(header, bg='#9b59b6')
-        header_content.pack(expand=True, fill='both', padx=25, pady=15)
+        # Header content
+        header_content = tk.Frame(header, bg=self.COLORS['primary'])
+        header_content.pack(expand=True, fill='both', padx=20, pady=12)
         
-        # Title and help button container
-        title_help_frame = tk.Frame(header_content, bg='#9b59b6')
-        title_help_frame.pack(fill='x')
-        
-        tk.Label(title_help_frame, text="🛡️ Controls Management & Dynamic Impact Analysis",
-                font=('Segoe UI', 18, 'bold'),
-                bg='#9b59b6', fg=self.COLORS['white']).pack(side='left')
-        
-        # Help button
-        help_btn = tk.Button(title_help_frame, text="❓ Help",
-                           font=('Segoe UI', 10, 'bold'),
-                           bg='#8e44ad', fg=self.COLORS['white'],
-                           relief='flat', padx=15, pady=5,
-                           command=self.show_controls_help)
-        help_btn.pack(side='right', padx=(10, 0))
+        # Title
+        tk.Label(header_content, text="🛡️ Controls Management & Dynamic Impact Analysis",
+                font=('Segoe UI', 14, 'bold'),
+                bg=self.COLORS['primary'], fg=self.COLORS['white']).pack(anchor='w')
         
         tk.Label(header_content, text="Select security controls to apply and see their dynamic impact on threat criteria",
-                font=('Segoe UI', 12),
-                bg='#9b59b6', fg='#ecf0f1').pack(anchor='w', pady=(3, 0))
+                font=('Segoe UI', 10),
+                bg=self.COLORS['primary'], fg=self.COLORS['light']).pack(anchor='w', pady=(2, 0))
 
         # Main content with scroll
         self.create_controls_content(self.controls_window)
+        
+        # Initialize interface state after creation
+        self.controls_window.after(100, self.update_impact_analysis)
 
     def show_controls_help(self):
         """Show comprehensive help dialog for Controls Management"""
         help_window = tk.Toplevel(self.controls_window)
-        help_window.title("🛡️ Controls Management - Help & User Guide")
-        help_window.geometry("900x700")
+        help_window.title("Controls Management - Help")
+        help_window.geometry("1200x700")
         help_window.configure(bg=self.COLORS['white'])
+        help_window.resizable(True, True)
+        
+        # Center the window (consistent with other help windows)
         help_window.transient(self.controls_window)
         help_window.grab_set()
         
-        # Make window resizable
-        help_window.resizable(True, True)
+        # Title (consistent style with other help windows)
+        title_label = tk.Label(help_window, text="Controls Management - User Guide", 
+                              font=('Segoe UI', 14, 'bold'),
+                              bg=self.COLORS['white'], fg=self.COLORS['dark'])
+        title_label.pack(pady=(20, 15))
         
-        # Header
-        header = tk.Frame(help_window, bg='#8e44ad', height=60)
-        header.pack(fill='x')
-        header.pack_propagate(False)
-        
-        tk.Label(header, text="🛡️ Controls Management - User Guide",
-                font=('Segoe UI', 16, 'bold'),
-                bg='#8e44ad', fg=self.COLORS['white']).pack(pady=15)
-        
-        # Scrollable content
-        canvas = tk.Canvas(help_window, bg=self.COLORS['white'])
+        # Create scrollable frame for the content (consistent structure)
+        canvas = tk.Canvas(help_window, bg=self.COLORS['white'], highlightthickness=0)
         scrollbar = tk.Scrollbar(help_window, orient="vertical", command=canvas.yview)
         scrollable_frame = tk.Frame(canvas, bg=self.COLORS['white'])
         
-        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
         
-        canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
-        scrollbar.pack(side="right", fill="y", pady=10)
+        # Add separator and tool explanation section (consistent with other help windows)
+        separator_frame = tk.Frame(scrollable_frame, bg=self.COLORS['gray'], height=2)
+        separator_frame.pack(fill='x', pady=(0, 15), padx=15)
         
-        # Help content
-        help_content = [
-            ("🚀 Overview", 
-             "The Controls Management system allows you to select and apply security controls to your risk assessment. "
-             "It provides intelligent asset compatibility filtering and real-time impact analysis."),
-             
-            ("🔍 How to Use", 
-             "1. BROWSE CONTROLS: Use the search bar or expand cluster categories to find relevant controls\n"
-             "2. SELECT CONTROLS: Check the boxes next to controls you want to apply\n"
-             "3. REVIEW IMPACT: The right panel shows real-time analysis of your selections\n"
-             "4. APPLY CONTROLS: Click 'SAVE & APPLY CONTROLS' to update your risk assessment"),
-             
-            ("🎯 Key Features (Enhanced August 2025)",
-             "• SMART ASSET FILTERING: Controls automatically apply only to compatible asset segments\n"
-             "• SEGMENT COMPATIBILITY: Ground, Space, Link, User, and Human Resources segments\n"
-             "• MOUSE WHEEL PROTECTION: Scroll safely without changing checkbox/combobox values\n"
-             "• REAL-TIME SEARCH: Filter controls by title, description, threats, or criteria\n"
-             "• DYNAMIC IMPACT ANALYSIS: Live visualization of control effectiveness"),
-             
-            ("📊 Understanding the Impact Panel",
-             "• CRITERIA IMPACT: Shows which threat assessment criteria are improved\n"
-             "• THREAT COVERAGE: Displays which threats are addressed by your controls\n"
-             "• COVERAGE LEVELS: Excellent (4+ controls), Good (2-3 controls), Basic (1 control)\n"
-             "• CONTROL SUMMARY: Organized breakdown by control clusters"),
-             
-            ("🛡️ Asset Segment Compatibility",
-             "Controls are automatically filtered based on asset compatibility:\n"
-             "• GROUND: Ground stations, mission control, data processing centers\n"
-             "• SPACE: Platform, payload, satellite systems\n"
-             "• LINK: Communication links between components\n"
-             "• USER: User terminals and interfaces\n"
-             "• HUMAN RESOURCES: Personnel and organizational controls"),
-             
-            ("🔧 Search and Filter Tips",
-             "• Type threat names (e.g., 'jamming', 'denial') to find relevant controls\n"
-             "• Search by control title or description keywords\n"
-             "• Use criteria names (e.g., 'detection', 'mitigation') to find specific improvements\n"
-             "• Clear search to show all available controls\n"
-             "• Click cluster headers to expand/collapse control categories"),
-             
-            ("⚡ Dynamic Impact Analysis",
-             "The right panel provides real-time analysis:\n"
-             "• CRITERIA IMPACT: Shows improvement to threat assessment criteria\n"
-             "• THREAT COVERAGE: Identifies which threats are addressed\n"
-             "• CONTROL STATISTICS: Number of selected controls and their effectiveness\n"
-             "• COVERAGE GAPS: Helps identify under-protected threats"),
-             
-            ("💾 Applying Controls",
-             "When you click 'SAVE & APPLY CONTROLS':\n"
-             "• Selected controls are saved to your assessment\n"
-             "• Threat criteria scores are automatically updated\n"
-             "• Only compatible controls affect each asset\n"
-             "• Risk calculations are recalculated with control impacts\n"
-             "• Main threat table is updated with new risk levels"),
-             
-            ("🚨 Important Notes",
-             "• COMPATIBILITY: Controls only apply to compatible asset segments\n"
-             "• AUTOMATIC FILTERING: System prevents incompatible control applications\n"
-             "• SCROLL PROTECTION: Mouse wheel won't accidentally change control selections\n"
-             "• REAL-TIME UPDATES: Impact analysis updates as you select/deselect controls\n"
-             "• PERSISTENT SELECTION: Your control selections are maintained until applied"),
-             
-            ("📈 Best Practices",
-             "• Review the impact panel before applying controls\n"
-             "• Ensure good coverage for high-risk threats\n"
-             "• Consider asset segment compatibility when selecting controls\n"
-             "• Use search functionality to find controls for specific threats\n"
-             "• Apply controls incrementally and review their cumulative impact")
-        ]
+        # Tool explanation title
+        explanation_title = tk.Label(scrollable_frame, text="How the Controls Management System Works", 
+                                    font=('Segoe UI', 13, 'bold'),
+                                    bg=self.COLORS['white'], fg=self.COLORS['primary'])
+        explanation_title.pack(pady=(10, 15), padx=15, anchor='w')
         
-        # Create help sections
-        for title, content in help_content:
-            # Section header
-            section_frame = tk.Frame(scrollable_frame, bg='#f8f9fa', relief='ridge', bd=1)
-            section_frame.pack(fill='x', pady=(10, 0), padx=10)
-            
-            header_label = tk.Label(section_frame, text=title,
-                                  font=('Segoe UI', 12, 'bold'),
-                                  bg='#6c7ae0', fg=self.COLORS['white'],
-                                  pady=8)
-            header_label.pack(fill='x')
-            
-            # Section content
-            content_label = tk.Label(section_frame, text=content,
+        # Tool explanation content
+        explanation_frame = tk.Frame(scrollable_frame, bg=self.COLORS['light'], relief='ridge', bd=1)
+        explanation_frame.pack(fill='x', padx=15, pady=(0, 20))
+        
+        explanation_text = """The Controls Management system for Phase B-C-D allows you to select and apply security controls to your risk assessment. It provides intelligent asset compatibility filtering, real-time impact analysis, and integrates seamlessly with your threat analysis. Here's how to use it effectively:
+
+1. ACCESSING CONTROLS MANAGEMENT:
+   • From the main Risk Assessment window, click "CONTROLS MANAGEMENT" to open the controls selection interface
+   • The system loads all available security controls with their compatibility information
+   • Controls are organized by clusters (families) for easier navigation
+   • Use this feature to enhance your risk assessment with implemented security measures
+
+2. BROWSING AND SEARCHING CONTROLS:
+   • Use the search bar at the top to filter controls by keywords, threat names, or criteria
+   • Search examples: "jamming", "detection", "access control", "encryption"
+   • Expand cluster categories by clicking the header to see all controls in that family
+   • All controls show their ID, title, description, and compatibility information
+   • Clear search to return to the full list of available controls
+
+3. INTELLIGENT ASSET COMPATIBILITY:
+   • Controls are automatically filtered based on asset segment compatibility
+   • GROUND: Ground stations, mission control, data processing centers, terrestrial infrastructure
+   • SPACE: Platform, payload, satellite systems, on-orbit assets
+   • LINK: Communication links, data transmission channels, network connections
+   • USER: User terminals, interfaces, end-user systems
+   • HUMAN RESOURCES: Personnel controls, organizational measures, training
+   • Only compatible controls will affect each asset during risk calculation
+
+4. SELECTING CONTROLS FOR APPLICATION:
+   • Check the boxes next to controls you want to apply to your assessment
+   • Selected controls are immediately reflected in the real-time impact analysis panel
+   • Use "Clear All Controls" button to deselect all currently selected controls
+   • Controls remain selected until you apply them or clear the selection
+   • MOUSE WHEEL PROTECTION: Scrolling won't accidentally change your selections
+
+5. REAL-TIME IMPACT ANALYSIS:
+   • The right panel provides live analysis of your control selections
+   • CRITERIA IMPACT: Shows which threat assessment criteria will be improved
+   • THREAT COVERAGE: Displays which threats are addressed by your selected controls
+   • COVERAGE LEVELS: Excellent (4+ controls), Good (2-3 controls), Basic (1 control)
+   • CONTROL SUMMARY: Organized breakdown by control clusters and effectiveness
+   • ASSET IMPACT: Shows how controls will affect each asset segment
+
+6. APPLYING CONTROLS TO YOUR ASSESSMENT:
+   • Click "SAVE & APPLY CONTROLS" to integrate selected controls with your threat analysis
+   • Selected controls are permanently saved to your assessment configuration
+   • Threat criteria scores are automatically updated based on control effectiveness
+   • Risk calculations are recalculated with control impact factors
+   • Main threat assessment table reflects new risk levels with controls applied
+
+7. INTEGRATION WITH THREAT ANALYSIS:
+   • Once controls are applied, the Threat Analysis window enters READ-ONLY MODE
+   • READ-ONLY MODE: Threat assessment scores become view-only to preserve control integration
+   • This prevents accidental modification of assessments that have been enhanced with controls
+   • To modify threat assessments after applying controls, you must clear controls first
+   • This ensures consistency between your control selections and threat evaluations
+
+8. CONTROL MANAGEMENT WORKFLOW:
+   • STEP 1: Complete your initial threat assessment without controls
+   • STEP 2: Use Controls Management to select appropriate security measures
+   • STEP 3: Review impact analysis to ensure adequate threat coverage
+   • STEP 4: Apply controls to see updated risk levels with security measures
+   • STEP 5: Generate final reports with control-enhanced risk assessments
+
+9. ADVANCED FEATURES:
+   • DYNAMIC CONTENT SCROLLING: Enhanced mouse wheel handling for smooth navigation
+   • PERSISTENT SELECTIONS: Your control choices are maintained during session
+   • COMPATIBILITY VALIDATION: System prevents invalid control applications
+   • IMPACT PREVIEW: See the effects before committing to control application
+   • CLUSTER ORGANIZATION: Controls grouped by security domains for logical selection
+
+10. BEST PRACTICES:
+   • Complete your baseline threat assessment before applying controls
+   • Select controls that address your highest-risk threats first
+   • Ensure good coverage across all critical asset segments
+   • Review the impact analysis to identify coverage gaps
+   • Consider the cumulative effect of multiple controls on the same threat
+   • Apply controls incrementally and review their impact on overall risk posture
+   • Generate reports both before and after control application for comparison
+
+11. IMPORTANT NOTES:
+   • COMPATIBILITY: Controls only apply to compatible asset segments automatically
+   • READ-ONLY PROTECTION: Threat Analysis becomes read-only after applying controls
+   • CLEAR CONTROLS: Use "Clear All Controls" to reset and allow threat assessment modifications
+   • REAL-TIME UPDATES: Impact analysis updates immediately as you select/deselect controls
+   • PERSISTENT STATE: Control selections are maintained until explicitly applied or cleared"""
+        
+        explanation_label = tk.Label(explanation_frame, text=explanation_text,
                                    font=('Segoe UI', 10),
-                                   bg='#f8f9fa', fg=self.COLORS['dark'],
-                                   wraplength=820, justify='left',
-                                   padx=15, pady=10)
-            content_label.pack(fill='x')
+                                   bg=self.COLORS['light'], fg=self.COLORS['dark'],
+                                   anchor='nw', justify='left', wraplength=1150,
+                                   padx=20, pady=15)
+        explanation_label.pack(fill='both', expand=True)
         
-        # Setup mouse wheel scrolling for help window
+        # Pack canvas and scrollbar (consistent with other help windows)
+        canvas.pack(side="left", fill="both", expand=True, padx=(0, 5))
+        scrollbar.pack(side="right", fill="y")
+        
+        # Setup global mouse wheel scrolling for the help window (consistent)
         self.setup_global_mousewheel(scrollable_frame, canvas)
+        
+        # Focus on help window
+        help_window.focus_set()
 
     def create_controls_content(self, window):
         """Creates the controls management content window"""
@@ -817,16 +1252,16 @@ class RiskAssessmentTool:
         content_frame = tk.Frame(main_container, bg=self.COLORS['white'])
         content_frame.pack(fill='both', expand=True, pady=(0, 15))
         
-        # Configure grid columns with weights: 65% vs 35% (more balanced)
-        content_frame.grid_columnconfigure(0, weight=13, minsize=1170)  # Left panel - 65% weight (13/20)
-        content_frame.grid_columnconfigure(1, weight=7, minsize=630)    # Right panel - 35% weight (7/20)
+        # Configure grid columns with weights: 60% vs 40% (optimized for 1920x1080)
+        content_frame.grid_columnconfigure(0, weight=12, minsize=820)   # Left panel - 60% weight, reduced width
+        content_frame.grid_columnconfigure(1, weight=8, minsize=420)    # Right panel - 40% weight, reduced width
         content_frame.grid_rowconfigure(0, weight=1)
         
-        # Left panel: Controls selection (75% width)
+        # Left panel: Controls selection (60% width)
         left_panel = tk.Frame(content_frame, bg=self.COLORS['white'])
         left_panel.grid(row=0, column=0, sticky='nsew', padx=(0, 8))
         
-        # Right panel: Impact analysis (25% width)  
+        # Right panel: Impact analysis (40% width)  
         right_panel = tk.Frame(content_frame, bg=self.COLORS['light'])
         right_panel.grid(row=0, column=1, sticky='nsew')
         
@@ -836,26 +1271,37 @@ class RiskAssessmentTool:
         # === RIGHT PANEL: IMPACT ANALYSIS ===
         self.create_controls_impact_panel(right_panel)
         
-        # === BOTTOM: SAVE & APPLY BUTTON - Always visible ===
-        bottom_button_frame = tk.Frame(main_container, bg='#ecf0f1', relief='ridge', bd=2)
-        bottom_button_frame.pack(fill='x', pady=(10, 0))
+        # === BOTTOM: BUTTON BAR - Always visible ===
+        bottom_button_frame = tk.Frame(main_container, bg=self.COLORS['light'], relief='ridge', bd=2)
+        bottom_button_frame.pack(fill='x', pady=(15, 0))
         
-        # Create button container with nice styling
-        button_container = tk.Frame(bottom_button_frame, bg='#ecf0f1')
+        # Create button container with consistent styling (like assessment windows)
+        button_container = tk.Frame(bottom_button_frame, bg=self.COLORS['light'])
         button_container.pack(expand=True, pady=15)
         
-        save_apply_btn = tk.Button(button_container, text="💾 SAVE & APPLY CONTROLS",
-                                  font=('Segoe UI', 14, 'bold'),
-                                  bg='#27ae60', fg=self.COLORS['white'],
-                                  relief='flat', padx=40, pady=15,
-                                  command=self.save_and_apply_controls)
-        save_apply_btn.pack(side='left', padx=(0, 15))
+        # Clear All Controls button (left side)
+        clear_all_btn = tk.Button(button_container, text="🗑️ Clear All Controls",
+                                 font=('Segoe UI', 11, 'bold'),
+                                 bg='#e74c3c', fg=self.COLORS['white'],
+                                 relief='flat', padx=20, pady=10,
+                                 command=self.clear_all_controls_gui)
+        clear_all_btn.pack(side='left', padx=(0, 15))
         
-        # Status label for apply operations - always visible
-        self.apply_status_label = tk.Label(button_container, text="Ready to apply selected controls",
-                                          font=('Segoe UI', 12),
-                                          bg='#ecf0f1', fg='#2c3e50')
-        self.apply_status_label.pack(side='left')
+        # Help button (left side, next to clear)
+        help_btn = tk.Button(button_container, text="❓ Help",
+                            font=('Segoe UI', 11, 'bold'),
+                            bg='#8e44ad', fg=self.COLORS['white'],
+                            relief='flat', padx=20, pady=10,
+                            command=self.show_controls_help)
+        help_btn.pack(side='left', padx=(0, 30))
+        
+        # Save & Apply button (right side)
+        save_apply_btn = tk.Button(button_container, text="💾 Save & Apply Controls",
+                                  font=('Segoe UI', 12, 'bold'),
+                                  bg='#27ae60', fg=self.COLORS['white'],
+                                  relief='flat', padx=30, pady=10,
+                                  command=self.save_and_apply_controls)
+        save_apply_btn.pack(side='right', padx=(0, 0))
 
     def create_controls_selection_panel(self, parent):
         """Creates the controls selection panel"""
@@ -865,47 +1311,47 @@ class RiskAssessmentTool:
         header_frame.pack_propagate(False)
         
         tk.Label(header_frame, text="📋 Available Security Controls",
-                font=('Segoe UI', 14, 'bold'),
+                font=('Segoe UI', 12, 'bold'),
                 bg=self.COLORS['primary'], fg=self.COLORS['white']).pack(pady=12)
         
-        # Search frame
-        search_frame = tk.Frame(parent, bg=self.COLORS['white'], relief='ridge', bd=1)
+        # Search frame (style consistent with assessment windows)
+        search_frame = tk.Frame(parent, bg=self.COLORS['light'], relief='ridge', bd=1)
         search_frame.pack(fill='x', pady=(0, 10))
         
         # Search label and entry
-        search_label_frame = tk.Frame(search_frame, bg=self.COLORS['white'])
-        search_label_frame.pack(fill='x', padx=10, pady=8)
+        search_label_frame = tk.Frame(search_frame, bg=self.COLORS['light'])
+        search_label_frame.pack(fill='x', padx=15, pady=10)
         
         tk.Label(search_label_frame, text="🔍 Search Controls:",
-                font=('Segoe UI', 11, 'bold'),
-                bg=self.COLORS['white'], fg=self.COLORS['dark']).pack(side='left')
+                font=('Segoe UI', 10, 'bold'),
+                bg=self.COLORS['light'], fg=self.COLORS['dark']).pack(side='left')
         
-        # Create search entry with placeholder-like behavior
+        # Create search entry with consistent styling
         self.search_var = tk.StringVar()
         self.search_entry = tk.Entry(search_label_frame, textvariable=self.search_var,
                                     font=('Segoe UI', 10),
-                                    bg='#f8f9fa', fg=self.COLORS['dark'],
-                                    relief='flat', bd=5)
-        self.search_entry.pack(side='left', fill='x', expand=True, padx=(10, 0))
+                                    bg=self.COLORS['white'], fg=self.COLORS['dark'],
+                                    relief='solid', bd=1)
+        self.search_entry.pack(side='left', fill='x', expand=True, padx=(15, 0))
         
         # Bind search functionality
         self.search_var.trace('w', self.on_search_changed)
         
         # Search instructions
-        search_instruction_frame = tk.Frame(search_frame, bg='#e8f4fd', relief='flat', bd=1)
-        search_instruction_frame.pack(fill='x', padx=5, pady=(0, 5))
+        search_instruction_frame = tk.Frame(search_frame, bg=self.COLORS['light'])
+        search_instruction_frame.pack(fill='x', padx=15, pady=(0, 8))
         
         tk.Label(search_instruction_frame, text="💡 Type to search by threat name, control title, or description. Clear to show all controls.",
                 font=('Segoe UI', 9, 'italic'),
-                bg='#e8f4fd', fg='#2c3e50').pack(pady=5, padx=10)
+                bg=self.COLORS['light'], fg=self.COLORS['gray']).pack()
         
         # Instructions (updated)
-        instruction_frame = tk.Frame(parent, bg='#e8f4fd', relief='flat', bd=1)
-        instruction_frame.pack(fill='x', pady=(0, 10))
+        instruction_frame = tk.Frame(parent, bg=self.COLORS['light'], relief='ridge', bd=1)
+        instruction_frame.pack(fill='x', pady=(0, 15))
         
-        tk.Label(instruction_frame, text="Click on cluster names to expand and see individual controls",
+        tk.Label(instruction_frame, text="💡 Click on cluster names to expand and see individual controls. Use search to filter controls.",
                 font=('Segoe UI', 10, 'italic'),
-                bg='#e8f4fd', fg='#2c3e50').pack(pady=8, padx=10)
+                bg=self.COLORS['light'], fg=self.COLORS['dark']).pack(pady=8, padx=15)
         
         # Scrollable controls list
         canvas = tk.Canvas(parent, bg=self.COLORS['white'], highlightthickness=0)
@@ -968,7 +1414,7 @@ class RiskAssessmentTool:
             # Create the button first - directly in scrollable frame for full width
             cluster_btn = tk.Button(self.controls_scrollable_frame,
                                    text=f"📁 {cluster_name} ({len(cluster_controls)} controls)",
-                                   font=('Segoe UI', 12, 'bold'),
+                                   font=('Segoe UI', 11, 'bold'),
                                    bg='#6c7ae0', fg=self.COLORS['white'],
                                    activebackground='#5a67d8', activeforeground=self.COLORS['white'],
                                    relief='flat', bd=0,
@@ -1039,25 +1485,38 @@ class RiskAssessmentTool:
         
     def create_control_item(self, parent, control):
         """Creates a single control item with checkbox and info"""
-        control_frame = tk.Frame(parent, bg=self.COLORS['white'], relief='ridge', bd=1)
+        # Check if control is already applied
+        is_applied = self.is_control_applied(control['id'])
+        
+        # Set background color based on status
+        bg_color = '#e8f5e8' if is_applied else self.COLORS['white']
+        
+        control_frame = tk.Frame(parent, bg=bg_color, relief='ridge', bd=1)
         control_frame.pack(fill='x', pady=2, padx=5)
         
         # Control selection checkbox
         control_var = tk.BooleanVar()
+        control_var.set(is_applied)  # Pre-select if already applied
         self.selected_controls[control['id']] = control_var
         
         # Main control info
-        info_frame = tk.Frame(control_frame, bg=self.COLORS['white'])
+        info_frame = tk.Frame(control_frame, bg=bg_color)
         info_frame.pack(fill='x', padx=10, pady=5)
         
         # Checkbox and title
-        check_frame = tk.Frame(info_frame, bg=self.COLORS['white'])
+        check_frame = tk.Frame(info_frame, bg=bg_color)
         check_frame.pack(fill='x')
         
+        # Add status indicator to title
+        title_text = f"#{control['id']} - {control['title']}"
+        if is_applied:
+            title_text += "  APPLIED"
+        
         checkbox = tk.Checkbutton(check_frame,
-                                 text=f"#{control['id']} - {control['title']}",
+                                 text=title_text,
                                  font=('Segoe UI', 10, 'bold'),
-                                 bg=self.COLORS['white'], fg=self.COLORS['dark'],
+                                 bg=bg_color, 
+                                 fg='#27ae60' if is_applied else self.COLORS['dark'],
                                  variable=control_var,
                                  command=lambda c=control: self.on_control_selected(c))
         checkbox.pack(anchor='w')
@@ -1069,26 +1528,40 @@ class RiskAssessmentTool:
         desc_text = control['description'][:400] + "..." if len(control['description']) > 400 else control['description']
         desc_label = tk.Label(info_frame, text=desc_text,
                              font=('Segoe UI', 9),
-                             bg=self.COLORS['white'], fg='#666666',
-                             wraplength=1000, justify='left')  # Reduced from 1200 to 1000 for better fit
+                             bg=bg_color, fg='#666666',
+                             wraplength=1000, justify='left')
         desc_label.pack(anchor='w', pady=(2, 0))
         
         # Threats and criteria info
-        if control['threats_addressed'] or control['criteria']:
+        if control['threats_addressed'] or control['criteria'] or control.get('segment'):
             impact_frame = tk.Frame(info_frame, bg='#f8f9fa', relief='flat', bd=1)
             impact_frame.pack(fill='x', pady=(5, 0))
             
+            # Show segment information first if available
+            if control.get('segment'):
+                segment_text = f"🏢 Segment: {control['segment']}"
+                # Special display for Human -> User Ground Segment
+                if control['segment'].lower() == 'human':
+                    segment_text += " (User Ground Segment)"
+                
+                segment_label = tk.Label(impact_frame, 
+                                       text=segment_text,
+                                       font=('Segoe UI', 9, 'bold'),
+                                       bg='#f8f9fa', fg='#6c5ce7',
+                                       wraplength=1000, justify='left')
+                segment_label.pack(anchor='w', padx=5, pady=2)
+            
             if control['threats_addressed']:
                 threats_label = tk.Label(impact_frame, 
-                                       text=f"🎯 Threats: {control['threats_addressed'][:200]}...",  # Increased from 150 to 200
+                                       text=f" Threats: {control['threats_addressed'][:200]}...",
                                        font=('Segoe UI', 9, 'italic'),
                                        bg='#f8f9fa', fg='#d63031',
-                                       wraplength=1000, justify='left')  # Reduced from 1200 to 1000
+                                       wraplength=1000, justify='left')
                 threats_label.pack(anchor='w', padx=5, pady=2)
             
             if control['criteria']:
                 criteria_label = tk.Label(impact_frame, 
-                                        text=f"📊 Criteria Impact: {control['criteria']}",
+                                        text=f" Criteria Impact: {control['criteria']}",
                                         font=('Segoe UI', 9, 'italic'),
                                         bg='#f8f9fa', fg='#00b894',
                                         wraplength=1000, justify='left')  # Reduced from 1200 to 1000
@@ -1107,21 +1580,21 @@ class RiskAssessmentTool:
     
     def create_controls_impact_panel(self, parent):
         """Creates the impact analysis panel"""
-        # Header
-        header_frame = tk.Frame(parent, bg='#00b894', height=40)
+        # Header (consistent with assessment windows)
+        header_frame = tk.Frame(parent, bg=self.COLORS['primary'], height=45)
         header_frame.pack(fill='x', pady=(0, 10))
         header_frame.pack_propagate(False)
         
         tk.Label(header_frame, text="⚡ Dynamic Impact Analysis",
-                font=('Segoe UI', 13, 'bold'),
-                bg='#00b894', fg=self.COLORS['white']).pack(pady=10)
+                font=('Segoe UI', 12, 'bold'),
+                bg=self.COLORS['primary'], fg=self.COLORS['white']).pack(pady=11)
         
         # Stats frame
-        stats_frame = tk.Frame(parent, bg=self.COLORS['white'], relief='ridge', bd=2)
+        stats_frame = tk.Frame(parent, bg=self.COLORS['white'], relief='ridge', bd=1)
         stats_frame.pack(fill='x', pady=(0, 10), padx=5)
         
-        self.stats_label = tk.Label(stats_frame, text="📊 No controls selected yet",
-                                   font=('Segoe UI', 11, 'bold'),
+        self.stats_label = tk.Label(stats_frame, text=" No controls selected yet",
+                                   font=('Segoe UI', 10, 'bold'),
                                    bg=self.COLORS['white'], fg=self.COLORS['gray'],
                                    pady=10)
         self.stats_label.pack()
@@ -1184,11 +1657,11 @@ class RiskAssessmentTool:
         
         # Update stats
         if not selected:
-            self.stats_label.config(text="📊 No controls selected yet")
+            self.stats_label.config(text=" No controls selected yet")
             self.show_empty_impact_state()
             return
         
-        self.stats_label.config(text=f"📊 {len(selected)} controls selected • Analyzing impact...")
+        self.stats_label.config(text=f" {len(selected)} controls selected • Analyzing impact...")
         
         # Analyze impact
         self.analyze_and_display_impact(selected)
@@ -1234,19 +1707,25 @@ class RiskAssessmentTool:
         
         # Display criteria impact
         if criteria_impact:
-            self.create_criteria_impact_section(criteria_impact)
+            criteria_section = self.create_criteria_impact_section(criteria_impact)
+            if criteria_section:
+                self.apply_impact_mousewheel_to_new_content(criteria_section)
         
         # Display threat impact  
         if threat_impact:
-            self.create_threat_impact_section(threat_impact)
+            threat_section = self.create_threat_impact_section(threat_impact)
+            if threat_section:
+                self.apply_impact_mousewheel_to_new_content(threat_section)
             
         # Display control summary
-        self.create_control_summary_section(selected_controls)
+        control_summary = self.create_control_summary_section(selected_controls)
+        if control_summary:
+            self.apply_impact_mousewheel_to_new_content(control_summary)
     
     def create_criteria_impact_section(self, criteria_impact):
         """Creates the criteria impact visualization section"""
         section_frame = tk.LabelFrame(self.impact_display_frame, 
-                                    text="📊 Criteria Impact Analysis",
+                                    text=" Criteria Impact Analysis",
                                     font=('Segoe UI', 12, 'bold'),
                                     bg=self.COLORS['white'], fg='#00b894',
                                     padx=10, pady=10)
@@ -1276,7 +1755,7 @@ class RiskAssessmentTool:
                 impact_color = '#95a5a6'
                 impact_text = f"GENERAL IMPACT"
             
-            tk.Label(header_frame, text=f"🎯 {criterion}",
+            tk.Label(header_frame, text=f" {criterion}",
                     font=('Segoe UI', 11, 'bold'),
                     bg='#3498db', fg=self.COLORS['white']).pack(side='left', padx=10, pady=5)
             
@@ -1293,11 +1772,13 @@ class RiskAssessmentTool:
                     font=('Segoe UI', 9),
                     bg='#e8f4fd', fg='#2c3e50',
                     wraplength=800, justify='left').pack(anchor='w', padx=10, pady=5)  # Increased from 700 to 800
+        
+        return section_frame
     
     def create_threat_impact_section(self, threat_impact):
         """Creates the threat impact visualization section"""
         section_frame = tk.LabelFrame(self.impact_display_frame, 
-                                    text="🎯 Threat Coverage Analysis",
+                                    text=" Threat Coverage Analysis",
                                     font=('Segoe UI', 12, 'bold'),
                                     bg=self.COLORS['white'], fg='#e74c3c',
                                     padx=10, pady=10)
@@ -1318,7 +1799,7 @@ class RiskAssessmentTool:
             coverage_color = '#27ae60' if coverage_level >= 4 else '#f39c12' if coverage_level >= 2 else '#e74c3c'
             coverage_text = f"EXCELLENT" if coverage_level >= 4 else f"GOOD" if coverage_level >= 2 else f"BASIC"
             
-            tk.Label(header_frame, text=f"⚠️ {threat[:50]}{'...' if len(threat) > 50 else ''}",
+            tk.Label(header_frame, text=f" {threat[:50]}{'...' if len(threat) > 50 else ''}",
                     font=('Segoe UI', 10, 'bold'),
                     bg='#e74c3c', fg=self.COLORS['white']).pack(side='left', padx=10, pady=3)
             
@@ -1332,6 +1813,8 @@ class RiskAssessmentTool:
             tk.Label(threat_frame, text=f"Controls: {controls_text}",
                     font=('Segoe UI', 9),
                     bg='#fdf2f2', fg='#2c3e50').pack(anchor='w', padx=10, pady=3)
+        
+        return section_frame
     
     def create_control_summary_section(self, selected_controls):
         """Creates a summary section of selected controls"""
@@ -1362,54 +1845,66 @@ class RiskAssessmentTool:
                 tk.Label(cluster_frame, text=f"   • #{control['id']}: {control['title']}",
                         font=('Segoe UI', 9),
                         bg='#f8f9fa', fg='#2c3e50').pack(anchor='w', padx=10)
+        
+        return section_frame
     
     def save_and_apply_controls(self):
-        """Save selected controls and apply their impact to threat assessments"""
-        # Get selected controls
-        selected_controls = []
-        for control_id, var in self.selected_controls.items():
-            if var.get():
-                control_data = next((c for c in self.CONTROLS if c['id'] == control_id), None)
-                if control_data:
-                    selected_controls.append(control_data)
-        
-        if not selected_controls:
-            # Update the apply status label in the right panel
-            if hasattr(self, 'apply_status_label'):
-                self.apply_status_label.config(text="⚠️ No controls selected to apply", fg='#e74c3c')
+        """Apply/remove controls based on current selections"""
+        # Check if we have threat data
+        if not self.threat_data:
+            messagebox.showwarning("No Data", "Please complete threat assessments first!")
             return
         
-        # Update the apply status label in the right panel
-        if hasattr(self, 'apply_status_label'):
-            self.apply_status_label.config(text="Applying controls...", fg='#6c7ae0')
-            self.controls_window.update_idletasks()
+        # Get current UI selections and compare with applied controls
+        newly_selected = []
+        to_remove = []
         
-        # Apply controls impact to threat data
-        impacts_applied = self.apply_controls_to_threats(selected_controls)
-        
-        # Update main table display
-        self.update_main_threat_table()
-        
-        # Show success message and close window
-        if impacts_applied > 0:
-            if hasattr(self, 'apply_status_label'):
-                self.apply_status_label.config(
-                    text=f"✅ {len(selected_controls)} controls applied successfully!",
-                    fg='#27ae60'
-                )
+        for control_id, var in self.selected_controls.items():
+            is_selected = var.get()
+            is_applied = self.is_control_applied(control_id)
             
-            # Auto-close window after successful application
-            self.controls_window.after(1500, self.controls_window.destroy)
+            if is_selected and not is_applied:
+                newly_selected.append(control_id)
+            elif not is_selected and is_applied:
+                to_remove.append(control_id)
+        
+        # Check if there are changes to apply
+        if not newly_selected and not to_remove:
+            return
+        
+        # Apply new controls
+        applied_count = 0
+        for control_id in newly_selected:
+            control_data = self.get_control_by_id(control_id)
+            if control_data and self.apply_control(control_id, control_data):
+                applied_count += 1
+        
+        # Remove deselected controls
+        removed_count = 0
+        for control_id in to_remove:
+            if self.remove_control(control_id):
+                removed_count += 1
+        
+        # Update main table
+        self.update_all_threats_in_main_table()
+        
+        # Show results
+        total_active = len(self.applied_controls)
+        if applied_count > 0 or removed_count > 0:            
+            # Show summary dialog
+            messagebox.showinfo("Controls Updated", 
+                f"Control changes applied successfully!\n\n"
+                f"• Applied: {applied_count} new controls\n"
+                f"• Removed: {removed_count} controls\n"
+                f"• Total active: {total_active} controls")
             
+            # Update button state
+            self.update_threat_analysis_button_state()
+            
+            # Auto-close after success
+            self.controls_window.after(100, self.controls_window.destroy)
         else:
-            if hasattr(self, 'apply_status_label'):
-                self.apply_status_label.config(
-                    text=f"ℹ️ {len(selected_controls)} controls saved, no active threats to modify.",
-                    fg='#f39c12'
-                )
-            
-            # Auto-close window after 2 seconds
-            self.controls_window.after(2000, self.controls_window.destroy)
+            pass  # No changes to apply
     
     def apply_controls_to_threats(self, selected_controls):
         """Apply controls impact to existing threat assessments"""
@@ -1444,7 +1939,7 @@ class RiskAssessmentTool:
         print(f"[DEBUG] Available threats in data: {list(self.threat_data.keys())}")
         
         for control in selected_controls:
-            print(f"🔧 Processing control #{control['id']}: {control['title']}")
+            print(f" Processing control #{control['id']}: {control['title']}")
             
             # Process criteria impact
             if control['criteria']:
@@ -1467,10 +1962,10 @@ class RiskAssessmentTool:
                         criterion_index = criteria_mapping.get(criterion.lower())
                     
                     if criterion_index is None:
-                        print(f"  ⚠️ Unknown criterion: '{criterion}' - skipping")
+                        print(f"   Unknown criterion: '{criterion}' - skipping")
                         continue  # Skip unknown criteria
                     
-                    print(f"  📊 Applying criterion '{criterion}' (index {criterion_index})")
+                    print(f"   Applying criterion '{criterion}' (index {criterion_index})")
                     
                     # Process threats addressed by this control
                     if control['threats_addressed']:
@@ -1507,9 +2002,9 @@ class RiskAssessmentTool:
                                                 new_score = max(1, current_score - 1)
                                                 scores[str(criterion_index)] = new_score
                                                 impacts_applied += 1
-                                                print(f"    ✅ Impact applied to {asset_key}: criterion {criterion_index} reduced from {current_score} to {new_score}")
+                                                print(f"     Impact applied to {asset_key}: criterion {criterion_index} reduced from {current_score} to {new_score}")
         
-        print(f"🎯 Total impacts applied: {impacts_applied}")
+        print(f" Total impacts applied: {impacts_applied}")
         return impacts_applied
     
     def is_asset_compatible_with_control(self, asset_key, control):
@@ -1544,26 +2039,26 @@ class RiskAssessmentTool:
             # For Human Resources controls, check if asset is in Ground -> User Ground Segment
             is_user_ground = self.is_user_ground_segment_asset(asset_key)
             if is_user_ground:
-                print(f"[COMPAT] ✅ Compatible via Human Resources -> User Ground Segment mapping")
+                print(f"[COMPAT]  Compatible via Human Resources -> User Ground Segment mapping")
                 return True
         
         # Direct segment matching
         for control_segment in control_segments:
             if control_segment == asset_category_lower:
-                print(f"[COMPAT] ✅ Compatible: Direct match ({control_segment})")
+                print(f"[COMPAT]  Compatible: Direct match ({control_segment})")
                 return True
             # Handle "human resources" mapping to ground
             if control_segment == 'human resources' and asset_category_lower == 'ground':
                 is_user_ground = self.is_user_ground_segment_asset(asset_key)
                 if is_user_ground:
-                    print(f"[COMPAT] ✅ Compatible via Human Resources -> Ground mapping")
+                    print(f"[COMPAT]  Compatible via Human Resources -> Ground mapping")
                     return True
             # Handle "link" mapping (Link assets)
             if control_segment == 'link' and asset_category_lower == 'link':
-                print(f"[COMPAT] ✅ Compatible: Link segment match")
+                print(f"[COMPAT]  Compatible: Link segment match")
                 return True
         
-        print(f"[COMPAT] ❌ Not compatible")
+        print(f"[COMPAT]  Not compatible")
         return False
     
     def get_asset_category_from_key(self, asset_key):
@@ -1776,6 +2271,8 @@ class RiskAssessmentTool:
                 bg=self.COLORS['white'], fg=self.COLORS['dark']).pack(anchor='w')
         
         self.selected_threat_var = tk.StringVar()
+        
+        # Threat selection ComboBox is always enabled (even in read-only mode)
         threat_combo = ttk.Combobox(threat_frame,
                                    textvariable=self.selected_threat_var,
                                    values=self.THREATS,
@@ -1794,15 +2291,27 @@ class RiskAssessmentTool:
         buttons_frame = tk.Frame(content_frame, bg=self.COLORS['white'])
         buttons_frame.pack(pady=20)
         
-        # Save button
-        save_btn = tk.Button(buttons_frame, text="SAVE ASSESSMENT",
-                            font=('Segoe UI', 11, 'bold'),
-                            bg=self.COLORS['success'], fg=self.COLORS['white'],
-                            relief='flat', padx=25, pady=10,
-                            command=lambda: self.save_threat_assessment(window))
-        save_btn.pack(side='left', padx=(0, 10))
+        # Check if we're in read-only mode
+        read_only_mode = getattr(self, 'threat_window_read_only', False)
         
-        # Help button
+        if read_only_mode:
+            # Read-only mode: Show info message instead of save button
+            info_label = tk.Label(buttons_frame, 
+                                text="📖 READ-ONLY MODE - Assessment cannot be modified while controls are active",
+                                font=('Segoe UI', 11, 'bold'),
+                                bg='#f39c12', fg='white',
+                                relief='flat', padx=25, pady=10)
+            info_label.pack(side='left', padx=(0, 10))
+        else:
+            # Normal mode: Show save button
+            save_btn = tk.Button(buttons_frame, text="SAVE ASSESSMENT",
+                                font=('Segoe UI', 11, 'bold'),
+                                bg=self.COLORS['success'], fg=self.COLORS['white'],
+                                relief='flat', padx=25, pady=10,
+                                command=lambda: self.save_threat_assessment(window))
+            save_btn.pack(side='left', padx=(0, 10))
+        
+        # Help button (always available)
         help_btn = tk.Button(buttons_frame, text="❓ Help",
                             font=('Segoe UI', 11, 'bold'),
                             bg=self.COLORS['gray'], fg=self.COLORS['white'],
@@ -2349,7 +2858,14 @@ class RiskAssessmentTool:
 
     def create_threat_asset_table(self, parent):
         """Creates the asset assessment table for threat window"""
-        table_frame = tk.LabelFrame(parent, text="Asset Assessment for Threat Analysis (Values 1-5)",
+        # Check if we're in read-only mode
+        read_only_mode = getattr(self, 'threat_window_read_only', False)
+        
+        table_title = "Asset Assessment for Threat Analysis (Values 1-5)"
+        if read_only_mode:
+            table_title += " - READ ONLY MODE"
+            
+        table_frame = tk.LabelFrame(parent, text=table_title,
                                    font=('Segoe UI', 11, 'bold'),
                                    bg=self.COLORS['white'], fg=self.COLORS['primary'],
                                    padx=15, pady=15)
@@ -2420,11 +2936,16 @@ class RiskAssessmentTool:
                 combo_var = tk.StringVar(value="")
                 # Use custom style for each criterion
                 style_name = f"Criteria{j-3}.TCombobox"
+                
+                # Check if we're in read-only mode for threat window
+                read_only_mode = getattr(self, 'threat_window_read_only', False)
+                combo_state = 'disabled' if read_only_mode else 'readonly'
+                
                 combo = ttk.Combobox(table_frame,
                                     textvariable=combo_var,
                                     values=["", "1", "2", "3", "4", "5"],
                                     font=('Segoe UI', 8),
-                                    width=5, state='readonly',
+                                    width=5, state=combo_state,
                                     style=style_name)
                 combo.grid(row=i+1, column=j, padx=1, pady=1, sticky='ew')
                 
@@ -3812,41 +4333,56 @@ class RiskAssessmentTool:
     def get_controls_status_for_threat(self, threat_name):
         """Get controls status for a threat: applied vs available"""
         try:
+            print(f"[DEBUG] Getting controls status for threat: {threat_name}")
+            print(f"[DEBUG] Applied controls list: {getattr(self, 'applied_controls', [])}")
             
             # Get all available controls for this threat from CSV
             available_controls = self.load_controls_for_threat(threat_name)
+            print(f"[DEBUG] Available controls from CSV: {len(available_controls)}")
             
-            # Get applied controls from the current controls selection
+            # Get applied controls from the applied_controls list (persistent data)
             applied_controls = []
             available_not_applied = []
             
-            if hasattr(self, 'selected_controls') and self.selected_controls:
-                # Check which controls are currently selected/applied
-                for control_id, var in self.selected_controls.items():
-                    try:
-                        if var.get():  # Control is selected/applied
-                            # Find this control in our CONTROLS list
-                            if hasattr(self, 'CONTROLS') and self.CONTROLS:
-                                control_data = next((c for c in self.CONTROLS if c['id'] == control_id), None)
-                                if control_data:
-                                    # Check if this control addresses the current threat
-                                    threats_addressed = control_data.get('threats_addressed', '')
-                                    if threats_addressed and isinstance(threats_addressed, str):
-                                        threats_list = [t.strip().lower() for t in threats_addressed.split(',')]
-                                        if any(threat_name.lower() in threat.lower() or threat.lower() in threat_name.lower() 
-                                              for threat in threats_list):
-                                            applied_controls.append({
-                                                'id': control_data.get('id', 'N/A'),
-                                                'title': control_data.get('title', ''),
-                                                'description': control_data.get('description', ''),
-                                                'criteria': control_data.get('criteria', ''),
-                                                'cluster': control_data.get('cluster', ''),
-                                                'reference': control_data.get('reference', ''),
-                                                'lifecycle': control_data.get('lifecycle', ''),
-                                                'segment': control_data.get('segment', '')
-                                            })
-                    except Exception as e:
-                        continue
+            # Use the persistent applied_controls list instead of selected_controls
+            if hasattr(self, 'applied_controls') and self.applied_controls:
+                print(f"[DEBUG] Processing {len(self.applied_controls)} applied controls")
+                for control_id in self.applied_controls:
+                    print(f"[DEBUG] Looking for control ID: {control_id}")
+                    # Find this control in our CONTROLS list
+                    if hasattr(self, 'CONTROLS') and self.CONTROLS:
+                        control_data = next((c for c in self.CONTROLS if c['id'] == control_id), None)
+                        if control_data:
+                            print(f"[DEBUG] Found control: {control_data.get('title', 'N/A')}")
+                            print(f"[DEBUG] Control reference: '{control_data.get('reference', '')}'")
+                            print(f"[DEBUG] Control lifecycle: '{control_data.get('lifecycle', '')}'")
+                            print(f"[DEBUG] All control keys: {list(control_data.keys())}")
+                            # Check if this control addresses the current threat
+                            threats_addressed = control_data.get('threats_addressed', '')
+                            print(f"[DEBUG] Control addresses threats: {threats_addressed}")
+                            if threats_addressed and isinstance(threats_addressed, str):
+                                threats_list = [t.strip().lower() for t in threats_addressed.split(',')]
+                                matches_threat = any(threat_name.lower() in threat.lower() or threat.lower() in threat_name.lower() 
+                                      for threat in threats_list)
+                                print(f"[DEBUG] Threat matches: {matches_threat}")
+                                if matches_threat:
+                                    applied_controls.append({
+                                        'id': control_data.get('id', 'N/A'),
+                                        'title': control_data.get('title', ''),
+                                        'description': control_data.get('description', ''),
+                                        'criteria': control_data.get('criteria', ''),
+                                        'cluster': control_data.get('cluster', ''),
+                                        'reference': control_data.get('reference', ''),
+                                        'lifecycle': control_data.get('lifecycle', ''),
+                                        'segment': control_data.get('segment', '')
+                                    })
+                                    print(f"[DEBUG] Added to applied controls")
+                        else:
+                            print(f"[DEBUG] Control ID {control_id} not found in CONTROLS dataset")
+            else:
+                print(f"[DEBUG] No applied controls found")
+            
+            print(f"[DEBUG] Final applied controls count: {len(applied_controls)}")
             
             # For available controls, mark which ones are not applied
             applied_ids = {c['id'] for c in applied_controls}
